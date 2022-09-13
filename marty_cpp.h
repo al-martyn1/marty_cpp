@@ -2452,16 +2452,28 @@ void enum_generate_serialize_prepare( std::vector< std::pair< StringType,StringT
         {
             // Если у нас число, то конвертация пройдёт успешно, и ничего делать не нужно
             // А если выскочит исключение, то это какой-то идентификатор, и его надо проапдейтить в соответствии с правилами
+            
             try
             {
-                std::stoll(n);
-                res.append(n);
+                std::size_t pos = 0;
+                std::stoll(n, &pos, 0); // base: auto
+                if (pos==n.size())
+                {
+                    res.append( n );
+                }
+                else
+                {
+                    auto iter = formattedEnumNames.find(n);
+                    res.append( iter==formattedEnumNames.end() ? n : iter->second );
+                }
+                //    continue;
             }
             catch(...)
             {
                 auto iter = formattedEnumNames.find(n);
                 res.append( iter==formattedEnumNames.end() ? n : iter->second );
             }
+
         }
     
         return res;
@@ -2473,8 +2485,10 @@ void enum_generate_serialize_prepare( std::vector< std::pair< StringType,StringT
 
         try
         {
-            std::stoll(s); // пробуем сконвертить в целое
-            return res; // dont add numeric names
+            std::size_t pos = 0;
+            std::stoll(s, &pos, 0); // base: auto, пробуем сконвертить в целое
+            if (pos==s.size())
+                return res; // dont add numeric names
         }
         catch(...)
         {
@@ -2562,8 +2576,10 @@ void enum_generate_serialize_prepare( std::vector< std::pair< StringType,StringT
         {
             try
             {
-                std::stoll(val);
-                deserializeNames.insert(val);
+                std::size_t pos = 0;
+                std::stoll(val, &pos, 0); // base: auto, пробуем сконвертить в целое
+                if (pos==val.size())
+                    deserializeNames.insert(val);
             }
             catch(...)
             {
@@ -2750,8 +2766,12 @@ void enum_generate_serialize( StreamType &ss
                     {
                         try
                         {
-                            lastValCounter = (unsigned)std::stoll(strVal);
-                            lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions);
+                            std::size_t pos = 0;
+                            lastValCounter = (unsigned)std::stoll(strVal, &pos, 0);
+                            if (pos==strVal.size())
+                                lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions);
+                            else
+                                lastVal = strVal;
                         }
                         catch(...)
                         {
@@ -2957,7 +2977,7 @@ makeNamespaceOutputWriteGuard( StreamType                   &oss
 
 #define MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )   \
 inline                                                                     \
-std::string serialize_#enumTypeName( enumTypeName v )                      \
+std::string enum_serialize_##enumTypeName( enumTypeName v )                \
 {                                                                          \
     static mapType< enumTypeName, std::string >  _m;                       \
     if (_m.empty())                                                        \
@@ -2982,7 +3002,7 @@ std::string serialize_#enumTypeName( enumTypeName v )                      \
 
 #define MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper ) \
 inline                                                                     \
-enumTypeName deserialize_#enumTypeName( const std::string &str )           \
+enumTypeName enum_deserialize_##enumTypeName( const std::string &str )     \
 {                                                                          \
     static bool upperCaseConvert = doUpper ? true : false;                 \
     static mapType< std::string, enumTypeName >  _m;                       \
@@ -2991,13 +3011,13 @@ enumTypeName deserialize_#enumTypeName( const std::string &str )           \
 
 
 #define MARTY_CPP_ENUM_DESERIALIZE_ITEM( val, valStr )                     \
-        _m[upperCaseConvert ? marty_cpp::toUpper(valStr) : valStr] = val
+        _m[upperCaseConvert ? marty_cpp::toUpper(std::string(valStr)) : std::string(valStr)] = val
 
 
 #define MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doUpper )   \
     }                                                                      \
                                                                            \
-    mapType< std::string, enumTypeName >::const_iterator it = _m.find(upperCaseConvert ? marty_cpp::toUpper(valStr) : valStr); \
+    mapType< std::string, enumTypeName >::const_iterator it = _m.find(upperCaseConvert ? marty_cpp::toUpper(str) : str); \
     if (it==_m.end())                                                      \
         throw std::runtime_error( #enumTypeName " - failed to deserialize value");\
                                                                            \
@@ -3005,11 +3025,11 @@ enumTypeName deserialize_#enumTypeName( const std::string &str )           \
 }                                                                          \
                                                                            \
 inline                                                                     \
-enumTypeName deserialize_#enumTypeName( const std::string &str, enumTypeName defVal ) \
+enumTypeName enum_deserialize_##enumTypeName( const std::string &str, enumTypeName defVal ) \
 {                                                                          \
     try                                                                    \
     {                                                                      \
-        return deserialize_#enumTypeName( str );                           \
+        return enum_deserialize_##enumTypeName( str );                     \
     }                                                                      \
     catch(...)                                                             \
     {                                                                      \
