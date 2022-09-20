@@ -1641,6 +1641,21 @@ std::vector<StringType> simple_string_split(const StringType &str, const StringT
 
 //-----------------------------------------------------------------------------
 template<typename StringType> inline
+std::vector<StringType> simple_string_split(const StringType &str, const typename StringType::value_type *delim, typename StringType::size_type nSplits = -1)
+{
+    return simple_string_split( str, StringType(delim), nSplits);
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+std::vector<StringType> simple_string_split(const StringType &str, const typename StringType::value_type delim, typename StringType::size_type nSplits = -1)
+{
+    typename StringType::value_type tmpDelimStr[2] = { delim, 0 };
+    return simple_string_split( str, tmpDelimStr, nSplits);
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
 StringType simple_string_replace(const StringType &str, const StringType &searchFor, const StringType &replaceWith, typename StringType::size_type nSplits = -1)
 {
     typename StringType::size_type replaceCounter = 0;
