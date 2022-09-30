@@ -16,8 +16,8 @@
 #include <algorithm>
 #include <sstream>
 
-#include  <cwctype>
-#include  <cctype>
+#include <cwctype>
+#include <cctype>
 
 //----------------------------------------------------------------------------
 
@@ -31,8 +31,10 @@ namespace marty_cpp
 
 
 
-//-----------------------------------------------------------------------------
-
+//----------------------------------------------------------------------------
+#ifndef MARTY_CPP_MAKE_STRING_DEFINED
+#define MARTY_CPP_MAKE_STRING_DEFINED
+//----------------------------------------------------------------------------
 template<typename StringType> inline StringType make_string( )
 {
     return StringType();
@@ -97,6 +99,10 @@ template<typename StringType> inline StringType make_string( char ch, size_t sz 
 }
 
 //-----------------------------------------------------------------------------
+
+#endif // MARTY_CPP_MAKE_STRING_DEFINED
+
+//----------------------------------------------------------------------------
 
 
 
@@ -402,23 +408,59 @@ inline wchar_t toUpper( wchar_t ch )  { return (wchar_t)std::towupper(ch); }
 
 //----------------------------------------------------------------------------
 
+#ifndef MARTY_CPP_TO_UPPER_TO_LOWER_DECLARED
+#define MARTY_CPP_TO_UPPER_TO_LOWER_DECLARED
+
 inline bool    isLower( char ch )     { return (ch>='a' && ch<='z'); }
 inline bool    isUpper( char ch )     { return (ch>='A' && ch<='Z'); }
-inline bool    isAlpha( char ch )     { return isLower(ch) || isUpper(ch); }
-inline bool    isDigit( char ch )     { return (ch>='0' && ch<='9'); }
-inline bool    getCase( char ch )     { return isUpper(ch); }
-inline char    toLower( char ch )     { return isUpper(ch) ? ch-'A'+'a' : ch; }
-inline char    toUpper( char ch )     { return isLower(ch) ? ch-'a'+'A' : ch; }
 
 inline bool    isLower( wchar_t ch )  { return (ch>=L'a' && ch<=L'z'); }
 inline bool    isUpper( wchar_t ch )  { return (ch>=L'A' && ch<=L'Z'); }
-inline bool    isAlpha( wchar_t ch )  { return isLower(ch) || isUpper(ch); }
-inline bool    isDigit( wchar_t ch )  { return (ch>=L'0' && ch<=L'9'); }
-inline bool    getCase( wchar_t ch )  { return isUpper(ch); }
+
+inline char    toLower( char ch )     { return isUpper(ch) ? ch-'A'+'a' : ch; }
+inline char    toUpper( char ch )     { return isLower(ch) ? ch-'a'+'A' : ch; }
+
 inline wchar_t toLower( wchar_t ch )  { return isUpper(ch) ? ch-L'A'+L'a' : ch; }
 inline wchar_t toUpper( wchar_t ch )  { return isLower(ch) ? ch-L'a'+L'A' : ch; }
 
+template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
+inline std::basic_string< CharT, Traits, Allocator >
+toLower( const std::basic_string< CharT, Traits, Allocator > &str )
+{
+    std::basic_string< CharT, Traits, Allocator > resStr;
+    for( auto it = str.begin(); it != str.end(); ++it )
+    {
+        resStr.append( 1, toLower(*it) );
+    }
 
+    return resStr;
+}
+
+template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
+inline std::basic_string< CharT, Traits, Allocator >
+toUpper( const std::basic_string< CharT, Traits, Allocator > &str )
+{
+    std::basic_string< CharT, Traits, Allocator > resStr;
+    for( auto it = str.begin(); it != str.end(); ++it )
+    {
+        resStr.append( 1, toUpper(*it) );
+    }
+
+    return resStr;
+}
+
+#endif // MARTY_CPP_TO_UPPER_TO_LOWER_DECLARED
+
+//----------------------------------------------------------------------------
+inline bool    isAlpha( char ch )     { return isLower(ch) || isUpper(ch); }
+inline bool    isDigit( char ch )     { return (ch>='0' && ch<='9'); }
+inline bool    getCase( char ch )     { return isUpper(ch); }
+
+inline bool    isAlpha( wchar_t ch )  { return isLower(ch) || isUpper(ch); }
+inline bool    isDigit( wchar_t ch )  { return (ch>=L'0' && ch<=L'9'); }
+inline bool    getCase( wchar_t ch )  { return isUpper(ch); }
+
+//----------------------------------------------------------------------------
 inline 
 bool isValidIdentChar( char ch, bool allowNonAsciiIdents, const std::string &forceAllowedChars )
 {
@@ -508,32 +550,6 @@ inline bool isUnderscoreString( const std::basic_string< CharT, Traits, Allocato
     return true;
 }
 
-
-template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
-inline std::basic_string< CharT, Traits, Allocator >
-toLower( const std::basic_string< CharT, Traits, Allocator > &str )
-{
-    std::basic_string< CharT, Traits, Allocator > resStr;
-    for( auto it = str.begin(); it != str.end(); ++it )
-    {
-        resStr.append( 1, toLower(*it) );
-    }
-
-    return resStr;
-}
-
-template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
-inline std::basic_string< CharT, Traits, Allocator >
-toUpper( const std::basic_string< CharT, Traits, Allocator > &str )
-{
-    std::basic_string< CharT, Traits, Allocator > resStr;
-    for( auto it = str.begin(); it != str.end(); ++it )
-    {
-        resStr.append( 1, toUpper(*it) );
-    }
-
-    return resStr;
-}
 
 template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
 inline std::basic_string< CharT, Traits, Allocator >
@@ -1226,142 +1242,6 @@ inline std::wstring formatName( const wchar_t * pStr, NameStyle nameStyle, bool 
 
 
 
-//----------------------------------------------------------------------------
-#define MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL( streamTypeName, fmtStr, fmtTypeName ) \
-            streamTypeName & operator<<( fmtTypeName v)       \
-            {                                                 \
-                char buf[128];                                \
-                std::sprintf(buf, fmtStr, v);                 \
-                m_str.append(make_string<string_type>(buf));  \
-                return *this;                                 \
-            }
-
-#define MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL( streamTypeName )           \
-            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%d"  , int)                  \
-            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%ld" , long)                 \
-            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%lld", long long)            \
-            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%u"  , unsigned)             \
-            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%lu" , unsigned long)        \
-            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%llu", unsigned long long)   \
-            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "f"   , float)                \
-            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "f"   , double)               \
-            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "Lf"  , long double)
-
-//----------------------------------------------------------------------------
-template<typename StringType>
-class SimpleStringRefStream
-{
-    StringType          &m_str;
-
-public:
-
-    typedef StringType  string_type;
-
-    typedef typename string_type::value_type         char_type        ;
-    typedef typename string_type::value_type         value_type       ;
-    typedef typename string_type::traits_type        traits_type      ;
-    typedef typename string_type::allocator_type     allocator_type   ;
-    typedef typename string_type::size_type          size_type        ;
-    typedef typename string_type::difference_type    difference_type  ;
-    //typedef typename string_type::
-
-
-    SimpleStringRefStream( string_type &str ) : m_str(str) {}
-    SimpleStringRefStream() = delete;
-    SimpleStringRefStream(const SimpleStringRefStream&) = delete;
-    SimpleStringRefStream(SimpleStringRefStream&&) = delete;
-    SimpleStringRefStream& operator=(const SimpleStringRefStream&) = delete;
-
-    const string_type& str() const { return m_str; }
-
-    SimpleStringRefStream& operator<<( const char_type *str )
-    {
-        m_str.append(str);
-        return *this;
-    }
-
-    SimpleStringRefStream& operator<<( char_type ch )
-    {
-        m_str.append(1, ch);
-        return *this;
-    }
-
-    SimpleStringRefStream& operator<<( const string_type &str )
-    {
-        m_str.append(str);
-        return *this;
-    }
-
-    SimpleStringRefStream& operator<<( bool b )
-    {
-        m_str.append(make_string<string_type>(b ? "true" : "false"));
-        return *this;
-    }
-
-    MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL(SimpleStringRefStream)
-
-
-}; // template<StringType> class SimpleStringRefStream
-
-//----------------------------------------------------------------------------
-template<typename StringType>
-class SimpleStringStream
-{
-    StringType          m_str;
-
-public:
-
-    typedef StringType  string_type;
-
-    typedef typename string_type::value_type         char_type        ;
-    typedef typename string_type::value_type         value_type       ;
-    typedef typename string_type::traits_type        traits_type      ;
-    typedef typename string_type::allocator_type     allocator_type   ;
-    typedef typename string_type::size_type          size_type        ;
-    typedef typename string_type::difference_type    difference_type  ;
-    //typedef typename string_type::
-
-
-    SimpleStringStream() = default;
-    SimpleStringStream(const SimpleStringStream&) = delete;
-    SimpleStringStream(SimpleStringStream&&) = delete;
-    SimpleStringStream& operator=(const SimpleStringStream&) = delete;
-
-    const string_type& str() const { return m_str; }
-
-    SimpleStringStream& operator<<( const char_type *str )
-    {
-        m_str.append(str);
-        return *this;
-    }
-
-    SimpleStringStream& operator<<( char_type ch )
-    {
-        m_str.append(1, ch);
-        return *this;
-    }
-
-    SimpleStringStream& operator<<( const string_type &str )
-    {
-        m_str.append(str);
-        return *this;
-    }
-
-    SimpleStringStream& operator<<( bool b )
-    {
-        m_str.append(make_string<string_type>(b ? "true" : "false"));
-        return *this;
-    }
-
-    MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL(SimpleStringStream)
-
-
-}; // template<StringType> class SimpleStringStream
-
-
-
-
-
 
 
 //----------------------------------------------------------------------------
@@ -1959,6 +1839,152 @@ StringType unquoted( StringType &s                    //!< Строка для �
 
 
 
+//----------------------------------------------------------------------------
+#ifndef MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL
+    #define MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL( streamTypeName, fmtStr, fmtTypeName ) \
+            streamTypeName & operator<<( fmtTypeName v)       \
+            {                                                 \
+                char buf[128];                                \
+                std::sprintf(buf, fmtStr, v);                 \
+                m_str.append(make_string<string_type>(buf));  \
+                return *this;                                 \
+            }
+#endif
+
+#ifndef MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL
+    #define MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL( streamTypeName )           \
+            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%d"  , int)                  \
+            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%ld" , long)                 \
+            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%lld", long long)            \
+            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%u"  , unsigned)             \
+            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%lu" , unsigned long)        \
+            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%llu", unsigned long long)   \
+            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%f"  , float)                \
+            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%f"  , double)               \
+            MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTER_IMPL(streamTypeName, "%Lf" , long double)
+#endif
+
+//----------------------------------------------------------------------------
+#ifndef MARTY_CPP_SIMPLE_STRING_STREAM__DEFINED
+#define MARTY_CPP_SIMPLE_STRING_STREAM__DEFINED
+template<typename StringType>
+class SimpleStringRefStream
+{
+    StringType          &m_str;
+
+public:
+
+    typedef StringType  string_type;
+
+    typedef typename string_type::value_type         char_type        ;
+    typedef typename string_type::value_type         value_type       ;
+    typedef typename string_type::traits_type        traits_type      ;
+    typedef typename string_type::allocator_type     allocator_type   ;
+    typedef typename string_type::size_type          size_type        ;
+    typedef typename string_type::difference_type    difference_type  ;
+    //typedef typename string_type::
+
+
+    SimpleStringRefStream( string_type &str ) : m_str(str) {}
+    SimpleStringRefStream() = delete;
+    SimpleStringRefStream(const SimpleStringRefStream&) = delete;
+    SimpleStringRefStream(SimpleStringRefStream&&) = delete;
+    SimpleStringRefStream& operator=(const SimpleStringRefStream&) = delete;
+
+    const string_type& str() const { return m_str; }
+
+    SimpleStringRefStream& operator<<( const char_type *str )
+    {
+        m_str.append(str);
+        return *this;
+    }
+
+    SimpleStringRefStream& operator<<( char_type ch )
+    {
+        m_str.append(1, ch);
+        return *this;
+    }
+
+    SimpleStringRefStream& operator<<( const string_type &str )
+    {
+        m_str.append(str);
+        return *this;
+    }
+
+    SimpleStringRefStream& operator<<( bool b )
+    {
+        m_str.append(make_string<string_type>(b ? "true" : "false"));
+        return *this;
+    }
+
+    MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL(SimpleStringRefStream)
+
+
+}; // template<StringType> class SimpleStringRefStream
+
+//----------------------------------------------------------------------------
+template<typename StringType>
+class SimpleStringStream
+{
+    StringType          m_str;
+
+public:
+
+    typedef StringType  string_type;
+
+    typedef typename string_type::value_type         char_type        ;
+    typedef typename string_type::value_type         value_type       ;
+    typedef typename string_type::traits_type        traits_type      ;
+    typedef typename string_type::allocator_type     allocator_type   ;
+    typedef typename string_type::size_type          size_type        ;
+    typedef typename string_type::difference_type    difference_type  ;
+    //typedef typename string_type::
+
+
+    SimpleStringStream() = default;
+    SimpleStringStream(const SimpleStringStream&) = delete;
+    SimpleStringStream(SimpleStringStream&&) = delete;
+    SimpleStringStream& operator=(const SimpleStringStream&) = delete;
+
+    const string_type& str() const { return m_str; }
+
+    SimpleStringStream& operator<<( const char_type *str )
+    {
+        m_str.append(str);
+        return *this;
+    }
+
+    SimpleStringStream& operator<<( char_type ch )
+    {
+        m_str.append(1, ch);
+        return *this;
+    }
+
+    SimpleStringStream& operator<<( const string_type &str )
+    {
+        m_str.append(str);
+        return *this;
+    }
+
+    SimpleStringStream& operator<<( bool b )
+    {
+        m_str.append(make_string<string_type>(b ? "true" : "false"));
+        return *this;
+    }
+
+    MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL(SimpleStringStream)
+
+
+}; // template<StringType> class SimpleStringStream
+
+#endif // MARTY_CPP_SIMPLE_STRING_STREAM__DEFINED
+
+//-----------------------------------------------------------------------------
+
+
+
+
+
 //-----------------------------------------------------------------------------
 /*
     enum генератор
@@ -1986,14 +2012,19 @@ struct EnumGeneratorOptionFlags
     static const unsigned uppercaseDeserelialize       = 0x00000020;
     static const unsigned integerDeserelialize         = 0x00000040;
 
+    static const unsigned enumFlags                    = 0x00000080;
+
     static const unsigned generateDefSerialize         = 0x00010000;
     static const unsigned generateDefDeserialize       = 0x00020000;
     static const unsigned generateDefType              = 0x00040000;
+    static const unsigned generateDefSerializeSet      = 0x00100000;
+    static const unsigned generateDefDeserializeSet    = 0x00200000;
 
     // complex flags
     static const unsigned generateDefSerializeBoth     = 0x00030000; // generateDefSerialize | generateDefDeserialize
     static const unsigned generateDefSerializeBothDir  = 0x00030000; // generateDefSerialize | generateDefDeserialize
     static const unsigned generateDefAll               = 0x00070000; // generateDefSerialize | generateDefDeserialize | generateDefType
+    static const unsigned generateDefSerializeExtra    = 0x00300000;
 
     //unsigned unsignedVals = 0x02;
 
@@ -2017,6 +2048,8 @@ struct EnumGeneratorTemplate
 
     StringType declItemTemplate            ; // $(ITEMINDENT)$(NAME) = $(VAL)
 
+    StringType declFlagsTemplate           ;
+
 
     StringType serializeBeginTemplate      ;
     StringType serializeEndTemplate        ;
@@ -2030,41 +2063,71 @@ struct EnumGeneratorTemplate
     StringType serializeItemSepBefore      ;
     StringType serializeItemSepAfter       ;
 
+    StringType serializeSetTemplate        ;
+    StringType deserializeSetTemplate      ;
+
+    StringType setSerializeSetType         ;
 
     static
     EnumGeneratorTemplate defaultCpp()
     {
         EnumGeneratorTemplate res;
 
-        res.declBeginTemplate               = make_string<StringType>(" enum $(CLASS) $(ENAMNAME)");
-        res.declBeginUnderlyingTemplate     = make_string<StringType>(" enum $(CLASS) $(ENAMNAME) : $(UNDERLYING)");
+        res.declBeginTemplate            = make_string<StringType>(" enum $(CLASS) $(ENAMNAME)");
+        res.declBeginUnderlyingTemplate  = make_string<StringType>(" enum $(CLASS) $(ENAMNAME) : $(UNDERLYING)");
 
-        res.declClass                       = make_string<StringType>("class");
+        res.declClass                    = make_string<StringType>("class");
 
-        res.scopeBeginTemplate              = make_string<StringType>("\n$(INDENT){");
-        res.scopeEndTemplate                = make_string<StringType>("\n\n$(INDENT)}; // $(DECLBEGIN)\n");
+        res.scopeBeginTemplate           = make_string<StringType>("\n$(INDENT){");
+        res.scopeEndTemplate             = make_string<StringType>("\n\n$(INDENT)}; // $(DECLBEGIN)\n");
 
         //res.itemValAssign           = make_string<StringType>("=");
-        res.declItemSepBeforeFirst              = make_string<StringType>("\n");
-        res.declItemSepBefore                   = make_string<StringType>(",\n");
-        res.declItemSepAfter                    = make_string<StringType>("");
+        res.declItemSepBeforeFirst       = make_string<StringType>("\n");
+        res.declItemSepBefore            = make_string<StringType>(",\n");
+        res.declItemSepAfter             = make_string<StringType>("");
 
-        res.declItemTemplate                = make_string<StringType>(" $(ITEMNAME) = $(ITEMVAL)");
+        res.declItemTemplate             = make_string<StringType>(" $(ITEMNAME) = $(ITEMVAL)");
 
+        res.declFlagsTemplate            = make_string<StringType>("MARTY_CPP_MAKE_ENUM_FLAGS($(ENAMNAME))\n");
 
-        res.serializeBeginTemplate   = make_string<StringType>(" MARTY_CPP_ENUM_SERIALIZE_BEGIN( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n");
-        res.serializeEndTemplate     = make_string<StringType>(" MARTY_CPP_ENUM_SERIALIZE_END( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n"  );
-        res.serializeItemTemplate    = make_string<StringType>(" MARTY_CPP_ENUM_SERIALIZE_ITEM( $(ITEMNAME), $(ITEMVAL) )"  );
+        res.serializeBeginTemplate       = make_string<StringType>(" MARTY_CPP_ENUM$(PPCLASS)_SERIALIZE_BEGIN( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n");
+        res.serializeEndTemplate         = make_string<StringType>(" MARTY_CPP_ENUM$(PPCLASS)_SERIALIZE_END( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n");
+        res.serializeItemTemplate        = make_string<StringType>(" MARTY_CPP_ENUM$(PPCLASS)_SERIALIZE_ITEM( $(ITEMNAME), $(ITEMVAL) )"  );
 
-        res.deserializeBeginTemplate = make_string<StringType>(" MARTY_CPP_ENUM_DESERIALIZE_BEGIN( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n");
-        res.deserializeEndTemplate   = make_string<StringType>(" MARTY_CPP_ENUM_DESERIALIZE_END( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n"  );
-        res.deserializeItemTemplate  = make_string<StringType>(" MARTY_CPP_ENUM_DESERIALIZE_ITEM( $(ITEMNAME), $(ITEMVAL) )" );
+        res.deserializeBeginTemplate     = make_string<StringType>(" MARTY_CPP_ENUM$(PPCLASS)_DESERIALIZE_BEGIN( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n");
+        res.deserializeEndTemplate       = make_string<StringType>(" MARTY_CPP_ENUM$(PPCLASS)_DESERIALIZE_END( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n");
+        res.deserializeItemTemplate      = make_string<StringType>(" MARTY_CPP_ENUM$(PPCLASS)_DESERIALIZE_ITEM( $(ITEMNAME), $(ITEMVAL) )" );
 
-        res.serializeItemSepBeforeFirst = make_string<StringType>("");
-        res.serializeItemSepBefore      = make_string<StringType>("");
-        res.serializeItemSepAfter       = make_string<StringType>(";\n");
+        res.serializeItemSepBeforeFirst  = make_string<StringType>("");
+        res.serializeItemSepBefore       = make_string<StringType>("");
+        res.serializeItemSepAfter        = make_string<StringType>(";\n");
 
+        res.serializeSetTemplate         = make_string<StringType>("MARTY_CPP_ENUM$(PPCLASS)_SERIALIZE_SET($(ENAMNAME), $(SETTYPE))\n");
+        res.deserializeSetTemplate       = make_string<StringType>("MARTY_CPP_ENUM$(PPCLASS)_DESERIALIZE_SET($(ENAMNAME), $(SETTYPE))\n");
+        
         return res;
+    }
+
+    StringType makeClassMacroVal(unsigned options) const
+    {
+        StringType ccClass;
+        if (options&EnumGeneratorOptionFlags::enumFlags)
+            ccClass = declClass;
+        else if (options&EnumGeneratorOptionFlags::enumClass)
+            ccClass = declClass;
+
+        return ccClass;
+    }
+
+    StringType makePpClassMacroVal(unsigned options) const
+    {
+        StringType ppClass;
+        if (options&EnumGeneratorOptionFlags::enumFlags)
+            ppClass = make_string<StringType>("_FLAGS");
+        else if (options&EnumGeneratorOptionFlags::enumClass)
+            ppClass = make_string<StringType>("_CLASS");
+
+        return ppClass;
     }
 
     StringType replaceLeadingSpaceToIndentMacro(const StringType &str) const
@@ -2076,13 +2139,14 @@ struct EnumGeneratorTemplate
         return res;
     }
 
-    StringType formatDeclBegin( const StringType &indent, const StringType &enumName, const StringType &underlyingTypeName, bool bEnumClass ) const
+    StringType formatDeclBegin( const StringType &indent, const StringType &enumName, const StringType &underlyingTypeName, unsigned options ) const
     {
         StringType res = replaceLeadingSpaceToIndentMacro(underlyingTypeName.empty() ? declBeginTemplate : declBeginUnderlyingTemplate);
 
         res = simple_string_replace( res, make_string<StringType>("$(UNDERLYING)"), underlyingTypeName );
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
-        res = simple_string_replace( res, make_string<StringType>("$(CLASS)"), bEnumClass ? declClass : StringType() );
+        res = simple_string_replace( res, make_string<StringType>("$(CLASS)"), makeClassMacroVal(options) );
+        res = simple_string_replace( res, make_string<StringType>("$(PPCLASS)"), makePpClassMacroVal(options) );
         res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), enumName );
         return res;
     }
@@ -2100,6 +2164,14 @@ struct EnumGeneratorTemplate
         StringType res = replaceLeadingSpaceToIndentMacro(scopeEndTemplate);
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
         res = simple_string_replace( res, make_string<StringType>("$(DECLBEGIN)"), declBegin );
+        return res;
+    }
+
+    StringType formatDeclFlags( const StringType &indent, const StringType &enumName, unsigned options ) const
+    {
+        StringType res = replaceLeadingSpaceToIndentMacro(declFlagsTemplate);
+        res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent );
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), enumName );
         return res;
     }
 
@@ -2130,11 +2202,12 @@ struct EnumGeneratorTemplate
         StringType upperFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::uppercaseDeserelialize ? "1" : "0" );
 
         StringType res = replaceLeadingSpaceToIndentMacro(tpl);
-        res = simple_string_replace( res, make_string<StringType>("$(INDENT)")  , indent );
+        res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent );
+        res = simple_string_replace( res, make_string<StringType>("$(PPCLASS)")  , makePpClassMacroVal(options) );
         res = simple_string_replace( res, make_string<StringType>("$(MAPTYPE)")  , mapType );
         res = simple_string_replace( res, make_string<StringType>("$(SETTYPE)")  , setType );
         res = simple_string_replace( res, make_string<StringType>("$(UPPERFLAG)"), upperFlag );
-        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), name );
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , name );
 
         return res;
     }
@@ -2149,12 +2222,13 @@ struct EnumGeneratorTemplate
         auto valExpanded  = expand_copy(val, nValLen);
 
         StringType res = replaceLeadingSpaceToIndentMacro(tpl);
-        res = simple_string_replace( res, make_string<StringType>("$(INDENT)")  , indent );
+        res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent );
+        res = simple_string_replace( res, make_string<StringType>("$(PPCLASS)")  , makePpClassMacroVal(options) );
         res = simple_string_replace( res, make_string<StringType>("$(MAPTYPE)")  , mapType );
         res = simple_string_replace( res, make_string<StringType>("$(SETTYPE)")  , setType );
         res = simple_string_replace( res, make_string<StringType>("$(UPPERFLAG)"), upperFlag );
-        res = simple_string_replace( res, make_string<StringType>("$(ITEMNAME)"), nameExpanded );
-        res = simple_string_replace( res, make_string<StringType>("$(ITEMVAL)"), valExpanded );
+        res = simple_string_replace( res, make_string<StringType>("$(ITEMNAME)") , nameExpanded );
+        res = simple_string_replace( res, make_string<StringType>("$(ITEMVAL)")  , valExpanded );
 
         return getSerializeItemSepBefore(nItem) + res + serializeItemSepAfter;
     }
@@ -2187,6 +2261,30 @@ struct EnumGeneratorTemplate
     StringType formatDeserializeItem( std::size_t nItem, const StringType &indent, const StringType &enumName, const StringType &name, const StringType &val, unsigned options, std::size_t nNameLen = 32, std::size_t nValLen = 32 ) const
     {
         return formatSerializeItemTemplateImpl( deserializeItemTemplate, nItem, indent, enumName, name, val, options, nNameLen, nValLen );
+    }
+
+    StringType formatSerializeSetImpl(const StringType &tpl, const StringType &indent, const StringType &enumName, unsigned options) const
+    {
+        auto setType = setSerializeSetType;
+        if (setType.empty())
+            setType = make_string<StringType>("std::set");
+
+        StringType res = replaceLeadingSpaceToIndentMacro(tpl);
+        res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent   );
+        res = simple_string_replace( res, make_string<StringType>("$(PPCLASS)")  , makePpClassMacroVal(options) );
+        res = simple_string_replace( res, make_string<StringType>("$(SETTYPE)")  , setType  );
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , enumName );
+        return res;
+    }
+
+    StringType formatSerializeSet(const StringType &indent, const StringType &enumName, unsigned options) const
+    {
+        return formatSerializeSetImpl(serializeSetTemplate, indent, enumName, options);
+    }
+
+    StringType formatDeserializeSet(const StringType &indent, const StringType &enumName, unsigned options) const
+    {
+        return formatSerializeSetImpl(deserializeSetTemplate, indent, enumName, options);
     }
 
 
@@ -2229,6 +2327,26 @@ StringType makeEnamValueString(const StringType &name, const StringType &prefix,
 }
 
 //-----------------------------------------------------------------------------
+inline
+unsigned enum_generate_adjust_gen_options(unsigned genOptions)
+{
+    if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+        genOptions |= EnumGeneratorOptionFlags::enumClass;
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefSerializeSet)
+        genOptions |= EnumGeneratorOptionFlags::generateDefSerialize;
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefDeserializeSet)
+        genOptions |= EnumGeneratorOptionFlags::generateDefDeserialize;
+
+    return genOptions;
+}
+
+// genOptions = enum_generate_adjust_gen_options(genOptions);
+// if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+
+
+//-----------------------------------------------------------------------------
 //! Генерирует собственно само определение enum
 template<typename StreamType, typename StringType> inline
 void enum_generate_serialize_enum_def( StreamType &ss
@@ -2243,7 +2361,10 @@ void enum_generate_serialize_enum_def( StreamType &ss
                             , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
                             )
 {
-    auto declBegin = genTpl.formatDeclBegin( indent, enumName, underlayedTypeName, genOptions&EnumGeneratorOptionFlags::enumClass ? true : false );
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+
+    auto declBegin = genTpl.formatDeclBegin( indent, enumName, underlayedTypeName, genOptions );
     ss << declBegin;
 
     ss << genTpl.formatScopeBegin(indent,declBegin);
@@ -2265,6 +2386,12 @@ void enum_generate_serialize_enum_def( StreamType &ss
 
     ss << genTpl.formatScopeEnd(indent,declBegin);
 
+    if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+    {
+        ss << "\n";
+        ss << genTpl.formatDeclFlags(indent,enumName,genOptions);
+    }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -2283,6 +2410,9 @@ void enum_generate_serialize_enum_serialize( StreamType &ss
                             , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
                             )
 {
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+
     ss << genTpl.formatSerializeBegin( indent, enumName, genOptions );
 
     std::size_t maxNameLen = serializeVals.empty() 
@@ -2336,6 +2466,9 @@ void enum_generate_serialize_enum_deserialize( StreamType &ss
                             , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
                             )
 {
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+
     ss << genTpl.formatDeserializeBegin( indent, enumName, genOptions );
 
     auto setItemsMaxLen = []( const std::unordered_set<StringType> &s )
@@ -2392,6 +2525,8 @@ void enum_generate_serialize_enum_deserialize( StreamType &ss
 template<typename StringType> inline
 StringType enum_generate_number_convert(unsigned val, unsigned genOptions)
 {
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
     //std::basic_stringstream< typename StringType::value_type, typename StringType::traits_type, typename StringType::allocator_type >  oss;
     SimpleStringStream<StringType> oss;
     if (val==(unsigned)-1)
@@ -2414,19 +2549,22 @@ template<typename StringType> inline
 void enum_generate_serialize_prepare( std::vector< std::pair< StringType,StringType > >                 &defVals // for enum def
                                     , std::unordered_map< StringType, std::unordered_set<StringType> >  &deserializeVals // keyEnumName -> set of deserialize variants
                                     , std::unordered_map< StringType, StringType >                      &serializeVals // keyEnumName -> serialize str
-                                    , const std::vector< std::pair< StringType,StringType > > &vals
-                                    , const StringType                         &enumName
-                                    , const StringType                         &underlayedTypeName
-                                    , NameStyle                                valuesNameStyle
-                                    , NameStyle                                serializedNameStyle
-                                    , const StringType                         &valuesPrefix
-                                    , unsigned                                 genOptions
-                                    , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
-                                    , std::vector<StringType>                  *pDups = 0
-                                    , std::vector<StringType>                  *pDupVals = 0
+                                    , std::vector< std::pair< StringType,StringType > >                 vals
+                                    , const StringType                                                  &enumName
+                                    , const StringType                                                  &underlayedTypeName
+                                    , NameStyle                                                         valuesNameStyle
+                                    , NameStyle                                                         serializedNameStyle
+                                    , const StringType                                                  &valuesPrefix
+                                    , unsigned                                                          genOptions
+                                    , const EnumGeneratorTemplate<StringType>                           &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
+                                    , std::vector<StringType>                                           *pDups = 0
+                                    , std::vector<StringType>                                           *pDupVals = 0
                                     )
 {
     NameStyleSet deserializeNameStyles;
+
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
 
     if (serializedNameStyle==NameStyle::all)
     {
@@ -2437,6 +2575,7 @@ void enum_generate_serialize_prepare( std::vector< std::pair< StringType,StringT
         deserializeNameStyles.insert(serializedNameStyle);
     }
 
+    //unsigned long long counter = 0;
     // const std::vector< std::pair< StringType,unsigned > > &vals
     // enum value name -> enum value pairs
 
@@ -2503,7 +2642,21 @@ void enum_generate_serialize_prepare( std::vector< std::pair< StringType,StringT
             std::size_t pos = 0;
             std::stoll(s, &pos, 0); // base: auto, пробуем сконвертить в целое
             if (pos==s.size())
-                return res; // dont add numeric names
+            {
+                // конвертация прошла успешно, у нас - имя, которое выглядит, как число
+                if (genOptions&EnumGeneratorOptionFlags::integerDeserelialize)
+                {
+                    // Но также у нас разрешена десериализация из чисел
+                    // А имя, которое выглядит как число, может иметь константу, не соответствующую своему имени
+                    // Так, для виртуальных клавиш:
+                    // vkM - клавиша - 'M', код - 77, соответствует коду символа 'M'
+                    // vk8 - клавиша - '8', код - 56, соответствует коду символа '8'
+                    // При десериализации чисел '8' будет использована как число 8 и преобразовано
+                    // в элемент vkBack = 8
+                    return res; // В данном случае числовые имена нельзя рассматривать, как годные строки для (де)сериализации
+                }
+            }
+                
         }
         catch(...)
         {
@@ -2632,6 +2785,8 @@ void enum_generate_serialize( StreamType &ss
                             , std::vector<StringType>                  *pDupVals = 0
                             )
 {
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
 
     if ((genOptions&EnumGeneratorOptionFlags::generateDefAll)==0)
         return;
@@ -2668,6 +2823,24 @@ void enum_generate_serialize( StreamType &ss
             ss << make_string<StringType>("\n");
         enum_generate_serialize_enum_deserialize( ss, deserializeVals, indent, indentInc, enumName, underlayedTypeName, valuesNameStyle, serializedNameStyle, valuesPrefix, genOptions, genTpl );
     }
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefSerializeSet)
+    {
+        if ((genOptions&EnumGeneratorOptionFlags::noExtraLinefeed)==0)
+            ss << make_string<StringType>("\n");
+        ss << genTpl.formatSerializeSet(indent, enumName, genOptions);
+    }
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefDeserializeSet)
+    {
+        if ((genOptions&EnumGeneratorOptionFlags::noExtraLinefeed)==0)
+            ss << make_string<StringType>("\n");
+        ss << genTpl.formatDeserializeSet(indent, enumName, genOptions);
+    }
+
+    if ((genOptions&EnumGeneratorOptionFlags::noExtraLinefeed)==0)
+        ss << make_string<StringType>("\n");
+
 }
 
 
@@ -2688,6 +2861,9 @@ void enum_generate_serialize( StreamType &ss
                             , std::vector<StringType>                  *pDupVals = 0
                             )
 {
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+
     std::vector< std::pair< StringType,StringType > > strVals;
     strVals.reserve(vals.size());
 
@@ -2723,6 +2899,9 @@ void enum_generate_serialize( StreamType &ss
                             , std::vector<StringType>                  *pDupVals = 0
                             )
 {
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+
     auto valsStrPrepared = simple_string_replace<StringType>(valsStr, make_string<StringType>("\n"), make_string<StringType>(";") /* , typename StringType::size_type nSplits = -1 */ );
 
     auto enumItems = simple_string_split(valsStrPrepared, make_string<StringType>(";") /* , typename StringType::size_type nSplits = -1 */ );
@@ -2735,8 +2914,25 @@ void enum_generate_serialize( StreamType &ss
 
     std::vector< std::pair< StringType,StringType> > vals;
 
-    unsigned     lastValCounter = 0;
-    StringType   lastVal;
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+
+    auto calcNextCounterVal = [&](unsigned long long curVal) -> unsigned long long
+        {
+            if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+            {
+                if (!curVal)
+                    return 1;
+                return curVal<<1;
+            }
+            else
+            {
+                return curVal+1;
+            }
+        };
+
+    unsigned long long  lastValCounter = (genOptions&EnumGeneratorOptionFlags::enumFlags) ? 0 : (unsigned long long)-1;
+    StringType          lastVal;
 
     for( auto &i: enumItems)
     {
@@ -2766,7 +2962,7 @@ void enum_generate_serialize( StreamType &ss
                 lastValUpdated = true;
                 if (namesAndVal.size()<2)
                 {
-                    ++lastValCounter;
+                    lastValCounter = calcNextCounterVal(lastValCounter);
                     lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions);
                 }
                 else
@@ -2774,7 +2970,7 @@ void enum_generate_serialize( StreamType &ss
                     auto strVal = simple_trim(namesAndVal[1], isSpaceChar);
                     if (strVal.empty())
                     {
-                        ++lastValCounter;
+                        lastValCounter = calcNextCounterVal(lastValCounter);
                         lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions);
                     }
                     else
@@ -2821,6 +3017,10 @@ void enum_generate_serialize( StreamType &ss
                             , std::vector<StringType> *pDups = 0
                             )
 {
+    if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+        genOptions |= EnumGeneratorOptionFlags::enumClass;
+
+
     enum_generate_serialize( ss, valsStr, indent, indentInc, enumName, underlayedTypeName
                            , fromString<StringType>(valuesNameStyle, NameStyle::defaultStyle)
                            , fromString<StringType>(serializedNameStyle, NameStyle::defaultStyle /* all */ )
@@ -2837,220 +3037,9 @@ void enum_generate_serialize( StreamType &ss
 
 
 
-//-----------------------------------------------------------------------------
-template<typename StreamType, typename StringType>
-class NamespaceOutputWriteGuard
-{
-    StreamType                       &m_oss           ;
-    std::vector<StringType>          m_nsNames        ;
-    NameStyle                        m_nsNameStyle    ;
-    StringType                       m_nsBeginTemplate;
-    StringType                       m_nsEndTemplate  ;
-
-    StringType                       m_indentSize     ;
-
-    template<typename IterType>
-    void writeNsNames(IterType b, IterType e, const StringType &tpl) const
-    {
-        auto isSpaceChar = [](typename StringType::value_type ch)
-                             {
-                                 typedef typename StringType::value_type CharType; 
-                                 return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
-                             };
-
-
-        for(; b!=e; ++b)
-        {
-            auto n = simple_trim(*b, isSpaceChar);
-            if (n.empty())
-                continue;
-        
-            if (m_nsNameStyle!=NameStyle::defaultStyle)
-                n = formatName(n, m_nsNameStyle);
-            n = simple_string_replace<StringType>(tpl, make_string<StringType>("$"), n);
-            m_oss<<n;
-        }
-    }
-
-    static
-    std::vector<StringType> parseNsNameList( StringType nsList )
-    {
-        auto isSpaceChar = [](typename StringType::value_type ch)
-                             {
-                                 typedef typename StringType::value_type CharType; 
-                                 return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
-                             };
-
-        // normalize NS separators
-        nsList = simple_string_replace<StringType>(nsList, make_string<StringType>("::"), make_string<StringType>("/"));
-        nsList = simple_string_replace<StringType>(nsList, make_string<StringType>(":" ), make_string<StringType>("/"));
-        nsList = simple_string_replace<StringType>(nsList, make_string<StringType>(":" ), make_string<StringType>("/"));
-        nsList = simple_string_replace<StringType>(nsList, make_string<StringType>("\\"), make_string<StringType>("/"));
-        return simple_seq_filter(simple_string_split(nsList, make_string<StringType>("/")), [&](auto s) { return !simple_trim(s, isSpaceChar).empty(); } );
-    }
-
-
-public:
-
-    typedef StringType string_type;
-
-    /* typename  */ 
-    typename string_type::size_type indentSize(typename StringType::size_type nLevelSize = 4) const
-    {
-        return nLevelSize*m_nsNames.size();
-    }
-
-    StringType indentStr(typename StringType::size_type nLevelSize = 4) const
-    {
-        return StringType(indentSize(), (typename StringType::value_type)' ');
-    }
-
-    NamespaceOutputWriteGuard( NamespaceOutputWriteGuard && ) = default;
-    NamespaceOutputWriteGuard( const NamespaceOutputWriteGuard & ) = default;
-
-    NamespaceOutputWriteGuard( StreamType                   &oss
-                             , const StringType             &nsList
-                             , NameStyle                    nsNameStyle      = NameStyle::defaultStyle
-                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace ${\n")
-                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
-                             )
-    : m_oss            (oss)
-    , m_nsNames        (parseNsNameList(nsList))
-    , m_nsNameStyle(nsNameStyle)
-    , m_nsBeginTemplate(nsBeginTemplate)
-    , m_nsEndTemplate  (nsEndTemplate)
-    {
-        writeNsNames(m_nsNames.cbegin(),m_nsNames.cend(), m_nsBeginTemplate);
-    } 
-
-    NamespaceOutputWriteGuard( StreamType                   &oss
-                             , const StringType             &nsList
-                             , const StringType             &nsNameStyle
-                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace ${\n")
-                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
-                             )
-    : m_oss            (oss)
-    , m_nsNames        (parseNsNameList(nsList))
-    , m_nsNameStyle(fromString<StringType>(nsNameStyle))
-    , m_nsBeginTemplate(nsBeginTemplate)
-    , m_nsEndTemplate  (nsEndTemplate)
-    {
-        writeNsNames(m_nsNames.cbegin(),m_nsNames.cend(), m_nsBeginTemplate);
-    } 
-
-    ~NamespaceOutputWriteGuard()
-    {
-        writeNsNames(m_nsNames.crbegin(),m_nsNames.crend(), m_nsEndTemplate);
-    } 
-
-};
-
-//------------------------------
-template<typename StreamType, typename StringType> inline
-NamespaceOutputWriteGuard<StreamType, StringType>
-makeNamespaceOutputWriteGuard( StreamType                   &oss
-                             , const StringType             &nsList
-                             , NameStyle                    nsNameStyle = NameStyle::defaultStyle
-                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace ${\n")
-                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
-                             )
-{
-    return NamespaceOutputWriteGuard<StreamType, StringType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);
-}
-
-//------------------------------
-template<typename StreamType, typename StringType> inline
-NamespaceOutputWriteGuard<StreamType, StringType>
-makeNamespaceOutputWriteGuard( StreamType                   &oss
-                             , const StringType             &nsList
-                             , const StringType             &nsNameStyle
-                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace ${\n")
-                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
-                             )
-{
-    return NamespaceOutputWriteGuard<StreamType, StringType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);
-}
-
-
-
-//-----------------------------------------------------------------------------
-
-
-
 
 //-----------------------------------------------------------------------------
 } // namespace marty_cpp
 
-
-// Requires
-//   <marty_cpp/marty_cpp.h>
-//   <map> or <unordered_map>
-//   <exception>
-//   <stdexcept>
-// to be included
-
-
-#define MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )   \
-inline                                                                     \
-std::string enum_serialize_##enumTypeName( enumTypeName v )                \
-{                                                                          \
-    static mapType< enumTypeName, std::string >  _m;                       \
-    if (_m.empty())                                                        \
-    {
-
-
-#define MARTY_CPP_ENUM_SERIALIZE_ITEM( val, valStr ) \
-        _m[val] = valStr
-
-
-#define MARTY_CPP_ENUM_SERIALIZE_END( enumTypeName, mapType, doUpper )     \
-    }                                                                      \
-                                                                           \
-    mapType< enumTypeName, std::string >::const_iterator it = _m.find(v);  \
-    if (it==_m.end())                                                      \
-        return std::string();                                              \
-                                                                           \
-    return it->second;                                                     \
-}
-
-
-
-#define MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper ) \
-inline                                                                     \
-enumTypeName enum_deserialize_##enumTypeName( const std::string &str )     \
-{                                                                          \
-    static bool upperCaseConvert = doUpper ? true : false;                 \
-    static mapType< std::string, enumTypeName >  _m;                       \
-    if (_m.empty())                                                        \
-    {
-
-
-#define MARTY_CPP_ENUM_DESERIALIZE_ITEM( val, valStr )                     \
-        _m[upperCaseConvert ? marty_cpp::toUpper(std::string(valStr)) : std::string(valStr)] = val
-
-
-#define MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doUpper )   \
-    }                                                                      \
-                                                                           \
-    mapType< std::string, enumTypeName >::const_iterator it = _m.find(upperCaseConvert ? marty_cpp::toUpper(str) : str); \
-    if (it==_m.end())                                                      \
-        throw std::runtime_error( #enumTypeName " - failed to deserialize value");\
-                                                                           \
-    return it->second;                                                     \
-}                                                                          \
-                                                                           \
-inline                                                                     \
-enumTypeName enum_deserialize_##enumTypeName( const std::string &str, enumTypeName defVal ) \
-{                                                                          \
-    try                                                                    \
-    {                                                                      \
-        return enum_deserialize_##enumTypeName( str );                     \
-    }                                                                      \
-    catch(...)                                                             \
-    {                                                                      \
-    }                                                                      \
-                                                                           \
-    return defVal;                                                         \
-}
 
 
