@@ -2921,8 +2921,10 @@ void enum_generate_serialize( StreamType &ss
         {
             if (genOptions&EnumGeneratorOptionFlags::enumFlags)
             {
-                if (!curVal)
+                if (curVal==0)
                     return 1;
+                else if (curVal==(unsigned long long)-1)
+                    return 0;
                 return curVal<<1;
             }
             else

@@ -32,67 +32,82 @@
 // https://stackoverflow.com/questions/1448396/how-to-use-enums-as-flags-in-c
 
 #define MARTY_CPP_MAKE_ENUM_FLAGS(TEnum)                                                       \
-    inline constexpr bool operator==(TEnum a, std::underlying_type<TEnum>::type b) {           \
+    inline constexpr bool operator==(TEnum a, std::underlying_type<TEnum>::type b)             \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return static_cast<TUnder>(a) == b;                                                    \
     }                                                                                          \
-    inline constexpr bool operator==(std::underlying_type<TEnum>::type a, TEnum b) {           \
+    inline constexpr bool operator==(std::underlying_type<TEnum>::type a, TEnum b)             \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return a == static_cast<TUnder>(b);                                                    \
     }                                                                                          \
-    inline constexpr bool operator!=(TEnum a, std::underlying_type<TEnum>::type b) {           \
+    inline constexpr bool operator!=(TEnum a, std::underlying_type<TEnum>::type b)             \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return static_cast<TUnder>(a) != b;                                                    \
     }                                                                                          \
-    inline constexpr bool operator!=(std::underlying_type<TEnum>::type a, TEnum b) {           \
+    inline constexpr bool operator!=(std::underlying_type<TEnum>::type a, TEnum b)             \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return a != static_cast<TUnder>(b);                                                    \
     }                                                                                          \
-    inline constexpr TEnum operator<<(TEnum a, unsigned b) {                                   \
+    inline constexpr TEnum operator<<(TEnum a, unsigned b)                                     \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return static_cast<TEnum>(static_cast<TUnder>(a) << b);                                \
     }                                                                                          \
-    inline constexpr TEnum operator>>(TEnum a, unsigned b) {                                   \
+    inline constexpr TEnum operator>>(TEnum a, unsigned b)                                     \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return static_cast<TEnum>(static_cast<TUnder>(a) >> b);                                \
     }                                                                                          \
-    inline constexpr TEnum operator~(TEnum a) {                                                \
+    inline constexpr TEnum operator~(TEnum a)                                                  \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return static_cast<TEnum>(~static_cast<TUnder>(a));                                    \
     }                                                                                          \
-    inline constexpr TEnum operator|(TEnum a, TEnum b) {                                       \
+    inline constexpr TEnum operator|(TEnum a, TEnum b)                                         \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return static_cast<TEnum>(static_cast<TUnder>(a) | static_cast<TUnder>(b));            \
     }                                                                                          \
-    inline constexpr TEnum operator&(TEnum a, TEnum b) {                                       \
+    inline constexpr TEnum operator&(TEnum a, TEnum b)                                         \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return static_cast<TEnum>(static_cast<TUnder>(a) & static_cast<TUnder>(b));            \
     }                                                                                          \
-    inline constexpr TEnum operator^(TEnum a, TEnum b) {                                       \
+    inline constexpr TEnum operator^(TEnum a, TEnum b)                                         \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         return static_cast<TEnum>(static_cast<TUnder>(a) ^ static_cast<TUnder>(b));            \
     }                                                                                          \
-    inline constexpr TEnum& operator<<=(TEnum& a, unsigned b) {                                \
+    inline constexpr TEnum& operator<<=(TEnum& a, unsigned b)                                  \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         a = static_cast<TEnum>(static_cast<TUnder>(a) << b );                                  \
         return a;                                                                              \
     }                                                                                          \
-    inline constexpr TEnum& operator>>=(TEnum& a, unsigned b) {                                \
+    inline constexpr TEnum& operator>>=(TEnum& a, unsigned b)                                  \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         a = static_cast<TEnum>(static_cast<TUnder>(a) >> b );                                  \
         return a;                                                                              \
     }                                                                                          \
-    inline constexpr TEnum& operator|=(TEnum& a, TEnum b) {                                    \
+    inline constexpr TEnum& operator|=(TEnum& a, TEnum b)                                      \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         a = static_cast<TEnum>(static_cast<TUnder>(a) | static_cast<TUnder>(b));               \
         return a;                                                                              \
     }                                                                                          \
-    inline constexpr TEnum& operator&=(TEnum& a, TEnum b) {                                    \
+    inline constexpr TEnum& operator&=(TEnum& a, TEnum b)                                      \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         a = static_cast<TEnum>(static_cast<TUnder>(a) & static_cast<TUnder>(b));               \
         return a;                                                                              \
     }                                                                                          \
-    inline constexpr TEnum& operator^=(TEnum& a, TEnum b) {                                    \
+    inline constexpr TEnum& operator^=(TEnum& a, TEnum b)                                      \
+    {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
         a = static_cast<TEnum>(static_cast<TUnder>(a) ^ static_cast<TUnder>(b));               \
         return a;                                                                              \
@@ -101,32 +116,38 @@
 
 //----------------------------------------------------------------------------
 #define MARTY_CPP_ENUM_FLAGS_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_CLASS_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
+        MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
+//        MARTY_CPP_ENUM_CLASS_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
 
 #define MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( val, valStr )\
-        MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( val, valStr )
+        MARTY_CPP_ENUM_SERIALIZE_ITEM( val, valStr )
+//        MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( val, valStr )
 
 #define MARTY_CPP_ENUM_FLAGS_SERIALIZE_END( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_CLASS_SERIALIZE_END( enumTypeName, mapType, doUpper )
+        MARTY_CPP_ENUM_SERIALIZE_END( enumTypeName, mapType, doUpper )
+//        MARTY_CPP_ENUM_CLASS_SERIALIZE_END( enumTypeName, mapType, doUpper )
 
 //------------------------------
 #define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_CLASS_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
+        MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
+//        MARTY_CPP_ENUM_CLASS_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
 
 #define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( val, valStr )\
-        MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( val, valStr )
+        MARTY_CPP_ENUM_DESERIALIZE_ITEM( val, valStr )
+//        MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( val, valStr )
 
 #define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_END( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_CLASS_DESERIALIZE_END( enumTypeName, mapType, doUpper )
+        MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doUpper )
+//        MARTY_CPP_ENUM_CLASS_DESERIALIZE_END( enumTypeName, mapType, doUpper )
 
 //----------------------------------------------------------------------------
 
 
 
 //----------------------------------------------------------------------------
-#define MARTY_CPP_ENUM_FLAGS_SERIALIZE_SET(enumTypeName, setType)            \
-                                                                             \
-inline                                                                       \
+#define MARTY_CPP_ENUM_FLAGS_SERIALIZE_SET(enumTypeName, setType)                                                \
+                                                                                                                 \
+inline                                                                                                           \
 std::string enum_serialize_flags_##enumTypeName( enumTypeName enumVal, const char *seps = "|+,")                 \
 {                                                                                                                \
     return marty_cpp::serializeEnumFlagsImpl(enumVal, enum_serialize_##enumTypeName, seps);                      \
@@ -148,7 +169,20 @@ inline                                                                          
 std::string enum_serialize_flags( enumTypeName enumVal, const std::string &seps)                                 \
 {                                                                                                                \
     return marty_cpp::serializeEnumFlagsImpl(enumVal, enum_serialize_##enumTypeName, seps);                      \
+}                                                                                                                \
+                                                                                                                 \
+inline                                                                                                           \
+std::string enum_serialize( enumTypeName enumVal, const char *seps = "|+,")                                      \
+{                                                                                                                \
+    return marty_cpp::serializeEnumFlagsImpl(enumVal, enum_serialize_##enumTypeName, seps);                      \
+}                                                                                                                \
+                                                                                                                 \
+inline                                                                                                           \
+std::string enum_serialize( enumTypeName enumVal, const std::string &seps)                                       \
+{                                                                                                                \
+    return marty_cpp::serializeEnumFlagsImpl(enumVal, enum_serialize_##enumTypeName, seps);                      \
 }
+
 
 //----------------------------------------------------------------------------
 
@@ -188,16 +222,21 @@ std::string serializeEnumFlagsImpl( EnumType enumVal
 
     using EnumUnderlyingUnsignedType = typename std::make_unsigned<EnumUnderlyingType>::type;
 
-    // Calc max bit
-    EnumUnderlyingUnsignedType curBit = ~(((EnumUnderlyingUnsignedType)-1)>>1);
-
-    for(; curBit; curBit>>=1)
+    // // Calc max bit
+    // EnumUnderlyingUnsignedType curBit = ~(((EnumUnderlyingUnsignedType)-1)>>1);
+    // for(; curBit; curBit>>=1)
+    EnumUnderlyingUnsignedType curBit = (EnumUnderlyingUnsignedType)1;
+    for(; curBit; curBit<<=1)
     {
         auto testVal = enumVal&((EnumType)curBit);
         if (testVal==0)
             continue;
 
         auto enumValStr = serializer(testVal);
+        if (enumValStr.empty())
+        {
+            throw std::runtime_error("serializeEnumFlagsImpl: try to serialize unknown flag");
+        }
 
         if (!res.empty())
             res.append(1,sepChar);
@@ -205,6 +244,9 @@ std::string serializeEnumFlagsImpl( EnumType enumVal
         res.append(enumValStr);
 
     }
+
+    if (res.empty())
+        res = "0";
 
     return res;
 }
