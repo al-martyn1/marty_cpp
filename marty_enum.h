@@ -174,19 +174,23 @@ enumTypeName enum_deserialize( const std::string &str, enumTypeName defVal ) \
 #define MARTY_CPP_ENUM_DESERIALIZE_SET(enumTypeName, setType)                \
                                                                              \
 inline                                                                       \
-void enum_deserialize_set_##enumTypeName( setType<enumTypeName> &s, const std::string &str, const char *seps = ",|+", char quotChar = '\'' ) \
+setType<enumTypeName> enum_deserialize_set_##enumTypeName( const std::string &str, const char *seps = ",|+", char quotChar = '\'' ) \
 {                                                                            \
     auto deser = [](const std::string &str)                                  \
     { return enum_deserialize_##enumTypeName(str); };                        \
-    return marty_cpp::deserializeEnumSetImpl(s, str, deser, seps, quotChar); \
+    setType<enumTypeName> s;                                                 \
+    marty_cpp::deserializeEnumSetImpl(s, str, deser, seps, quotChar);        \
+    return s;                                                                \
 }                                                                            \
                                                                              \
 inline                                                                       \
-void enum_deserialize_set_##enumTypeName( setType<enumTypeName> &s, const std::string &str, const std::string &seps, char quotChar = '\'' )  \
+setType<enumTypeName> enum_deserialize_set_##enumTypeName( const std::string &str, const std::string &seps, char quotChar = '\'' )  \
 {                                                                            \
     auto deser = [](const std::string &str)                                  \
     { return enum_deserialize_##enumTypeName(str); };                        \
-    return marty_cpp::deserializeEnumSetImpl(s, str, deser, seps, quotChar); \
+    setType<enumTypeName> s;                                                 \
+    marty_cpp::deserializeEnumSetImpl(s, str, deser, seps, quotChar);        \
+    return s;                                                                \
 }
 
 //------------------------------
@@ -196,13 +200,13 @@ void enum_deserialize_set_##enumTypeName( setType<enumTypeName> &s, const std::s
 inline                                                                       \
 void enum_deserialize_set( setType<enumTypeName> &s, const std::string &str, const char *seps = ",|+", char quotChar = '\'' ) \
 {                                                                            \
-    return enum_deserialize_set_##enumTypeName(s, str, seps, quotChar);      \
+    s = enum_deserialize_set_##enumTypeName(str, seps, quotChar);            \
 }                                                                            \
                                                                              \
 inline                                                                       \
 void enum_deserialize_set( setType<enumTypeName> &s, const std::string &str, const std::string &seps, char quotChar = '\'' )  \
 {                                                                            \
-    return enum_deserialize_set_##enumTypeName(s, str, seps, quotChar);      \
+    s = enum_deserialize_set_##enumTypeName(str, seps, quotChar);            \
 }
 
 //----------------------------------------------------------------------------
@@ -384,7 +388,7 @@ void deserializeEnumSetImpl( const EnumSetType &enumValsSet
                            , char quotChar = '\''
                            )
 {
-    return deserializeEnumSetImpl(enumValsSet, str, deserializer, seps.c_str(), quotChar);
+    deserializeEnumSetImpl(enumValsSet, str, deserializer, seps.c_str(), quotChar);
 }
 
 
