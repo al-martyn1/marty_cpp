@@ -221,6 +221,151 @@ namespace marty_cpp
 {
 
 
+
+
+//-----------------------------------------------------------------------------
+#ifndef MARTY_CPP_SIMPLE_STRING_SPLIT_DECLARED
+#define MARTY_CPP_SIMPLE_STRING_SPLIT_DECLARED
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+std::vector<StringType> simple_string_split(const StringType &str, const StringType &delim, typename StringType::size_type nSplits = -1)
+{
+    // std::string s = "scott>=tiger>=mushroom";
+    // std::string delimiter = ">=";
+
+    // txt = "apple#banana#cherry#orange"
+    // # setting the maxsplit parameter to 1, will return a list with 2 elements!
+    // x = txt.split("#", 1)
+
+    std::vector<StringType> res;
+
+    typename StringType::size_type curPos  = 0;
+    typename StringType::size_type prevPos = 0;
+    //StringType token;
+    while (res.size()!=nSplits && (curPos = str.find(delim, prevPos)) != StringType::npos)
+    {
+        res.emplace_back(str, prevPos, curPos-prevPos);
+        prevPos = curPos+delim.size();
+    }
+
+    res.emplace_back(str, prevPos);
+
+    return res;
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+std::vector<StringType> simple_string_split(const StringType &str, const typename StringType::value_type *delim, typename StringType::size_type nSplits = -1)
+{
+    return simple_string_split( str, StringType(delim), nSplits);
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+std::vector<StringType> simple_string_split(const StringType &str, const typename StringType::value_type delim, typename StringType::size_type nSplits = -1)
+{
+    typename StringType::value_type tmpDelimStr[2] = { delim, 0 };
+    return simple_string_split( str, tmpDelimStr, nSplits);
+}
+
+//-----------------------------------------------------------------------------
+#endif // MARTY_CPP_SIMPLE_STRING_SPLIT_DECLARED
+//-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+#ifndef MARTY_CPP_SIMPLE_STRING_REPLACE_DECLARED
+#define MARTY_CPP_SIMPLE_STRING_REPLACE_DECLARED
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType simple_string_replace(const StringType &str, const StringType &searchFor, const StringType &replaceWith, typename StringType::size_type nSplits = -1)
+{
+    typename StringType::size_type replaceCounter = 0;
+
+    typename StringType::size_type curPos  = 0;
+    typename StringType::size_type prevPos = 0;
+
+    StringType res; res.reserve(str.size());
+
+    for(; replaceCounter!=nSplits && (curPos = str.find(searchFor, prevPos)) != StringType::npos; ++replaceCounter)
+    {
+        res.append(str, prevPos, curPos-prevPos);
+        prevPos = curPos+searchFor.size();
+        res.append(replaceWith);
+    }
+
+    res.append(str, prevPos);
+
+    return res;
+}
+
+//-----------------------------------------------------------------------------
+#endif // MARTY_CPP_SIMPLE_STRING_REPLACE_DECLARED
+//-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+#ifndef MARTY_CPP_SIMPLE_SEQ_FILTER_DECLARED
+#define MARTY_CPP_SIMPLE_SEQ_FILTER_DECLARED
+//-----------------------------------------------------------------------------
+template<typename InputIterType, typename OutputIterType, typename FilterAllowPred> inline
+void simple_seq_filter(InputIterType b, InputIterType e, OutputIterType o, const FilterAllowPred &allowPred)
+{
+    for(; b!=e; ++b)
+    {
+        if (allowPred(*b))
+            *o++ = *b;
+    }
+}
+
+//-----------------------------------------------------------------------------
+template<typename ItemType, typename FilterAllowPred> inline
+std::vector<ItemType> simple_seq_filter( const std::vector<ItemType> &v, const FilterAllowPred &allowPred )
+{
+    std::vector<ItemType> res;
+    simple_seq_filter(v.cbegin(), v.cend(), std::back_inserter(res), allowPred);
+    return res;
+}
+//-----------------------------------------------------------------------------
+#endif // MARTY_CPP_SIMPLE_SEQ_FILTER_DECLARED
+//-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+#ifndef MARTY_CPP_SIMPLE_TRIM_DECLARED
+#define MARTY_CPP_SIMPLE_TRIM_DECLARED
+//-----------------------------------------------------------------------------
+template<typename IterType, typename ConditionType> inline
+IterType trim_iter_impl( IterType b, IterType e, const ConditionType &trimCondition )
+{
+    for(; trimCondition(*b) && b!=e; ++b) {}
+    return b;
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType, typename ConditionType> inline
+StringType simple_trim(const StringType &str, const ConditionType &trimCondition)
+{
+    auto e = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
+    auto b = trim_iter_impl(str.cbegin(), e, trimCondition);
+    return StringType(b,e);
+}
+
+//-----------------------------------------------------------------------------
+#endif // MARTY_CPP_SIMPLE_TRIM_DECLARED
+//-----------------------------------------------------------------------------
+
+
+
+
+
+//-----------------------------------------------------------------------------
 #ifndef MARTY_CPP_TO_UPPER_TO_LOWER_DECLARED
 #define MARTY_CPP_TO_UPPER_TO_LOWER_DECLARED
 
@@ -263,6 +408,7 @@ toUpper( const std::basic_string< CharT, Traits, Allocator > &str )
 }
 
 #endif // MARTY_CPP_TO_UPPER_TO_LOWER_DECLARED
+//-----------------------------------------------------------------------------
 
 
 
@@ -368,20 +514,45 @@ std::string serializeEnumSetImpl( const EnumSetType &enumValsSet
 template< typename EnumSetType
         , typename EnumTypeDeserializer
         > inline
-void deserializeEnumSetImpl( const EnumSetType &enumValsSet
-                           , const std::string &str
+void deserializeEnumSetImpl( EnumSetType &enumValsSet
+                           , std::string str
                            , EnumTypeDeserializer deserializer
                            , const char *seps
                            , char quotChar = '\''
                            )
 {
+    char sep = ',';
+    if (seps)
+    {
+        sep = *seps++;
+        while(*seps)
+        {
+            str = simple_string_replace<std::string>(str, std::string(1,*seps++), std::string(1,sep));
+        }
+    }
+
+    auto isSpaceChar = [](char ch)
+                         {
+                             typedef char CharType; 
+                             return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
+                         };
+
+    auto items = simple_seq_filter(simple_string_split(str, std::string(1,sep)), [&](auto s) { return !simple_trim(s, isSpaceChar).empty(); } );
+
+    enumValsSet.clear();
+
+    for(const auto &i : items)
+    {
+        enumValsSet.insert(deserializer(i));
+    }
+
 }
 
 //-----------------------------------------------------------------------------
 template< typename EnumSetType
         , typename EnumTypeDeserializer
         > inline
-void deserializeEnumSetImpl( const EnumSetType &enumValsSet
+void deserializeEnumSetImpl( EnumSetType &enumValsSet
                            , const std::string &str
                            , EnumTypeDeserializer deserializer
                            , const std::string &seps

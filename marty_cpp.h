@@ -1493,6 +1493,9 @@ StringType expand_copy( const StringType &str                                   
 
 
 //-----------------------------------------------------------------------------
+#ifndef MARTY_CPP_SIMPLE_STRING_SPLIT_DECLARED
+#define MARTY_CPP_SIMPLE_STRING_SPLIT_DECLARED
+//-----------------------------------------------------------------------------
 template<typename StringType> inline
 std::vector<StringType> simple_string_split(const StringType &str, const StringType &delim, typename StringType::size_type nSplits = -1)
 {
@@ -1535,6 +1538,16 @@ std::vector<StringType> simple_string_split(const StringType &str, const typenam
 }
 
 //-----------------------------------------------------------------------------
+#endif // MARTY_CPP_SIMPLE_STRING_SPLIT_DECLARED
+//-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+#ifndef MARTY_CPP_SIMPLE_STRING_REPLACE_DECLARED
+#define MARTY_CPP_SIMPLE_STRING_REPLACE_DECLARED
+//-----------------------------------------------------------------------------
 template<typename StringType> inline
 StringType simple_string_replace(const StringType &str, const StringType &searchFor, const StringType &replaceWith, typename StringType::size_type nSplits = -1)
 {
@@ -1558,6 +1571,16 @@ StringType simple_string_replace(const StringType &str, const StringType &search
 }
 
 //-----------------------------------------------------------------------------
+#endif // MARTY_CPP_SIMPLE_STRING_REPLACE_DECLARED
+//-----------------------------------------------------------------------------
+
+
+
+
+//-----------------------------------------------------------------------------
+#ifndef MARTY_CPP_SIMPLE_SEQ_FILTER_DECLARED
+#define MARTY_CPP_SIMPLE_SEQ_FILTER_DECLARED
+//-----------------------------------------------------------------------------
 template<typename InputIterType, typename OutputIterType, typename FilterAllowPred> inline
 void simple_seq_filter(InputIterType b, InputIterType e, OutputIterType o, const FilterAllowPred &allowPred)
 {
@@ -1576,7 +1599,16 @@ std::vector<ItemType> simple_seq_filter( const std::vector<ItemType> &v, const F
     simple_seq_filter(v.cbegin(), v.cend(), std::back_inserter(res), allowPred);
     return res;
 }
+//-----------------------------------------------------------------------------
+#endif // MARTY_CPP_SIMPLE_SEQ_FILTER_DECLARED
+//-----------------------------------------------------------------------------
 
+
+
+
+//-----------------------------------------------------------------------------
+#ifndef MARTY_CPP_SIMPLE_TRIM_DECLARED
+#define MARTY_CPP_SIMPLE_TRIM_DECLARED
 //-----------------------------------------------------------------------------
 template<typename IterType, typename ConditionType> inline
 IterType trim_iter_impl( IterType b, IterType e, const ConditionType &trimCondition )
@@ -1594,6 +1626,8 @@ StringType simple_trim(const StringType &str, const ConditionType &trimCondition
     return StringType(b,e);
 }
 
+//-----------------------------------------------------------------------------
+#endif // MARTY_CPP_SIMPLE_TRIM_DECLARED
 //-----------------------------------------------------------------------------
 
 

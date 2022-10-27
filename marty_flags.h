@@ -278,6 +278,33 @@ void deserializeEnumFlagsImpl( EnumType enumVal
                            , const char *seps
                            )
 {
+    char sep = ',';
+    if (seps)
+    {
+        sep = *seps++;
+        while(*seps)
+        {
+            str = simple_string_replace<std::string>(str, std::string(1,*seps++), std::string(1,sep));
+        }
+    }
+
+    auto isSpaceChar = [](char ch)
+                         {
+                             typedef char CharType; 
+                             return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
+                         };
+
+    auto items = simple_seq_filter(simple_string_split(str, std::string(1,sep)), [&](auto s) { return !simple_trim(s, isSpaceChar).empty(); } );
+
+    enumVal = 0;
+
+    for(const auto &i : items)
+    {
+        if (i=="0")
+            continue;
+        enumVal |= deserializer(i);
+    }
+
 }
 
 //-----------------------------------------------------------------------------
