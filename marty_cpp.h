@@ -1613,7 +1613,7 @@ std::vector<ItemType> simple_seq_filter( const std::vector<ItemType> &v, const F
 template<typename IterType, typename ConditionType> inline
 IterType trim_iter_impl( IterType b, IterType e, const ConditionType &trimCondition )
 {
-    for(; trimCondition(*b) && b!=e; ++b) {}
+    for(; b!=e && trimCondition(*b); ++b) {}
     return b;
 }
 
@@ -1621,6 +1621,8 @@ IterType trim_iter_impl( IterType b, IterType e, const ConditionType &trimCondit
 template<typename StringType, typename ConditionType> inline
 StringType simple_trim(const StringType &str, const ConditionType &trimCondition)
 {
+    // if (str.empty())
+    //     return str;
     auto e = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
     auto b = trim_iter_impl(str.cbegin(), e, trimCondition);
     return StringType(b,e);
