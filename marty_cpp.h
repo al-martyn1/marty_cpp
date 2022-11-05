@@ -2075,6 +2075,8 @@ struct EnumGeneratorTemplate
 
     StringType declClass                   ; // class
 
+    StringType castTemplate                ;
+
     StringType scopeBeginTemplate          ; // $(INDENT){
     StringType scopeEndTemplate            ; // $(INDENT)}; // $(DECLBEGIN)
 
@@ -2113,6 +2115,8 @@ struct EnumGeneratorTemplate
         res.declBeginUnderlyingTemplate  = make_string<StringType>(" enum $(CLASS) $(ENAMNAME) : $(UNDERLYING)");
 
         res.declClass                    = make_string<StringType>("class");
+
+        res.castTemplate                 = make_string<StringType>("($(UNDERLYING))($(ITEMVAL))");
 
         res.scopeBeginTemplate           = make_string<StringType>("\n$(INDENT){");
         res.scopeEndTemplate             = make_string<StringType>("\n\n$(INDENT)}; // $(DECLBEGIN)\n");
@@ -2172,6 +2176,18 @@ struct EnumGeneratorTemplate
             return str;
         StringType res = make_string<StringType>("$(INDENT)");
         res.append(str, 1);
+        return res;
+    }
+
+    StringType formatCastToUnderlying(const StringType &underlyingTypeName, const StringType &val) const
+    {
+        if (underlyingTypeName.empty())
+            return val;
+
+        auto res = castTemplate;
+        // StringType
+        res = simple_string_replace( res, make_string<StringType>("$(UNDERLYING)"), underlyingTypeName );
+        res = simple_string_replace( res, make_string<StringType>("$(ITEMVAL)"), val );
         return res;
     }
 
@@ -2417,7 +2433,16 @@ void enum_generate_serialize_enum_def( StreamType &ss
     for( const auto& [name,val] : vals)
     {
         ++i;
-        ss << genTpl.formatDeclItem( i, lineIndent, name, val, genOptions, maxNameLen );
+
+        if (val==make_string<StringType>("-1") && !underlayedTypeName.empty())
+        {
+            ss << genTpl.formatDeclItem( i, lineIndent, name, genTpl.formatCastToUnderlying(underlayedTypeName,val), genOptions, maxNameLen );
+        }
+        else
+        {
+            ss << genTpl.formatDeclItem( i, lineIndent, name, val, genOptions, maxNameLen );
+        }
+
     }
 
     ss << genTpl.formatScopeEnd(indent,declBegin);
