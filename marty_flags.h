@@ -115,30 +115,30 @@
 
 
 //----------------------------------------------------------------------------
-#define MARTY_CPP_ENUM_FLAGS_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
-//        MARTY_CPP_ENUM_CLASS_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
+#define MARTY_CPP_ENUM_FLAGS_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )\
+        MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )
+//        MARTY_CPP_ENUM_CLASS_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )
 
 #define MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( val, valStr )\
         MARTY_CPP_ENUM_SERIALIZE_ITEM( val, valStr )
 //        MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( val, valStr )
 
-#define MARTY_CPP_ENUM_FLAGS_SERIALIZE_END( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_SERIALIZE_END( enumTypeName, mapType, doUpper )
-//        MARTY_CPP_ENUM_CLASS_SERIALIZE_END( enumTypeName, mapType, doUpper )
+#define MARTY_CPP_ENUM_FLAGS_SERIALIZE_END( enumTypeName, mapType, doLower )\
+        MARTY_CPP_ENUM_SERIALIZE_END( enumTypeName, mapType, doLower )
+//        MARTY_CPP_ENUM_CLASS_SERIALIZE_END( enumTypeName, mapType, doLower )
 
 //------------------------------
-#define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
-//        MARTY_CPP_ENUM_CLASS_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
+#define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )\
+        MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )
+//        MARTY_CPP_ENUM_CLASS_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )
 
 #define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( val, valStr )\
         MARTY_CPP_ENUM_DESERIALIZE_ITEM( val, valStr )
 //        MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( val, valStr )
 
-#define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_END( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doUpper )
-//        MARTY_CPP_ENUM_CLASS_DESERIALIZE_END( enumTypeName, mapType, doUpper )
+#define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_END( enumTypeName, mapType, doLower )\
+        MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doLower )
+//        MARTY_CPP_ENUM_CLASS_DESERIALIZE_END( enumTypeName, mapType, doLower )
 
 //----------------------------------------------------------------------------
 

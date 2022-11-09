@@ -35,7 +35,7 @@
 
 
 //----------------------------------------------------------------------------
-#define MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )     \
+#define MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )     \
 inline                                                                       \
 std::string enum_serialize_##enumTypeName( enumTypeName v )                  \
 {                                                                            \
@@ -48,7 +48,7 @@ std::string enum_serialize_##enumTypeName( enumTypeName v )                  \
         _m[val] = valStr
 
 //------------------------------
-#define MARTY_CPP_ENUM_SERIALIZE_END( enumTypeName, mapType, doUpper )       \
+#define MARTY_CPP_ENUM_SERIALIZE_END( enumTypeName, mapType, doLower )       \
     }                                                                        \
                                                                              \
     mapType< enumTypeName, std::string >::const_iterator it = _m.find(v);    \
@@ -59,14 +59,14 @@ std::string enum_serialize_##enumTypeName( enumTypeName v )                  \
 }
 
 //------------------------------
-#define MARTY_CPP_ENUM_CLASS_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
+#define MARTY_CPP_ENUM_CLASS_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )\
+        MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )
 
 #define MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( val, valStr )                   \
         MARTY_CPP_ENUM_SERIALIZE_ITEM( val, valStr )
 
-#define MARTY_CPP_ENUM_CLASS_SERIALIZE_END( enumTypeName, mapType, doUpper ) \
-        MARTY_CPP_ENUM_SERIALIZE_END( enumTypeName, mapType, doUpper )       \
+#define MARTY_CPP_ENUM_CLASS_SERIALIZE_END( enumTypeName, mapType, doLower ) \
+        MARTY_CPP_ENUM_SERIALIZE_END( enumTypeName, mapType, doLower )       \
 inline                                                                       \
 std::string enum_serialize( enumTypeName v )                                 \
 {                                                                            \
@@ -111,24 +111,24 @@ std::string enum_serialize_set( const setType<enumTypeName> &s, const std::strin
 
 
 //----------------------------------------------------------------------------
-#define MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )   \
+#define MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )   \
 inline                                                                       \
 enumTypeName enum_deserialize_##enumTypeName( const std::string &str )       \
 {                                                                            \
-    static bool upperCaseConvert = doUpper ? true : false;                   \
+    static bool lowerCaseConvert = doLower ? true : false;                   \
     static mapType< std::string, enumTypeName >  _m;                         \
     if (_m.empty())                                                          \
     {
 
 //------------------------------
 #define MARTY_CPP_ENUM_DESERIALIZE_ITEM( val, valStr )                       \
-        _m[upperCaseConvert ? marty_cpp::toUpper(std::string(valStr)) : std::string(valStr)] = val
+        _m[lowerCaseConvert ? marty_cpp::toLower(std::string(valStr)) : std::string(valStr)] = val
 
 //------------------------------
-#define MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doUpper )     \
+#define MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doLower )     \
     }                                                                        \
                                                                              \
-    mapType< std::string, enumTypeName >::const_iterator it = _m.find(upperCaseConvert ? marty_cpp::toUpper(str) : str); \
+    mapType< std::string, enumTypeName >::const_iterator it = _m.find(lowerCaseConvert ? marty_cpp::toLower(str) : str); \
     if (it==_m.end())                                                        \
         throw std::runtime_error( #enumTypeName " - failed to deserialize value");\
                                                                              \
@@ -150,14 +150,14 @@ enumTypeName enum_deserialize_##enumTypeName( const std::string &str, enumTypeNa
 }
 
 //------------------------------
-#define MARTY_CPP_ENUM_CLASS_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )\
-        MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doUpper )
+#define MARTY_CPP_ENUM_CLASS_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )\
+        MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )
 
 #define MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( val, valStr ) \
         MARTY_CPP_ENUM_DESERIALIZE_ITEM( val, valStr )
 
-#define MARTY_CPP_ENUM_CLASS_DESERIALIZE_END( enumTypeName, mapType, doUpper ) \
-        MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doUpper )     \
+#define MARTY_CPP_ENUM_CLASS_DESERIALIZE_END( enumTypeName, mapType, doLower ) \
+        MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doLower )     \
 inline                                                                       \
 void enum_deserialize( enumTypeName &deserializeTo, const std::string &str ) \
 {                                                                            \

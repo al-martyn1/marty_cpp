@@ -2045,7 +2045,7 @@ struct EnumGeneratorOptionFlags
     static const unsigned useUnorderedMap              = 0x00000004;
     static const unsigned singleDef                    = 0x00000008;
     static const unsigned noExtraLinefeed              = 0x00000010;
-    static const unsigned uppercaseDeserelialize       = 0x00000020;
+    static const unsigned lowercaseDeserelialize       = 0x00000020;
     static const unsigned integerDeserelialize         = 0x00000040;
 
     static const unsigned enumFlags                    = 0x00000080;
@@ -2251,14 +2251,14 @@ struct EnumGeneratorTemplate
     {
         StringType mapType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_map" : "std::map" );
         StringType setType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_set" : "std::set" );
-        StringType upperFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::uppercaseDeserelialize ? "1" : "0" );
+        StringType lowerFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::lowercaseDeserelialize ? "1" : "0" );
 
         StringType res = replaceLeadingSpaceToIndentMacro(tpl);
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent );
         res = simple_string_replace( res, make_string<StringType>("$(PPCLASS)")  , makePpClassMacroVal(options) );
         res = simple_string_replace( res, make_string<StringType>("$(MAPTYPE)")  , mapType );
         res = simple_string_replace( res, make_string<StringType>("$(SETTYPE)")  , setType );
-        res = simple_string_replace( res, make_string<StringType>("$(UPPERFLAG)"), upperFlag );
+        res = simple_string_replace( res, make_string<StringType>("$(UPPERFLAG)"), lowerFlag );
         res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , name );
 
         return res;
@@ -2268,7 +2268,7 @@ struct EnumGeneratorTemplate
     {
         StringType mapType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_map" : "std::map" );
         StringType setType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_set" : "std::set" );
-        StringType upperFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::uppercaseDeserelialize ? "1" : "0" );
+        StringType lowerFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::lowercaseDeserelialize ? "1" : "0" );
 
         auto nameExpanded = expand_copy((options&EnumGeneratorOptionFlags::enumClass) ? (enumName + make_string<StringType>("::") + name) : name, nNameLen);
         auto valExpanded  = expand_copy(val, nValLen);
@@ -2278,7 +2278,7 @@ struct EnumGeneratorTemplate
         res = simple_string_replace( res, make_string<StringType>("$(PPCLASS)")  , makePpClassMacroVal(options) );
         res = simple_string_replace( res, make_string<StringType>("$(MAPTYPE)")  , mapType );
         res = simple_string_replace( res, make_string<StringType>("$(SETTYPE)")  , setType );
-        res = simple_string_replace( res, make_string<StringType>("$(UPPERFLAG)"), upperFlag );
+        res = simple_string_replace( res, make_string<StringType>("$(UPPERFLAG)"), lowerFlag );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMNAME)") , nameExpanded );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMVAL)")  , valExpanded );
 
@@ -2729,8 +2729,8 @@ void enum_generate_serialize_prepare( std::vector< std::pair< StringType,StringT
                            ? s
                            : formatName(s,nameStyle, false /* fixStartDigit */ )
                            ;
-            if (genOptions&EnumGeneratorOptionFlags::uppercaseDeserelialize)
-                tmp = toUpper(tmp);
+            if (genOptions&EnumGeneratorOptionFlags::lowercaseDeserelialize)
+                tmp = toLower(tmp);
 
             res.insert(tmp);
         }
