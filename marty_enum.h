@@ -20,6 +20,27 @@
 #include <cctype>
 
 
+
+//----------------------------------------------------------------------------
+#if !defined(MARTY_CPP_NO_MARTY_CPP_EXCEPTIONS)
+
+    #include "marty_cpp_exceptions.h"
+
+#endif
+
+
+#if defined(MARTY_CPP_NO_MARTY_CPP_EXCEPTIONS)
+
+    #define THROW_MARTY_CPP_MARTY_ENUM_DESERIALIZE_ERROR( tymeName, str ) \
+                throw std::runtime_error( tymeName " - failed to deserialize value")
+
+#else
+
+    #define THROW_MARTY_CPP_MARTY_ENUM_DESERIALIZE_ERROR( tymeName, str ) \
+                throw marty_cpp::enum_deserialization_error( tymeName, str )
+
+#endif
+
 //----------------------------------------------------------------------------
 
 
@@ -130,7 +151,7 @@ enumTypeName enum_deserialize_##enumTypeName( const std::string &str )       \
                                                                              \
     mapType< std::string, enumTypeName >::const_iterator it = _m.find(lowerCaseConvert ? marty_cpp::toLower(str) : str); \
     if (it==_m.end())                                                        \
-        throw std::runtime_error( #enumTypeName " - failed to deserialize value");\
+        THROW_MARTY_CPP_MARTY_ENUM_DESERIALIZE_ERROR( #enumTypeName, str );  \
                                                                              \
     return it->second;                                                       \
 }                                                                            \
