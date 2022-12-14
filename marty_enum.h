@@ -134,22 +134,40 @@ std::string enum_serialize_set( const setType<enumTypeName> &s, const std::strin
 //----------------------------------------------------------------------------
 #define MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )   \
 inline                                                                       \
-enumTypeName enum_deserialize_##enumTypeName( const std::string &str )       \
+const mapType< std::string, enumTypeName >& enum_deserialize_impl_get_map_##enumTypeName( )       \
 {                                                                            \
     static bool lowerCaseConvert = doLower ? true : false;                   \
     static mapType< std::string, enumTypeName >  _m;                         \
     if (_m.empty())                                                          \
     {
 
+
 //------------------------------
 #define MARTY_CPP_ENUM_DESERIALIZE_ITEM( val, valStr )                       \
         _m[lowerCaseConvert ? marty_cpp::toLower(std::string(valStr)) : std::string(valStr)] = val
+
 
 //------------------------------
 #define MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doLower )     \
     }                                                                        \
                                                                              \
+    return _m;                                                               \
+}                                                                            \
+                                                                             \
+inline                                                                       \
+mapType< std::string, enumTypeName >::const_iterator enum_deserialize_impl_find_##enumTypeName( const mapType< std::string, enumTypeName > &_m, const std::string &str )  \
+{                                                                            \
+    static bool lowerCaseConvert = doLower ? true : false;                   \
     mapType< std::string, enumTypeName >::const_iterator it = _m.find(lowerCaseConvert ? marty_cpp::toLower(str) : str); \
+    return it;                                                       \
+}                                                                            \
+                                                                             \
+inline                                                                       \
+enumTypeName enum_deserialize_##enumTypeName( const std::string &str )       \
+{                                                                            \
+    const auto & _m = enum_deserialize_impl_get_map_##enumTypeName( );       \
+                                                                             \
+    auto it = enum_deserialize_impl_find_##enumTypeName(_m, str);            \
     if (it==_m.end())                                                        \
         THROW_MARTY_CPP_MARTY_ENUM_DESERIALIZE_ERROR( #enumTypeName, str );  \
                                                                              \
@@ -159,16 +177,18 @@ enumTypeName enum_deserialize_##enumTypeName( const std::string &str )       \
 inline                                                                       \
 enumTypeName enum_deserialize_##enumTypeName( const std::string &str, enumTypeName defVal ) \
 {                                                                            \
-    try                                                                      \
-    {                                                                        \
-        return enum_deserialize_##enumTypeName( str );                       \
-    }                                                                        \
-    catch(...)                                                               \
-    {                                                                        \
-    }                                                                        \
+    const auto & _m = enum_deserialize_impl_get_map_##enumTypeName( );       \
                                                                              \
-    return defVal;                                                           \
+    auto it = enum_deserialize_impl_find_##enumTypeName(_m, str);            \
+    if (it==_m.end())                                                        \
+        return defVal;                                                       \
+                                                                             \
+    return it->second;                                                       \
 }
+
+
+
+
 
 //------------------------------
 #define MARTY_CPP_ENUM_CLASS_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )\
