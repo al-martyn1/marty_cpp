@@ -190,7 +190,39 @@ std::string enum_serialize( enumTypeName enumVal, const std::string &seps)      
 
 
 //----------------------------------------------------------------------------
-#define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_SET(enumTypeName, setType)
+#define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_SET(enumTypeName, setType)          \
+inline                                                                       \
+enumTypeName enum_deserialize_flags_##enumTypeName( const std::string &str, const char *seps = ",|+", char quotChar = '\'' ) \
+{                                                                            \
+    auto deser = [](const std::string &str)                                  \
+    { return enum_deserialize_##enumTypeName(str); };                        \
+    enumTypeName e;                                                          \
+    marty_cpp::deserializeEnumFlagsImpl(e, str, deser, seps);                \
+    return e;                                                                \
+}                                                                            \
+                                                                             \
+inline                                                                       \
+enumTypeName enum_deserialize_flags_##enumTypeName( const std::string &str, const std::string &seps, char quotChar = '\'' )  \
+{                                                                            \
+    auto deser = [](const std::string &str)                                  \
+    { return enum_deserialize_##enumTypeName(str); };                        \
+    enumTypeName e;                                                          \
+    marty_cpp::deserializeEnumFlagsImpl(e, str, deser, seps);                \
+    return e;                                                                \
+}                                                                            \
+                                                                             \
+inline                                                                       \
+void enum_deserialize_flags( enumTypeName &e, const std::string &str, const char *seps = ",|+", char quotChar = '\'' ) \
+{                                                                            \
+    e = enum_deserialize_flags_##enumTypeName(str, seps, quotChar);          \
+}                                                                            \
+                                                                             \
+inline                                                                       \
+void enum_deserialize_flags( enumTypeName &e, const std::string &str, const std::string &seps, char quotChar = '\'' )  \
+{                                                                            \
+    e = enum_deserialize_flags_##enumTypeName(str, seps, quotChar);          \
+}
+
 
 
 
@@ -210,9 +242,9 @@ template< typename EnumType
         , typename EnumTypeSerializer
         > inline
 std::string serializeEnumFlagsImpl( EnumType enumVal
-                                , EnumTypeSerializer serializer
-                                , const char *seps // используем только первый элемент
-                                )
+                                  , EnumTypeSerializer serializer
+                                  , const char *seps // используем только первый элемент
+                                  )
 {
     const char sepChar = (seps && seps[0]) ? '|' : seps[0];
 
@@ -256,9 +288,9 @@ template< typename EnumType
         , typename EnumTypeSerializer
         > inline
 std::string serializeEnumFlagsImpl( EnumType enumVal
-                                , EnumTypeSerializer serializer
-                                , const std::string &seps // используем только первый элемент
-                                )
+                                  , EnumTypeSerializer serializer
+                                  , const std::string &seps // используем только первый элемент
+                                  )
 {
     return serializeEnumFlagsImpl(enumVal, serializer, seps.c_str());
 }
@@ -272,18 +304,20 @@ std::string serializeEnumFlagsImpl( EnumType enumVal
 template< typename EnumType
         , typename EnumTypeDeserializer
         > inline
-void deserializeEnumFlagsImpl( EnumType enumVal
-                           , const std::string &str
-                           , EnumTypeDeserializer deserializer
-                           , const char *seps
-                           )
+void deserializeEnumFlagsImpl( EnumType &enumVal // deserialize to
+                             , std::string str
+                             , EnumTypeDeserializer deserializer
+                             , const char *seps
+                             )
 {
     char sep = ',';
-    if (seps)
+    if (seps && *seps)
     {
         sep = *seps++;
         while(*seps)
         {
+            // auto sepStr     = std::string(1,*seps++);
+            // auto replaceTo  = std::string(1,sep);
             str = simple_string_replace<std::string>(str, std::string(1,*seps++), std::string(1,sep));
         }
     }
@@ -296,7 +330,7 @@ void deserializeEnumFlagsImpl( EnumType enumVal
 
     auto items = simple_seq_filter(simple_string_split(str, std::string(1,sep)), [&](auto s) { return !simple_trim(s, isSpaceChar).empty(); } );
 
-    enumVal = 0;
+    enumVal = (EnumType)0;
 
     for(const auto &i : items)
     {
@@ -311,11 +345,11 @@ void deserializeEnumFlagsImpl( EnumType enumVal
 template< typename EnumType
         , typename EnumTypeDeserializer
         > inline
-void deserializeEnumFlagsImpl( EnumType enumVal
-                           , const std::string &str
-                           , EnumTypeDeserializer deserializer
-                           , const std::string &seps
-                           )
+void deserializeEnumFlagsImpl( EnumType &enumVal // deserialize to
+                             , const std::string &str
+                             , EnumTypeDeserializer deserializer
+                             , const std::string &seps
+                             )
 {
     return deserializeEnumFlagsImpl(enumVal, str, deserializer, seps.c_str());
 }

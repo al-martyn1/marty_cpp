@@ -565,7 +565,7 @@ void deserializeEnumSetImpl( EnumSetType &enumValsSet
                            )
 {
     char sep = ',';
-    if (seps)
+    if (seps && *seps)
     {
         sep = *seps++;
         while(*seps)
