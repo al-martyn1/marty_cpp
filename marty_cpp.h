@@ -2617,8 +2617,29 @@ void enum_generate_serialize_enum_deserialize( StreamType &ss
 
 //-----------------------------------------------------------------------------
 //! Отформатировать
+
+        // if (val==make_string<StringType>("-1") && !underlayedTypeName.empty())
+        // {
+        //     ss << genTpl.formatDeclItem( i, lineIndent, name, genTpl.formatCastToUnderlying(underlayedTypeName,val), comment, genOptions, maxNameLen );
+        // }
+        // else
+        // {
+        //     ss << genTpl.formatDeclItem( i, lineIndent, name, val, comment, genOptions, maxNameLen );
+        // }
+
+                            // , const StringType                         &underlayedTypeName
+                            // , NameStyle                                valuesNameStyle
+                            // , NameStyle                                serializedNameStyle
+                            // , const StringType                         &valuesPrefix
+                            // , unsigned                                 genOptions
+                            // , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
+
+
 template<typename StringType> inline
-StringType enum_generate_number_convert(unsigned val, unsigned genOptions, unsigned curValFormat)
+StringType enum_generate_number_convert( unsigned val, unsigned genOptions, unsigned curValFormat
+                                       , const StringType &underlyingTypeName
+                                       , const EnumGeneratorTemplate<StringType> &genTpl
+                                       )
 {
     typedef typename StringType::value_type char_type;
     typedef std::basic_stringstream<char_type>  stringstream;  // std::char_traits<char_type>, std::allocator<char_type>
@@ -2642,7 +2663,16 @@ StringType enum_generate_number_convert(unsigned val, unsigned genOptions, unsig
     {
         //TODO: !!! Нужен каст к underlaying типу, если он задан. Сюда надо будет передавать шаблоны и строку underlaying типа
         // return make_string<StringType>("-1");
-        oss << make_string<StringType>("-1");
+        // oss << make_string<StringType>("-1");
+
+        if (underlyingTypeName.empty())
+        {
+            oss << make_string<StringType>("-1");
+        }
+        else
+        {
+            oss << genTpl.formatCastToUnderlying(underlyingTypeName, make_string<StringType>("-1"));
+        }
     }
     else
     {
@@ -3214,7 +3244,7 @@ void enum_generate_serialize( StreamType &ss
         // unsigned enum_detect_val_output_format(const StringType &str)
 
         /*
-
+            
         */
 
         bool lastValUpdated = false;
@@ -3231,7 +3261,7 @@ void enum_generate_serialize( StreamType &ss
                 if (valStrSrc.empty())
                 {
                     lastValCounter = calcNextCounterVal(lastValCounter);
-                    lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions, lastIntFormat);
+                    lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions, lastIntFormat, underlayedTypeName, genTpl);
                 }
                 else
                 {
@@ -3240,7 +3270,7 @@ void enum_generate_serialize( StreamType &ss
                     if (valStrSrc.empty())
                     {
                         lastValCounter = calcNextCounterVal(lastValCounter);
-                        lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions, lastIntFormat);
+                        lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions, lastIntFormat, underlayedTypeName, genTpl);
                     }
                     else
                     {
@@ -3253,7 +3283,7 @@ void enum_generate_serialize( StreamType &ss
                                 unsigned curIntFormat = enum_detect_val_output_format(valStrSrc);
                                 if (curIntFormat!=EnumGeneratorOptionFlags::outputAuto)
                                     lastIntFormat = curIntFormat;
-                                lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions, lastIntFormat);
+                                lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions, lastIntFormat, underlayedTypeName, genTpl);
                             }
                             else
                             {
