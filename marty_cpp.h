@@ -2077,6 +2077,11 @@ struct EnumGeneratorOptionFlags
 
 }; // struct EnumGeneratorOptionFlags
 
+
+typedef std::int64_t           enum_internal_int_t;
+typedef std::uint64_t          enum_internal_uint_t;
+
+
 //-----------------------------------------------------------------------------
 template<typename StringType>
 struct EnumGeneratorTemplate
@@ -2611,7 +2616,7 @@ void enum_generate_serialize_enum_deserialize( StreamType &ss
 
 //-----------------------------------------------------------------------------
 template<typename StringType> inline
-StringType enum_generate_number_convert( unsigned val, unsigned genOptions, unsigned curValFormat
+StringType enum_generate_number_convert( enum_internal_uint_t val, unsigned genOptions, unsigned curValFormat
                                        , const StringType &underlyingTypeName
                                        , const EnumGeneratorTemplate<StringType> &genTpl
                                        )
@@ -2634,7 +2639,7 @@ StringType enum_generate_number_convert( unsigned val, unsigned genOptions, unsi
 
     //std::basic_stringstream< typename StringType::value_type, typename StringType::traits_type, typename StringType::allocator_type >  oss;
     //SimpleStringStream<StringType> oss;
-    if ((unsigned)val==(unsigned)-1)
+    if ((enum_internal_uint_t)val==(enum_internal_uint_t)-1)
     {
         //TODO: !!! Нужен каст к underlaying типу, если он задан. Сюда надо будет передавать шаблоны и строку underlaying типа
         // return make_string<StringType>("-1");
@@ -2656,7 +2661,7 @@ StringType enum_generate_number_convert( unsigned val, unsigned genOptions, unsi
             switch(appliedValFormat)
             {
                 case EnumGeneratorOptionFlags::outputHex:
-                    oss << std::showbase << std::hex << (unsigned)val;
+                    oss << std::showbase << std::hex << (enum_internal_uint_t)val;
                     // std::cout << "Formatting hex, input: " << (unsigned)val << " " << 42 << "\n";
                     // std::cout << "Formatted (1): " << std::hex << (unsigned)val << " " << 42 << "\n";
                     // std::cout << "Formatted (2): " << std::hex << val           << " " << 42 << "\n";
@@ -2664,17 +2669,17 @@ StringType enum_generate_number_convert( unsigned val, unsigned genOptions, unsi
                     break;
 
                 case EnumGeneratorOptionFlags::outputOct:
-                    oss << std::oct << (unsigned)val;
+                    oss << std::oct << (enum_internal_uint_t)val;
                     break;
 
                 default: // EnumGeneratorOptionFlags::outputDec:
-                    oss << std::dec << (unsigned)val;
+                    oss << std::dec << (enum_internal_uint_t)val;
                     break;
             }
         }
         else
         {
-            oss << std::dec << (int)val;
+            oss << std::dec << (enum_internal_int_t)val;
         }
 
     }
@@ -3015,9 +3020,10 @@ void enum_generate_serialize( StreamType &ss
 
 
 //-----------------------------------------------------------------------------
+//TODO: !!! add comment to vals
 template<typename StreamType, typename StringType> inline
 void enum_generate_serialize( StreamType &ss
-                            , const std::vector< std::pair< StringType,unsigned > > &vals
+                            , const std::vector< std::pair< StringType,enum_internal_uint_t > > &vals
                             , const StringType                         &indent
                             , const StringType                         &indentInc
                             , const StringType                         &enumName
@@ -3039,7 +3045,7 @@ void enum_generate_serialize( StreamType &ss
 
     for( const auto& [name,val] : vals)
     {
-        strVals.emplace_back(name, enum_generate_number_convert<StringType>(val,genOptions));
+        strVals.emplace_back(name, enum_generate_number_convert<StringType>(val,genOptions/* !!! */)); //!!! std::make_tuple
     }
     
     enum_generate_serialize( ss, strVals
@@ -3151,9 +3157,9 @@ void enum_generate_serialize( StreamType &ss
 
 
 
-    unsigned long long  lastValCounter = (genOptions&EnumGeneratorOptionFlags::enumFlags) ? 0 : (unsigned long long)-1;
-    StringType          lastVal;
-    unsigned            lastIntFormat = EnumGeneratorOptionFlags::outputAuto;
+    enum_internal_uint_t  lastValCounter = (genOptions&EnumGeneratorOptionFlags::enumFlags) ? 0 : (unsigned long long)-1;
+    StringType            lastVal;
+    unsigned              lastIntFormat = EnumGeneratorOptionFlags::outputAuto;
 
 
 
@@ -3205,7 +3211,7 @@ void enum_generate_serialize( StreamType &ss
                         try
                         {
                             std::size_t pos = 0;
-                            lastValCounter = (unsigned)std::stoll(valStrSrc, &pos, 0);
+                            lastValCounter = (enum_internal_uint_t)std::stoll(valStrSrc, &pos, 0);
                             if (pos==valStrSrc.size())
                             {
                                 unsigned curIntFormat = enum_detect_val_output_format(valStrSrc);
