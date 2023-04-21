@@ -3023,7 +3023,7 @@ void enum_generate_serialize( StreamType &ss
 //TODO: !!! add comment to vals
 template<typename StreamType, typename StringType> inline
 void enum_generate_serialize( StreamType &ss
-                            , const std::vector< std::pair< StringType,enum_internal_uint_t > > &vals
+                            , const std::vector< std::tuple< StringType,enum_internal_uint_t,StringType > > &vals
                             , const StringType                         &indent
                             , const StringType                         &indentInc
                             , const StringType                         &enumName
@@ -3040,12 +3040,13 @@ void enum_generate_serialize( StreamType &ss
     genOptions = enum_generate_adjust_gen_options(genOptions);
 
 
-    std::vector< std::pair< StringType,StringType > > strVals;
+    std::vector< std::tuple< StringType,StringType,StringType,StringType > > strVals;
     strVals.reserve(vals.size());
 
-    for( const auto& [name,val] : vals)
+    for( const auto& [name,val,comment] : vals)
     {
-        strVals.emplace_back(name, enum_generate_number_convert<StringType>(val,genOptions/* !!! */)); //!!! std::make_tuple
+        StringType strVal = enum_generate_number_convert<StringType>(val, genOptions, EnumGeneratorOptionFlags::outputAuto, underlayedTypeName, genTpl);
+        strVals.emplace_back(name, strVal, strVal, comment); //!!! std::make_tuple
     }
     
     enum_generate_serialize( ss, strVals
