@@ -2467,11 +2467,11 @@ void enum_generate_serialize_enum_def( StreamType &ss
     {
         ++i;
 
-        if (val==make_string<StringType>("-1") && !underlayedTypeName.empty())
-        {
-            ss << genTpl.formatDeclItem( i, lineIndent, name, genTpl.formatCastToUnderlying(underlayedTypeName,val), comment, genOptions, maxNameLen );
-        }
-        else
+        // if (val==make_string<StringType>("-1") && !underlayedTypeName.empty())
+        // {
+        //     ss << genTpl.formatDeclItem( i, lineIndent, name, genTpl.formatCastToUnderlying(underlayedTypeName,val), comment, genOptions, maxNameLen );
+        // }
+        // else
         {
             ss << genTpl.formatDeclItem( i, lineIndent, name, val, comment, genOptions, maxNameLen );
         }
@@ -2609,32 +2609,7 @@ void enum_generate_serialize_enum_deserialize( StreamType &ss
 
 }
 
-    // StringType formatDeserializeBegin( const StringType &indent, const StringType &name, unsigned options ) const
-    // StringType formatDeserializeEnd( const StringType &indent, const StringType &name, unsigned options ) const
-    // StringType formatSerializeItem( const StringType &tpl, std::size_t nItem, const StringType &indent, const StringType &name, const StringType &val, unsigned options, std::size_t nNameLen = 32 ) const
-    // StringType formatDeserializeItem( const StringType &tpl, std::size_t nItem, const StringType &indent, const StringType &name, const StringType &val, unsigned options, std::size_t nNameLen = 32 ) const
-
-
 //-----------------------------------------------------------------------------
-//! Отформатировать
-
-        // if (val==make_string<StringType>("-1") && !underlayedTypeName.empty())
-        // {
-        //     ss << genTpl.formatDeclItem( i, lineIndent, name, genTpl.formatCastToUnderlying(underlayedTypeName,val), comment, genOptions, maxNameLen );
-        // }
-        // else
-        // {
-        //     ss << genTpl.formatDeclItem( i, lineIndent, name, val, comment, genOptions, maxNameLen );
-        // }
-
-                            // , const StringType                         &underlayedTypeName
-                            // , NameStyle                                valuesNameStyle
-                            // , NameStyle                                serializedNameStyle
-                            // , const StringType                         &valuesPrefix
-                            // , unsigned                                 genOptions
-                            // , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
-
-
 template<typename StringType> inline
 StringType enum_generate_number_convert( unsigned val, unsigned genOptions, unsigned curValFormat
                                        , const StringType &underlyingTypeName
@@ -2665,7 +2640,7 @@ StringType enum_generate_number_convert( unsigned val, unsigned genOptions, unsi
         // return make_string<StringType>("-1");
         // oss << make_string<StringType>("-1");
 
-        if (underlyingTypeName.empty())
+        if (underlyingTypeName.empty() || genOptions&EnumGeneratorOptionFlags::unsignedVals==0)
         {
             oss << make_string<StringType>("-1");
         }
@@ -2730,34 +2705,24 @@ unsigned enum_detect_val_output_format(const StringType &str)
 }
 
 //-----------------------------------------------------------------------------
-/*
-    //enum_generate_number_convert
-    static const unsigned outputFormatMask             = 0x03000000;
-    static const unsigned outputAuto                   = 0x00000000;
-    static const unsigned outputOct                    = 0x01000000;
-    static const unsigned outputDec                    = 0x02000000;
-    static const unsigned outputHex                    = 0x03000000;
 
-}; // struct EnumGeneratorOptionFlags
-
-*/
 
 
 //-----------------------------------------------------------------------------
 template<typename StringType> inline
-void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,StringType,StringType > >     &defVals // output for enum definition
-                                    , std::unordered_map< StringType, std::unordered_set<StringType> >  &deserializeVals // keyEnumName -> set of deserialize variants
-                                    , std::unordered_map< StringType, StringType >                      &serializeVals // keyEnumName -> serialize str
-                                    , std::vector< std::tuple< StringType,StringType,StringType > >     vals           // input values
-                                    , const StringType                                                  &enumName
-                                    , const StringType                                                  &underlayedTypeName
-                                    , NameStyle                                                         valuesNameStyle
-                                    , NameStyle                                                         serializedNameStyle
-                                    , const StringType                                                  &valuesPrefix
-                                    , unsigned                                                          genOptions
-                                    , const EnumGeneratorTemplate<StringType>                           &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
-                                    , std::vector<StringType>                                           *pDups = 0
-                                    , std::vector<StringType>                                           *pDupVals = 0
+void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,StringType,StringType > >             &defVals // output for enum definition
+                                    , std::unordered_map< StringType, std::unordered_set<StringType> >          &deserializeVals // keyEnumName -> set of deserialize variants
+                                    , std::unordered_map< StringType, StringType >                              &serializeVals // keyEnumName -> serialize str
+                                    , std::vector< std::tuple< StringType,StringType,StringType,StringType > >  vals           // input values
+                                    , const StringType                                                          &enumName
+                                    , const StringType                                                          &underlayedTypeName
+                                    , NameStyle                                                                 valuesNameStyle
+                                    , NameStyle                                                                 serializedNameStyle
+                                    , const StringType                                                          &valuesPrefix
+                                    , unsigned                                                                  genOptions
+                                    , const EnumGeneratorTemplate<StringType>                                   &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
+                                    , std::vector<StringType>                                                   *pDups = 0
+                                    , std::vector<StringType>                                                   *pDupVals = 0
                                     )
 {
     NameStyleSet deserializeNameStyles;
@@ -2774,14 +2739,10 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
         deserializeNameStyles.insert(serializedNameStyle);
     }
 
-    //unsigned long long counter = 0;
-    // const std::vector< std::pair< StringType,unsigned > > &vals
-    // enum value name -> enum value pairs
-
     // Заблаговременно форматируем все имена enum'а
     // Помещаем в map с ключем по имени исходного члена enum'а
     std::unordered_map<StringType, StringType> formattedEnumNames;
-    for( const auto& [name,val,comment] : vals)
+    for( const auto& [name,val,valOrgStr,comment] : vals)
     {
         auto formattedName = makeEnamValueString(name,valuesPrefix,valuesNameStyle);
         formattedEnumNames[name] = formattedName;
@@ -2892,7 +2853,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
     //StringType lineIndent = indent + indentInc;
     std::size_t i = (std::size_t)-1;
 
-    for( const auto& [name,val,comment] : vals)
+    for( const auto& [name,val,valOrgStr,comment] : vals)
     {
         ++i;
 
@@ -2944,9 +2905,9 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
             try
             {
                 std::size_t pos = 0;
-                std::stoll(val, &pos, 0); // base: auto, пробуем сконвертить в целое
-                if (pos==val.size())
-                    deserializeNames.insert(val);
+                auto iVal = std::stoll(valOrgStr, &pos, 0); // base: auto, пробуем сконвертить в целое
+                if (pos==valOrgStr.size())
+                    deserializeNames.insert(std::to_string(iVal));
             }
             catch(...)
             {
@@ -2980,7 +2941,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
 */
 template<typename StreamType, typename StringType> inline
 void enum_generate_serialize( StreamType &ss
-                            , const std::vector< std::tuple< StringType,StringType,StringType > > &vals
+                            , const std::vector< std::tuple< StringType,StringType,StringType,StringType > > &vals
                             , const StringType                         &indent
                             , const StringType                         &indentInc
                             , const StringType                         &enumName
@@ -3121,11 +3082,9 @@ void enum_generate_serialize( StreamType &ss
                              return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
                          };
 
-    std::vector< std::tuple< StringType,StringType,StringType> > vals;
+    std::vector< std::tuple< StringType,StringType,StringType,StringType> > vals;
 
     genOptions = enum_generate_adjust_gen_options(genOptions);
-
-    //enum IntFormat { ifUnknown, ifOct, ifDec, ifHex };
 
 
     auto calcNextCounterVal = [=](unsigned long long curVal) -> unsigned long long
@@ -3207,16 +3166,6 @@ void enum_generate_serialize( StreamType &ss
             continue;
 
         itemStr = simple_string_replace<StringType>(itemStr, make_string<StringType>(":"), make_string<StringType>("="));
-        //std::vector< StringType > namesAndVal = simple_string_split(itemStr, make_string<StringType>("="), 1 );
-
-        // StringType
-        // std::vector< StringType > namesValAndComments = simple_string_split(itemStr, make_string<StringType>("="), 1 );
-        // if (namesAndVal.empty())
-        //     continue;
-
-        //StringType &namesStr = namesAndVal[0];
-        //namesStr = simple_string_replace<StringType>(namesStr, make_string<StringType>("/"), make_string<StringType>(","));
-        //auto names = simple_string_split(simple_trim(namesStr, isSpaceChar), make_string<StringType>(","));
 
         std::vector<StringType> names;
         StringType valStrSrc;
@@ -3225,27 +3174,6 @@ void enum_generate_serialize( StreamType &ss
         if (!splitNameValComment(itemStr, names, valStrSrc, commentStr))
              continue;
         
-
-
-/*
-    //enum_generate_number_convert
-    static const unsigned outputFormatMask             = 0x03000000;
-    static const unsigned outputAuto                   = 0x00000000;
-    static const unsigned outputOct                    = 0x01000000;
-    static const unsigned outputDec                    = 0x02000000;
-    static const unsigned outputHex                    = 0x03000000;
-
-}; // struct EnumGeneratorOptionFlags
-
-*/
-
-    
-        // StringType enum_generate_number_convert(unsigned val, unsigned genOptions, unsigned curValFormat)
-        // unsigned enum_detect_val_output_format(const StringType &str)
-
-        /*
-            
-        */
 
         bool lastValUpdated = false;
         for( auto &name: names)
@@ -3298,7 +3226,7 @@ void enum_generate_serialize( StreamType &ss
                 }
             }
 
-            vals.emplace_back(name, lastVal, commentStr);
+            vals.emplace_back(name, lastVal, valStrSrc, commentStr);
 
         }
     }
