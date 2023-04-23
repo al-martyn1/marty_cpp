@@ -18,11 +18,36 @@ namespace marty_cpp {
 //----------------------------------------------------------------------------
 enum class SourceLineType
 {
-    genericLine,  // 0
-    emptyLine  ,  // 1
-    includeLine,  // 2
-    sortOn     ,  // 3
-    sortOff       // 4
+    genericLine, // 0
+    emptyLine  , // 1
+    includeLine, // 2
+
+    sortOn     , // 3
+    sortOff    , // 4
+
+    optSortPush, // 5
+    optSortPop , // 6
+
+    optSortUser, // 7
+    optSortSystem, // 8
+
+    optSortGrp0 = 16,
+    optSortGrp1,
+    optSortGrp2,
+    optSortGrp3,
+    optSortGrp4,
+    optSortGrp5,
+    optSortGrp6,
+    optSortGrp7,
+
+    optSortBlk0 = 32,
+    optSortBlk1,
+    optSortBlk2,
+    optSortBlk3,
+    optSortBlk4,
+    optSortBlk5,
+    optSortBlk6,
+    optSortBlk7
 
 };
 
@@ -112,23 +137,109 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, std::s
     if (b==e)
         return SourceLineType::emptyLine;
 
-    static std::vector<std::string> nosortMarkers = { "//#-sort", "/*#-sort", "//#nosort", "/*#nosort"};
-    static std::vector<std::string>   sortMarkers = { "//#+sort", "/*#+sort", "//#sort"  , "/*#sort"  };
+    static std::vector<std::string> nosortMarkers   = { "//#-sort", "/*#-sort", "//#nosort", "/*#nosort"};
+    static std::vector<std::string>   sortMarkers   = { "//#+sort", "/*#+sort", "//#sort"  , "/*#sort"  };
+    static std::vector<std::string>   optSortPush   = { "//#optsortpush", "/*#optsortpush" };
+    static std::vector<std::string>   optSortPop    = { "//#optsortpop" , "/*#optsortpop"  };
+    static std::vector<std::string>   optSortGrp    = { "//#optsortgrp" , "/*#optsortgrp"  };
+    static std::vector<std::string>   optSortBlk    = { "//#optsortblk" , "/*#optsortblk"  };
+    static std::vector<std::string>   optSortUser   = { "//#optsortuser", "/*#optsortuser" };
+    static std::vector<std::string>   optSortSystem = { "//#optsortsys" , "/*#optsortsys"  };
+
+/*
+    optSortPush, // 5
+    optSortPop , // 6
+    optSortGrp0, // 7
+    optSortGrp1, // 8
+    optSortGrp2, // 9
+    optSortGrp3, // 10
+    optSortGrp4, // 11
+    optSortBlk0, // 12
+    optSortBlk1, // 13
+    optSortBlk2, // 14
+    optSortBlk3, // 15
+    optSortBlk4  // 16
+
+    optSortPush, // 5
+    optSortPop , // 6
+
+    optSortGrp0 = 16,
+    optSortGrp1,
+    optSortGrp2,
+    optSortGrp3,
+    optSortGrp4,
+    optSortGrp5,
+    optSortGrp6,
+    optSortGrp7,
+
+    optSortBlk0 = 32,
+    optSortBlk1,
+    optSortBlk2,
+    optSortBlk3,
+    optSortBlk4,
+    optSortBlk5,
+    optSortBlk6,
+    optSortBlk7
+*/
+
 
     std::size_t 
     prefixLen = sort_includes_utils::startsWithOneOf(b, e, sortMarkers.begin(), sortMarkers.end());
-    // sort_includes_utils::startsWith(b, e, "/*#sort");
-    // if (!prefixLen)
-    //    prefixLen = sort_includes_utils::startsWith(b, e, "//#sort");
     if (prefixLen)
         return SourceLineType::sortOn;
 
     prefixLen = sort_includes_utils::startsWithOneOf(b, e, nosortMarkers.begin(), nosortMarkers.end());
-    // prefixLen = sort_includes_utils::startsWith(b, e, "/*#nosort");
-    // if (!prefixLen)
-    //    prefixLen = sort_includes_utils::startsWith(b, e, "//#nosort");
     if (prefixLen)
         return SourceLineType::sortOff;
+
+    prefixLen = sort_includes_utils::startsWithOneOf(b, e, optSortPush.begin(), optSortPush.end());
+    if (prefixLen)
+        return SourceLineType::optSortPush;
+
+    prefixLen = sort_includes_utils::startsWithOneOf(b, e, optSortPop.begin(), optSortPop.end());
+    if (prefixLen)
+        return SourceLineType::optSortPop;
+
+    prefixLen = sort_includes_utils::startsWithOneOf(b, e, optSortUser.begin(), optSortUser.end());
+    if (prefixLen)
+        return SourceLineType::optSortUser;
+
+    prefixLen = sort_includes_utils::startsWithOneOf(b, e, optSortSystem.begin(), optSortSystem.end());
+    if (prefixLen)
+        return SourceLineType::optSortSystem;
+
+    prefixLen = sort_includes_utils::startsWithOneOf(b, e, optSortGrp.begin(), optSortGrp.end());
+    if (prefixLen)
+    {
+        SourceLineType optSort = SourceLineType::optSortGrp0;
+        b += prefixLen;
+        if (b==e)
+            return optSort;
+
+        if (*b>='0' && *b<='7')
+        {
+            optSort = (SourceLineType)(unsigned(optSort) + unsigned(*b-'0'));
+        }
+
+        return optSort;    
+    }
+
+    prefixLen = sort_includes_utils::startsWithOneOf(b, e, optSortBlk.begin(), optSortBlk.end());
+    if (prefixLen)
+    {
+        SourceLineType optSort = SourceLineType::optSortBlk0;
+        b += prefixLen;
+        if (b==e)
+            return optSort;
+
+        if (*b>='0' && *b<='7')
+        {
+            optSort = (SourceLineType)(unsigned(optSort) + unsigned(*b-'0'));
+        }
+
+        return optSort;    
+    }
+
 
     if (*b!='#')
         return SourceLineType::genericLine;
@@ -262,6 +373,34 @@ std::vector<unsigned char> findSortIncludeMarkers(const std::vector<SourceLineTy
                 prevInclude = false;
                 break;
 
+            case SourceLineType::optSortPush:
+            case SourceLineType::optSortPop :
+
+            case SourceLineType::optSortUser  :
+            case SourceLineType::optSortSystem:
+
+            case SourceLineType::optSortGrp0:
+            case SourceLineType::optSortGrp1:
+            case SourceLineType::optSortGrp2:
+            case SourceLineType::optSortGrp3:
+            case SourceLineType::optSortGrp4:
+            case SourceLineType::optSortGrp5:
+            case SourceLineType::optSortGrp6:
+            case SourceLineType::optSortGrp7:
+
+            case SourceLineType::optSortBlk0:
+            case SourceLineType::optSortBlk1:
+            case SourceLineType::optSortBlk2:
+            case SourceLineType::optSortBlk3:
+            case SourceLineType::optSortBlk4:
+            case SourceLineType::optSortBlk5:
+            case SourceLineType::optSortBlk6:
+            case SourceLineType::optSortBlk7:
+                sortFlags.emplace_back(0); // do not sort current line with sort mode ctrl
+                backTraceEmptyLines(n);
+                prevInclude = false;
+                break;
+
             case SourceLineType::genericLine:
                 sortFlags.emplace_back(0); // do not sort generic lines
                 backTraceEmptyLines(n);
@@ -309,13 +448,17 @@ std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
                                      , const std::vector<unsigned char>  &sortMarkers
                                      , const std::vector<SourceLineType> &vecSlt
                                      , const std::unordered_map<std::size_t, std::string> &namesByLine
-                                     , const SortIncludeOptions          &sortOptions = SortIncludeOptions()
+                                     , const SortIncludeOptions          &sortOptionsIn = SortIncludeOptions()
                                      )
 {
     if (lines.size()!=sortMarkers.size() || lines.size()!=vecSlt.size())
     {
         throw std::runtime_error("marty_cpp::sortIncludes: size mismatch");
     }
+
+    std::vector<SortIncludeOptions> sortOptions;
+    sortOptions.emplace_back(sortOptionsIn);
+
 
     std::vector<std::string> resLines; resLines.reserve(lines.size());
 
@@ -324,6 +467,49 @@ std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
         while(n!=sortMarkers.size() && sortMarkers[n]==0)
         {
             resLines.emplace_back(lines[n]);
+
+            switch(vecSlt[n])
+            {
+                case SourceLineType::optSortPush:
+                    sortOptions.push_back(sortOptions.back());
+                    break;
+
+                case SourceLineType::optSortPop :
+                    if (sortOptions.size()>1)
+                        sortOptions.pop_back();
+                    break;
+                
+                case SourceLineType::optSortUser  :
+                    sortOptions.back().sysIncludesFirst = false;
+                    break;
+
+                case SourceLineType::optSortSystem:
+                    sortOptions.back().sysIncludesFirst = true;
+                    break;
+                
+                case SourceLineType::optSortGrp0:
+                case SourceLineType::optSortGrp1:
+                case SourceLineType::optSortGrp2:
+                case SourceLineType::optSortGrp3:
+                case SourceLineType::optSortGrp4:
+                case SourceLineType::optSortGrp5:
+                case SourceLineType::optSortGrp6:
+                case SourceLineType::optSortGrp7:
+                    sortOptions.back().sepGroupLines = std::size_t(vecSlt[n]) - std::size_t(SourceLineType::optSortGrp0);
+                    break;
+                
+                case SourceLineType::optSortBlk0:
+                case SourceLineType::optSortBlk1:
+                case SourceLineType::optSortBlk2:
+                case SourceLineType::optSortBlk3:
+                case SourceLineType::optSortBlk4:
+                case SourceLineType::optSortBlk5:
+                case SourceLineType::optSortBlk6:
+                case SourceLineType::optSortBlk7:
+                    sortOptions.back().sepBlockLines = std::size_t(vecSlt[n]) - std::size_t(SourceLineType::optSortBlk0);
+                    break;
+            }
+
             ++n;
         }
         return n;
@@ -346,7 +532,7 @@ std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
                 curGroup = grpName;
                 if (!firstGroup)
                 {
-                    resLines.insert(resLines.end(), sortOptions.sepGroupLines, std::string());
+                    resLines.insert(resLines.end(), sortOptions.back().sepGroupLines, std::string());
                 }
                 firstGroup = false;
             }
@@ -400,18 +586,18 @@ std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
         if (sysIncludesMap.empty() && userIncludesMap.empty())
             continue;
 
-        if (sortOptions.sysIncludesFirst)
+        if (sortOptions.back().sysIncludesFirst)
         {
             formatIncludes(sysIncludesMap);
             if (!sysIncludesMap.empty() && !userIncludesMap.empty())
-                resLines.insert(resLines.end(), sortOptions.sepBlockLines, std::string());
+                resLines.insert(resLines.end(), sortOptions.back().sepBlockLines, std::string());
             formatIncludes(userIncludesMap);
         }
         else
         {
             formatIncludes(userIncludesMap);
             if (!sysIncludesMap.empty() && !userIncludesMap.empty())
-                resLines.insert(resLines.end(), sortOptions.sepBlockLines, std::string());
+                resLines.insert(resLines.end(), sortOptions.back().sepBlockLines, std::string());
             formatIncludes(sysIncludesMap);
         }
     

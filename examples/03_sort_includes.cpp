@@ -2,6 +2,9 @@
     \brief Тестируем sort_includes.
 */
 
+// https://google.github.io/styleguide/cppguide.html#Names_and_Order_of_Includes
+// https://github.com/yandex/CMICOT/blob/master/CPP_STYLE_GUIDE.md#include
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -52,6 +55,13 @@ int main( int argc, char* argv[] )
     std::vector<std::string> parseSourceLineForIncludesTests =
         { "  #include <queue>"
         , ""
+        , "//#optsortpush"
+        , "//#optsortpop"
+        , "//#optsortpop"
+        , "//#optsortgrp0"
+        , "//#optsortblk3"
+        , "//#optsortsys"
+        , ""
         , "#ifdef AAA"
         , "#   include string"
         , "#endif"
@@ -90,6 +100,7 @@ int main( int argc, char* argv[] )
         , "#include \"marty_cpp\\sort_includes.h\""
         , "#include \"marty_cpp\\marty_cpp.h\""
         , "#include \"Qt\\QtGui.h\""
+        //, "// break sort"
         , "#include \"Qt\\QtCore.h\""
         , "#include \"marty_cpp\\c_escape.h\""
         , "#include \"marty_adt\\trie.h\""
@@ -103,7 +114,6 @@ int main( int argc, char* argv[] )
         , ""
         , "} // namespace www"
         , ""
-        };
 
     for(auto t : parseSourceLineForIncludesTests)
     {
