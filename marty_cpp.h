@@ -2500,6 +2500,9 @@ struct EnumGeneratorTemplate
     std::vector<StringType> flagIncludes       ;
     std::vector<StringType> setIncludes        ;
 
+    unsigned     hexWidth = 8;
+    unsigned     octWidth = 3;
+
     template<typename MessageStream> static
     std::tuple<bool,EnumGeneratorTemplate>
     parseTemplateOptionsText( const std::string &text
@@ -3257,10 +3260,19 @@ StringType enum_generate_number_convert( enum_internal_uint_t val, unsigned genO
     {
         if (genOptions&EnumGeneratorOptionFlags::unsignedVals || appliedValFormat!=EnumGeneratorOptionFlags::outputDec)
         {
+            unsigned  fmtWidth = 0;
+
             switch(appliedValFormat)
             {
                 case EnumGeneratorOptionFlags::outputHex:
-                    oss << std::showbase << std::hex << (enum_internal_uint_t)val;
+                    fmtWidth = genTpl.hexWidth;
+                    if (fmtWidth&1)
+                        fmtWidth += 1;
+                    if (!fmtWidth)
+                        fmtWidth = 2;
+                    if (fmtWidth>32)
+                        fmtWidth = 32;
+                    oss << "0x" << std::uppercase << std::hex << std::setw(fmtWidth) << std::setfill('0') << (enum_internal_uint_t)val;
                     // std::cout << "Formatting hex, input: " << (unsigned)val << " " << 42 << "\n";
                     // std::cout << "Formatted (1): " << std::hex << (unsigned)val << " " << 42 << "\n";
                     // std::cout << "Formatted (2): " << std::hex << val           << " " << 42 << "\n";
@@ -3268,7 +3280,12 @@ StringType enum_generate_number_convert( enum_internal_uint_t val, unsigned genO
                     break;
 
                 case EnumGeneratorOptionFlags::outputOct:
-                    oss << std::oct << (enum_internal_uint_t)val;
+                    fmtWidth = genTpl.octWidth;
+                    if (fmtWidth<3)
+                        fmtWidth = 3;
+                    if (fmtWidth>32)
+                        fmtWidth = 32;
+                    oss << "0" << std::oct << std::setw(fmtWidth) << std::setfill('0') << (enum_internal_uint_t)val;
                     break;
 
                 default: // EnumGeneratorOptionFlags::outputDec:
