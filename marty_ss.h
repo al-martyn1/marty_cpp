@@ -163,6 +163,18 @@ public:
 
     const string_type& str() const { return m_str; }
 
+    SimpleStringRefStream& operator<<( const std::string &str )
+    {
+        m_str.append(make_string<string_type>(str));
+        return *this;
+    }
+
+    SimpleStringRefStream& operator<<( const std::wstring &str )
+    {
+        m_str.append(make_string<string_type>(str));
+        return *this;
+    }
+
     SimpleStringRefStream& operator<<( const char_type *str )
     {
         m_str.append(str);
@@ -218,6 +230,18 @@ public:
 
     const string_type& str() const { return m_str; }
 
+    SimpleStringStream& operator<<( const std::string &str )
+    {
+        m_str.append(make_string<string_type>(str));
+        return *this;
+    }
+
+    SimpleStringStream& operator<<( const std::wstring &str )
+    {
+        m_str.append(make_string<string_type>(str));
+        return *this;
+    }
+
     SimpleStringStream& operator<<( const char_type *str )
     {
         m_str.append(str);
@@ -251,6 +275,67 @@ public:
 
 
 //-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+template<typename StringType>
+class SimpleNulStream
+{
+public:
+
+    typedef StringType  string_type;
+    typedef typename string_type::value_type         char_type        ;
+    typedef typename string_type::value_type         value_type       ;
+
+
+    SimpleNulStream() = default;
+    SimpleNulStream(const SimpleNulStream&) = delete;
+    SimpleNulStream(SimpleNulStream&&) = delete;
+    SimpleNulStream& operator=(const SimpleNulStream&) = delete;
+
+    const string_type str() const { return string_type(); }
+
+    SimpleNulStream& operator<<( const std::string &str )
+    {
+        return *this;
+    }
+
+    SimpleNulStream& operator<<( const std::wstring &str )
+    {
+        return *this;
+    }
+
+    SimpleNulStream& operator<<( const char_type *str )
+    {
+        return *this;
+    }
+
+    SimpleNulStream& operator<<( char_type ch )
+    {
+        return *this;
+    }
+
+    SimpleNulStream& operator<<( const string_type &str )
+    {
+        return *this;
+    }
+
+    SimpleNulStream& operator<<( bool b )
+    {
+        return *this;
+    }
+
+    template<typename ValueType>
+    SimpleNulStream& operator<<(ValueType v)
+    {
+        return *this;
+    }
+
+
+    // MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL(SimpleNulStream)
+
+
+}; // template<StringType> class SimpleNulStream
+
+
 
 
 

@@ -457,13 +457,56 @@ toUpper( const std::basic_string< CharT, Traits, Allocator > &str )
 #endif // MARTY_CPP_TO_UPPER_TO_LOWER_DECLARED
 
 //----------------------------------------------------------------------------
-inline bool    isAlpha( char ch )     { return isLower(ch) || isUpper(ch); }
-inline bool    isDigit( char ch )     { return (ch>='0' && ch<='9'); }
-inline bool    getCase( char ch )     { return isUpper(ch); }
+inline bool    isAlpha(char ch)     { return isLower(ch) || isUpper(ch); }
+inline bool    isDigit(char ch)     { return (ch>='0' && ch<='9'); }
+inline bool    getCase(char ch)     { return isUpper(ch); }
 
-inline bool    isAlpha( wchar_t ch )  { return isLower(ch) || isUpper(ch); }
-inline bool    isDigit( wchar_t ch )  { return (ch>=L'0' && ch<=L'9'); }
-inline bool    getCase( wchar_t ch )  { return isUpper(ch); }
+inline bool    isAlpha(wchar_t ch)  { return isLower(ch) || isUpper(ch); }
+inline bool    isDigit(wchar_t ch)  { return (ch>=L'0' && ch<=L'9'); }
+inline bool    getCase(wchar_t ch)  { return isUpper(ch); }
+
+inline int digitToIntImpl(char ch)
+{
+    if (ch>='0' && ch<='9')
+        return ch-'0';
+    if (ch>='a' && ch<='z')
+        return ch-'a' + 10;
+    if (ch>='A' && ch<='Z')
+        return ch-'A' + 10;
+    return -1;
+}
+
+inline int digitToIntImpl(wchar_t ch)
+{
+    if (ch>0x7F)
+        return -1;
+    return digitToIntImpl((char)ch);
+}
+
+inline int digitToInt(char ch, int ss)
+{
+    int d = digitToIntImpl(ch);
+    if (d<0)
+        return d;
+
+    if (ss<0)
+        ss = 10;
+    if (ss<2)
+        ss = 2;
+
+    if (d>=ss)
+        return -1;
+
+    return d;
+}
+
+inline int digitToInt(wchar_t ch, int ss)
+{
+    return digitToInt(ch, ss);
+}
+
+inline bool isDigit(char    ch, int ss) { return digitToInt(ch, ss)<0 ? false : true; }
+inline bool isDigit(wchar_t ch, int ss) { return digitToInt(ch, ss)<0 ? false : true; }
 
 //----------------------------------------------------------------------------
 inline 
@@ -520,6 +563,279 @@ bool isValidIdentChar( wchar_t ch, bool allowNonAsciiIdents, const std::wstring 
 
 //----------------------------------------------------------------------------
 
+
+
+
+//----------------------------------------------------------------------------
+template<typename CharType, typename OutputIterator> inline
+OutputIterator cEscapeChar(CharType ch, CharType chNext, OutputIterator outIt)
+{
+    // https://en.cppreference.com/w/cpp/language/escape
+
+    auto appendToOutput = [&](const char* ccStr)
+    {
+        for(; *ccStr; ++ccStr)
+        {
+            *outIt++ = (CharType)*ccStr;
+        }
+    };
+
+    switch(ch)
+    {
+        case '\'': appendToOutput("\\'"); break;
+        case '\"': appendToOutput("\\\""); break;
+        case '\\': appendToOutput("\\\\"); break;
+        case '\a': appendToOutput("\\a"); break;
+        case '\b': appendToOutput("\\b"); break;
+        case '\f': appendToOutput("\\f"); break;
+        case '\n': appendToOutput("\\n"); break;
+        case '\r': appendToOutput("\\r"); break;
+        case '\t': appendToOutput("\\t"); break;
+        case '\v': appendToOutput("\\v"); break;
+        case    0: 
+                   if (chNext==0 || !isDigit(chNext,8)) // Текущий символ - последний или следующий символ - не восьмеричная цифра
+                       appendToOutput("\\0"); // Достаточно одной таблэтки
+                   else
+                       appendToOutput("\\000"); // нужно выдать максимальное число цифр для данной нотации - 3
+                   break;
+        // case '\t': appendToOutput("\\t"); break;
+        default: *outIt++ = ch;
+    }
+
+    return outIt;
+}
+
+//----------------------------------------------------------------------------
+template<typename CharType, typename OutputIterator> inline
+void cEscapeStringImpl( const CharType *pStr, OutputIterator outIt )
+{
+    for(; *pStr; ++pStr)
+    {                            //  0 for Z-terminator
+        outIt = cEscapeChar(*pStr, *(pStr+1), outIt);
+    }
+}
+
+//----------------------------------------------------------------------------
+template<typename CharType, typename OutputIterator> inline
+void cEscapeStringImpl( const CharType *pStr, std::size_t sz, OutputIterator outIt )
+{
+    for(std::size_t i=0; i!=sz; ++i)
+    {
+        CharType nextCh = 0;
+        if (sz>0 && i!=(sz-1))
+            nextCh = pStr[i+1];
+        outIt = cEscapeChar(pStr[i], nextCh, outIt);
+    }
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string cEscapeString(const std::string &str)
+{
+    std::string resStr; resStr.reserve(str.size());
+    cEscapeStringImpl(str.data(), str.size(), std::back_inserter(resStr));
+    return resStr;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::wstring cEscapeString(const std::wstring &str)
+{
+    std::wstring resStr; resStr.reserve(str.size());
+    cEscapeStringImpl(str.data(), str.size(), std::back_inserter(resStr));
+    return resStr;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string cEscapeString(const char *pStr)
+{
+    std::string resStr;
+    cEscapeStringImpl(pStr, std::back_inserter(resStr));
+    return resStr;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::wstring cEscapeString(const wchar_t *pStr)
+{
+    std::wstring resStr;
+    cEscapeStringImpl(pStr, std::back_inserter(resStr));
+    return resStr;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+
+//----------------------------------------------------------------------------
+template<typename CharType> inline
+std::size_t cStringLen(const CharType *pStr)
+{
+    std::size_t i = 0;
+    while(*pStr) ++i;
+    return i;
+}
+//----------------------------------------------------------------------------
+
+template<typename CharType, typename OutputIterator> inline
+void cUnescapeStringImpl( const CharType *pStr, std::size_t sz, OutputIterator outIt )
+{
+    // https://en.cppreference.com/w/cpp/language/escape
+
+    #if defined(DEBUG) || defined(_DEBUG)
+        const CharType *curStrPtr = pStr;
+    #endif
+
+
+    for(std::size_t i=0; i!=sz; )
+    {
+
+        #if defined(DEBUG) || defined(_DEBUG)
+            curStrPtr = &pStr[i];
+        #endif
+
+        CharType ch = pStr[i];
+
+        if (ch!=(CharType)'\\')
+        {
+            *outIt++ = ch;
+            ++i;
+        }
+        else
+        {
+            // escape sequence found
+            ++i;
+            #if defined(DEBUG) || defined(_DEBUG)
+                curStrPtr = &pStr[i];
+            #endif
+            if (i==sz)
+            {
+                // Начало escape последовательности найдено в конце строки - просто помещаем слэш в out и выходим
+                *outIt++ = ch;
+                return;
+            }
+
+            ch = pStr[i];
+            switch(ch)
+            {
+                case '\'': *outIt++ = '\''; ++i; break;
+                case '\"': *outIt++ = '\"'; ++i; break;
+                case '\\': *outIt++ = '\\'; ++i; break;
+                case '?' : *outIt++ = '?' ; ++i; break;
+                case 'a' : *outIt++ = '\a'; ++i; break;
+                case 'b' : *outIt++ = '\b'; ++i; break;
+                case 'f' : *outIt++ = '\f'; ++i; break;
+                case 'n' : *outIt++ = '\n'; ++i; break;
+                case 'r' : *outIt++ = '\r'; ++i; break;
+                case 't' : *outIt++ = '\t'; ++i; break;
+                case 'v' : *outIt++ = '\v'; ++i; break;
+
+                case '0' : // octal value
+                {
+                    ++i;
+                    if (i==sz)
+                    {
+                        //*outIt++ = (CharType)0;
+                        return;
+                    }
+
+                    CharType tmpResCh = 0;
+                    for(std::size_t j=0; j!=2; ++j, ++i)
+                    {
+                        #if defined(DEBUG) || defined(_DEBUG)
+                            curStrPtr = &pStr[i];
+                        #endif
+
+                        int d = digitToInt(pStr[i], 8);
+                        if (d<0)
+                            break;
+                        tmpResCh <<= 3;
+                        tmpResCh  |= (CharType)d;
+                    }
+
+                    *outIt++ = tmpResCh;
+                }
+                break;
+
+                case 'x' : 
+                case 'X' : // hex value
+                {
+                    ++i;
+                    if (i==sz)
+                    {
+                        *outIt++ = ch;
+                        return;
+                    }
+
+                    CharType tmpResCh = 0;
+                    for(std::size_t j=0; j!=2; ++j, ++i)
+                    {
+                        #if defined(DEBUG) || defined(_DEBUG)
+                            curStrPtr = &pStr[i];
+                        #endif
+
+                        int d = digitToInt(pStr[i], 16);
+                        if (d<0)
+                            break;
+                        tmpResCh <<= 4;
+                        tmpResCh  |= (CharType)d;
+                    }
+
+                    *outIt++ = tmpResCh;
+                }
+                break;
+
+                default:
+                    *outIt++ = ch; ++i;
+
+            }
+
+        }
+
+
+    }
+
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string cUnescapeString(const std::string &str)
+{
+    std::string resStr; resStr.reserve(str.size());
+    cUnescapeStringImpl(str.data(), str.size(), std::back_inserter(resStr));
+    return resStr;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::wstring cUnescapeString(const std::wstring &str)
+{
+    std::wstring resStr; resStr.reserve(str.size());
+    cUnescapeStringImpl(str.data(), str.size(), std::back_inserter(resStr));
+    return resStr;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string cUnescapeString(const char *pStr)
+{
+    std::string resStr;
+    cUnescapeStringImpl(pStr, cStringLen(pStr), std::back_inserter(resStr));
+    return resStr;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::wstring cUnescapeString(const wchar_t *pStr)
+{
+    std::wstring resStr;
+    cUnescapeStringImpl(pStr, cStringLen(pStr), std::back_inserter(resStr));
+    return resStr;
+}
+
+//----------------------------------------------------------------------------
 
 
 
@@ -1554,7 +1870,7 @@ std::vector<StringType> simple_string_split(const StringType &str, const typenam
 #define MARTY_CPP_SIMPLE_STRING_REPLACE_DECLARED
 //-----------------------------------------------------------------------------
 template<typename StringType> inline
-StringType simple_string_replace(const StringType &str, const StringType &searchFor, const StringType &replaceWith, typename StringType::size_type nSplits = -1)
+StringType simple_string_replace(const StringType &str, const StringType &searchFor, const StringType &replaceWith, typename StringType::size_type nReplaces = -1)
 {
     typename StringType::size_type replaceCounter = 0;
 
@@ -1563,7 +1879,7 @@ StringType simple_string_replace(const StringType &str, const StringType &search
 
     StringType res; res.reserve(str.size());
 
-    for(; replaceCounter!=nSplits && (curPos = str.find(searchFor, prevPos)) != StringType::npos; ++replaceCounter)
+    for(; replaceCounter!=nReplaces && (curPos = str.find(searchFor, prevPos)) != StringType::npos; ++replaceCounter)
     {
         res.append(str, prevPos, curPos-prevPos);
         prevPos = curPos+searchFor.size();
@@ -1629,8 +1945,26 @@ StringType simple_trim(const StringType &str, const ConditionType &trimCondition
     // if (str.empty())
     //     return str;
     auto e = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
-    auto b = trim_iter_impl(str.cbegin(), e, trimCondition);
+    //auto b  = trim_iter_impl(str.cbegin(), er.base(), trimCondition);
+    auto b  = trim_iter_impl(str.cbegin(), e, trimCondition);
+    //return StringType(b,er.base());
     return StringType(b,e);
+}
+
+template<typename StringType, typename ConditionType> inline
+StringType simple_ltrim(const StringType &str, const ConditionType &trimCondition)
+{
+    auto b = trim_iter_impl(str.cbegin(), str.cend(), trimCondition);
+    return StringType(b,str.cend());
+}
+
+template<typename StringType, typename ConditionType> inline
+StringType simple_rtrim(const StringType &str, const ConditionType &trimCondition)
+{
+    // auto er = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
+    // return StringType(str.cbegin(),er.base());
+    auto e = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
+    return StringType(str.cbegin(),e);
 }
 
 //-----------------------------------------------------------------------------
@@ -1827,14 +2161,14 @@ bool unquote( StringType &s                               //!< Строка дл
     
     s.erase( s.size()-1 );
     s.erase( 0, 1 );
-    trim(s);
+    //trim(s);
     return true;
     
 }
 
 //-----------------------------------------------------------------------------
 template<typename StringType> inline
-StringType unquoted( StringType &s                        //!< Строка для раскавычивания
+StringType unquoted( StringType s                         //!< Строка для раскавычивания
             , typename StringType::value_type quotStart   //!< Открывающая кавычка
             , typename StringType::value_type quotEnd = 0 //!< Закрывающая кавычка, если 0 - то срабатывает автоопределение обоих кавычек (используются парные символы по открывающией кавычке)
             )
@@ -1865,7 +2199,7 @@ bool unquote( StringType &s                           //!< Строка для �
 
 //-----------------------------------------------------------------------------
 template<typename StringType> inline
-StringType unquoted( StringType &s                    //!< Строка для раскавычивания
+StringType unquoted( StringType s                     //!< Строка для раскавычивания
             , const StringType &strStart              //!< Открывающая кавычка
             , const StringType &strEnd = StringType() //!< Закрывающая кавычка, если пустая строка - то срабатывает автоопределение обоих кавычек (используются парные символы по открывающией кавычке)
             )
@@ -1873,9 +2207,31 @@ StringType unquoted( StringType &s                    //!< Строка для �
     unquote(s,strStart,strEnd);
     return s;
 }
+
 //-----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType quote( const StringType &s
+                , typename StringType::value_type quotStart  
+                , typename StringType::value_type quotEnd = 0
+                )
+{
+    quotEnd   = get_pair_right_char(quotStart);
+    quotStart = get_pair_left_char (quotStart);
 
+    return StringType(1,quotStart) + s + StringType(1,quotEnd);
+}
 
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType quote( const StringType &s
+                , StringType quotStart  
+                , StringType quotEnd
+                )
+{
+    return quotStart + s + quotEnd;
+}
+
+//----------------------------------------------------------------------------
 
 
 
@@ -2075,6 +2431,9 @@ struct EnumGeneratorOptionFlags
     static const unsigned outputDec                    = 0x02000000;
     static const unsigned outputHex                    = 0x03000000;
 
+    static const unsigned generateSysIncludesFirst     = 0x04000000;
+    static const unsigned disablePrologEpilog          = 0x08000000;
+
 }; // struct EnumGeneratorOptionFlags
 
 
@@ -2086,6 +2445,9 @@ typedef std::uint64_t          enum_internal_uint_t;
 template<typename StringType>
 struct EnumGeneratorTemplate
 {
+    StringType globalProlog                ;
+    StringType globalEpilog                ;
+
     StringType declBeginTemplate           ; // $(INDENT)enum $(CLASS) $(NAME)
     StringType declBeginUnderlyingTemplate ; // $(INDENT)enum $(CLASS) $(NAME) : $(UNDERLAYED)
 
@@ -2123,10 +2485,226 @@ struct EnumGeneratorTemplate
 
     StringType setSerializeSetType         ;
 
+    StringType userIncludeTemplate         ;
+    StringType systemIncludeTemplate       ;
+
+    StringType includesBefore              ;
+    StringType includesAfter               ;
+    StringType includesSep                 ;
+    StringType includesGroupSep            ;
+    StringType includesBlockSep            ;
+
+    std::vector<StringType> declIncludes       ;
+    std::vector<StringType> serializeIncludes  ;
+    std::vector<StringType> deserializeIncludes;
+    std::vector<StringType> flagIncludes       ;
+    std::vector<StringType> setIncludes        ;
+
+    template<typename MessageStream> static
+    std::tuple<bool,EnumGeneratorTemplate>
+    parseTemplateOptionsText( const std::string &text
+                            , MessageStream &ms
+                            , bool ignoreUnknownParams = false
+                            , bool logGccFormat = false // else MS-style
+                            , const std::string &fileName=std::string()
+                            ) // Text must be normalized by linefeeds to LF
+    {
+        std::vector<std::string> textLines = simple_string_split(text,"\n");
+
+        std::size_t lineNo = 1;
+        std::vector<std::string>::iterator lit = textLines.begin();
+
+        auto isSpaceChar = [](typename StringType::value_type ch)
+                             {
+                                 typedef typename StringType::value_type CharType; 
+                                 return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
+                             };
+
+        auto msg = [&](const std::string &msgTypeOrAndNum) -> MessageStream&
+        {
+            //ms << fileName << ":" << lineNo << ":"
+            if (logGccFormat)
+            {
+                // ..\src\main\payloads_bus_master_task.h:60:1: error:
+                if (!fileName.empty()) //-V547
+                    ms<<fileName<<":"<<lineNo<<": ";
+            }
+            else
+            {
+                // e:\_work\utils\rdlc\src\rdlc.cpp(668): error C2065:
+                if (!fileName.empty()) //-V547
+                    ms<<fileName<<"("<<lineNo<<"): ";
+            }
+
+            ms<<msgTypeOrAndNum<<" :";
+
+            return ms;
+        };
+
+        std::map<std::string,bool> paramsAssigned;
+
+        auto checkAssign = [&](const std::string &paramName, std::string paramValue, const std::string &expectedName, StringType &assignTo) -> bool
+        {
+            if (paramsAssigned.find(expectedName)==paramsAssigned.end())
+                paramsAssigned[expectedName] = false;
+
+            if (toUpper(expectedName)!=paramName)
+                return false;
+
+            paramValue = simple_trim(paramValue,isSpaceChar);
+            if (is_quoted(paramValue, '\"'))
+                unquote(paramValue, '\"');
+
+            paramValue = cUnescapeString(paramValue);
+
+            assignTo = make_string<StringType>(paramValue);
+            paramsAssigned[expectedName] = true;
+            return true;
+        };
+
+
+        EnumGeneratorTemplate<StringType> genTpl;
+
+        StringType declIncludesStr       ;
+        StringType serializeIncludesStr  ;
+        StringType deserializeIncludesStr;
+        StringType flagIncludesStr       ;
+        StringType setIncludesStr        ;
+
+
+        for(; lit!=textLines.end(); ++lit, ++lineNo)
+        {
+            StringType line = simple_trim(*lit, isSpaceChar);
+            if (line.empty() || line[0]=='#' || line[0]==';')
+                continue;
+
+            //line = simple_string_replace(line, std::string(":"), std::string("="), 1);
+
+            auto eqPos    = line.find("=", 0);
+            auto colonPos = line.find(":", 0);
+            auto sepPos   = std::min(eqPos,colonPos);
+            line[sepPos]  = '=';
+
+            std::vector< std::string > nameValue = simple_string_split(line, std::string("="), 1 );
+            if (nameValue.size()<1 || nameValue[0].empty())
+            {
+                msg("warning") << "parameter name not taken\n";
+                continue;
+            }
+
+            nameValue[0] = simple_trim(nameValue[0], isSpaceChar);
+            if (nameValue[0].empty())
+            {
+                msg("warning") << "parameter name not taken\n";
+                continue;
+            }
+
+            std::string paramName  = toUpper(nameValue[0]);
+
+            std::string paramValue;
+            if (nameValue.size()>1)
+                paramValue = simple_trim(nameValue[1], isSpaceChar);
+
+            if      (checkAssign(paramName, paramValue, "EnumGenerationProlog"                   , genTpl.globalProlog                )) {}
+            else if (checkAssign(paramName, paramValue, "EnumGenerationEpilog"                   , genTpl.globalEpilog                )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDeclarationBegin"                   , genTpl.declBeginTemplate           )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDeclarationWithUnderlyingTypeBegin" , genTpl.declBeginUnderlyingTemplate )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDeclarationClassKeyword"            , genTpl.declClass                   )) {}
+            else if (checkAssign(paramName, paramValue, "TypeCast"                               , genTpl.castTemplate                )) {}
+            else if (checkAssign(paramName, paramValue, "EnumScopeBegin"                         , genTpl.scopeBeginTemplate          )) {}
+            else if (checkAssign(paramName, paramValue, "EnumScopeEnd"                           , genTpl.scopeEndTemplate            )) {}
+            else if (checkAssign(paramName, paramValue, "EnumItemDeclarationSeparatorBeforeFirst", genTpl.declItemSepBeforeFirst      )) {}
+            else if (checkAssign(paramName, paramValue, "EnumItemDeclarationSeparatorBefore"     , genTpl.declItemSepBefore           )) {}
+            else if (checkAssign(paramName, paramValue, "EnumItemDeclarationSeparatorAfter"      , genTpl.declItemSepAfter            )) {}
+            else if (checkAssign(paramName, paramValue, "EnumItemDeclaration"                    , genTpl.declItemTemplate            )) {}
+            else if (checkAssign(paramName, paramValue, "EnumItemComment"                        , genTpl.declItemCommentTemplate     )) {}
+            else if (checkAssign(paramName, paramValue, "EnumFlagsDeclaration"                   , genTpl.declFlagsTemplate           )) {}
+            else if (checkAssign(paramName, paramValue, "EnumSerializationBegin"                 , genTpl.serializeBeginTemplate      )) {}
+            else if (checkAssign(paramName, paramValue, "EnumSerializationEnd"                   , genTpl.serializeEndTemplate        )) {}
+            else if (checkAssign(paramName, paramValue, "EnumSerializationItem"                  , genTpl.serializeItemTemplate       )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDeserializationBegin"               , genTpl.deserializeBeginTemplate    )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDeserializationEnd"                 , genTpl.deserializeEndTemplate      )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDeserializationItem"                , genTpl.deserializeItemTemplate     )) {}
+            else if (checkAssign(paramName, paramValue, "EnumItemSerializeBeforeFirst"           , genTpl.serializeItemSepBeforeFirst )) {}
+            else if (checkAssign(paramName, paramValue, "EnumItemSerializeBefore"                , genTpl.serializeItemSepBefore      )) {}
+            else if (checkAssign(paramName, paramValue, "EnumItemSerializeAfter"                 , genTpl.serializeItemSepAfter       )) {}
+            else if (checkAssign(paramName, paramValue, "EnumSerializeSet"                       , genTpl.serializeSetTemplate        )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDeserializeSet"                     , genTpl.deserializeSetTemplate      )) {}
+            else if (checkAssign(paramName, paramValue, "EnumSerializeSetType"                   , genTpl.setSerializeSetType         )) {}
+            else if (checkAssign(paramName, paramValue, "EnumUserIncludeFormat"                  , genTpl.userIncludeTemplate         )) {}
+            else if (checkAssign(paramName, paramValue, "EnumSystemIncludeFormat"                , genTpl.systemIncludeTemplate       )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDeclarationIncludes"                , declIncludesStr                    )) {}
+            else if (checkAssign(paramName, paramValue, "EnumSerializationIncludes"              , serializeIncludesStr               )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDeserializationIncludes"            , deserializeIncludesStr             )) {}
+            else if (checkAssign(paramName, paramValue, "EnumFlagIncludes"                       , flagIncludesStr                    )) {}
+            else if (checkAssign(paramName, paramValue, "EnumSetIncludes"                        , setIncludesStr                     )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesBefore"                     , genTpl.includesBefore              )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesAfter"                      , genTpl.includesAfter               )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesEntrySeparator"             , genTpl.includesSep                 )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesGroupSeparator"             , genTpl.includesGroupSep            )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesBlockSeparator"             , genTpl.includesBlockSep            )) {}
+
+            else
+            {
+                if (!ignoreUnknownParams)
+                {
+                    msg("error") << "unknown parameter '" << nameValue[0] << "'\n";
+                    return std::make_tuple(false, EnumGeneratorTemplate<StringType>());
+                }
+            }
+
+        } // for
+
+        --lineNo;
+
+
+        bool foundUnassigned = false;
+        std::map<std::string,bool>::const_iterator parIt = paramsAssigned.begin();
+        for(; parIt!=paramsAssigned.end(); ++parIt)
+        {
+            if (parIt->second!=false)
+                continue;
+
+            foundUnassigned = true;
+            msg("error") << "enum generator parameter '" << parIt->first << "' not defined\n";
+        }
+
+        if (foundUnassigned)
+        {
+            //msg("error") << "enum generator parameter '" << parIt->first << "' not defined\n";
+            return std::make_tuple(false, EnumGeneratorTemplate<StringType>());
+        }
+
+        auto splitIncludes = [&](const std::string &str)
+        {
+            std::vector<StringType> tmp = simple_string_split(str ,",");
+            std::vector<StringType> resVec;
+            for(auto s : tmp)
+            {
+                s = simple_string_replace(s, std::string("\\"), std::string("/"));
+                resVec.emplace_back(simple_trim(s,isSpaceChar));
+            }
+            return resVec;
+        };
+
+        genTpl.declIncludes        = splitIncludes(declIncludesStr       );
+        genTpl.serializeIncludes   = splitIncludes(serializeIncludesStr  );
+        genTpl.deserializeIncludes = splitIncludes(deserializeIncludesStr);
+        genTpl.flagIncludes        = splitIncludes(flagIncludesStr       );
+        genTpl.setIncludes         = splitIncludes(setIncludesStr        );
+
+        return std::make_tuple(true, genTpl);
+
+    }
+    //std::vector<StringType> simple_string_split(const StringType &str, const StringType &delim, typename StringType::size_type nSplits = -1)
+
     static
     EnumGeneratorTemplate defaultCpp()
     {
         EnumGeneratorTemplate res;
+
+        res.globalProlog  = make_string<StringType>("#pragma once\n\n");
+        res.globalEpilog  = make_string<StringType>("\n");
 
         res.declBeginTemplate            = make_string<StringType>(" enum $(CLASS) $(ENAMNAME)");
         res.declBeginUnderlyingTemplate  = make_string<StringType>(" enum $(CLASS) $(ENAMNAME) : $(UNDERLYING)");
@@ -2162,6 +2740,15 @@ struct EnumGeneratorTemplate
 
         res.serializeSetTemplate         = make_string<StringType>("MARTY_CPP_ENUM$(PPCLASS)_SERIALIZE_SET($(ENAMNAME), $(SETTYPE))\n");
         res.deserializeSetTemplate       = make_string<StringType>("MARTY_CPP_ENUM$(PPCLASS)_DESERIALIZE_SET($(ENAMNAME), $(SETTYPE))\n");
+
+        res.userIncludeTemplate          = make_string<StringType>("#include \"$(FILENAME)\"");
+        res.systemIncludeTemplate        = make_string<StringType>("#include <$(FILENAME)>");
+
+        res.includesBefore               = make_string<StringType>("\n\n");
+        res.includesAfter                = make_string<StringType>("\n\n");
+        res.includesSep                  = make_string<StringType>("\n");
+        res.includesGroupSep             = make_string<StringType>("\n");
+        res.includesBlockSep             = make_string<StringType>("\n");
         
         return res;
     }
@@ -2194,6 +2781,18 @@ struct EnumGeneratorTemplate
             return str;
         StringType res = make_string<StringType>("$(INDENT)");
         res.append(str, 1);
+        return res;
+    }
+
+    StringType formatInclude(const StringType &fileName, bool sysInclude) const
+    {
+        StringType res;
+        if (sysInclude)
+            res = systemIncludeTemplate; // replaceLeadingSpaceToIndentMacro(systemIncludeTemplate);
+        else
+            res = userIncludeTemplate; // replaceLeadingSpaceToIndentMacro(userIncludeTemplate);
+
+        res = simple_string_replace( res, make_string<StringType>("$(FILENAME)"), fileName );
         return res;
     }
 
@@ -2934,16 +3533,166 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
 }
 
 //-----------------------------------------------------------------------------
-//!!! Начнём менять отсюда
-/*
-    static const unsigned outputFormatMask             = 0x03000000;
-    static const unsigned outputAuto                   = 0x00000000;
-    static const unsigned outputOct                    = 0x01000000;
-    static const unsigned outputDec                    = 0x02000000;
-    static const unsigned outputHex                    = 0x03000000;
+template<typename StreamType, typename StringType> inline
+void enum_generate_prolog( StreamType &ss
+                         , unsigned                                 genOptions = 0
+                         , const EnumGeneratorTemplate<StringType>  &genTpl    = EnumGeneratorTemplate<StringType>::defaultCpp()
+                         )
+{
+    genOptions = enum_generate_adjust_gen_options(genOptions);
 
-}; // struct EnumGeneratorOptionFlags
-*/
+    if (genOptions&EnumGeneratorOptionFlags::disablePrologEpilog)
+        return;
+
+    ss << genTpl.globalProlog;
+}
+
+//-----------------------------------------------------------------------------
+template<typename StreamType, typename StringType> inline
+void enum_generate_epilog( StreamType &ss
+                         , unsigned                                 genOptions = 0
+                         , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
+                         )
+{
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+    if (genOptions&EnumGeneratorOptionFlags::disablePrologEpilog)
+        return;
+
+    ss << genTpl.globalEpilog;
+}
+
+//-----------------------------------------------------------------------------
+//
+template<typename StreamType, typename StringType> inline
+void enum_generate_includes( StreamType &ss
+                           , unsigned                                 genOptions
+                           , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
+                           )
+{
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+    bool sysIncludesFirst = (genOptions&EnumGeneratorOptionFlags::generateSysIncludesFirst) ? true : false;
+
+    std::vector<StringType> allIncludes;
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefType)
+    {
+        allIncludes.insert(allIncludes.end(), genTpl.declIncludes.begin(), genTpl.declIncludes.end());
+    }
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefSerialize)
+    {
+        allIncludes.insert(allIncludes.end(), genTpl.serializeIncludes.begin(), genTpl.serializeIncludes.end());
+    }
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefDeserialize)
+    {
+        allIncludes.insert(allIncludes.end(), genTpl.deserializeIncludes.begin(), genTpl.deserializeIncludes.end());
+    }
+
+    if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+    {
+        allIncludes.insert(allIncludes.end(), genTpl.flagIncludes.begin(), genTpl.flagIncludes.end());
+    }
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefSerializeSet || genOptions&EnumGeneratorOptionFlags::generateDefDeserializeSet)
+    {
+        allIncludes.insert(allIncludes.end(), genTpl.setIncludes.begin(), genTpl.setIncludes.end());
+    }
+
+    std::set<StringType>    userIncludesSet;
+    std::set<StringType>    sysIncludesSet;
+    std::set<StringType>    processedIncludes;
+
+
+    std::vector<StringType>::const_iterator ait = allIncludes.begin();
+    for(; ait!=allIncludes.end(); ++ait)
+    {
+        StringType fileName = *ait;
+
+        bool sysInclude = unquote(fileName, (StringType::value_type)'<', (StringType::value_type)'>');
+        if (!sysInclude)
+            unquote(fileName, (StringType::value_type)'\"', (StringType::value_type)'"');
+
+        if (processedIncludes.find(fileName)!=processedIncludes.end())
+        {
+            continue;
+        }
+
+        processedIncludes.insert(fileName);
+
+        if (sysInclude)
+            sysIncludesSet.insert(fileName);
+        else
+            userIncludesSet.insert(fileName);
+    }
+
+
+    auto formatInclude = [&](const StringType &fileName, bool sysInclude)
+    {
+        ss << genTpl.formatInclude(fileName, sysInclude);
+        ss << genTpl.includesSep;
+
+        processedIncludes.insert(fileName);
+    };
+
+    bool firstGroup = true;
+    StringType curGroup;
+
+    auto getGroupName = [](const StringType &name) -> StringType
+    {
+        auto sepPos = name.find_last_of((StringType::value_type)'/' /* , name.size() */ );
+        if (sepPos==name.npos)
+            return StringType();
+        return StringType(name,0,sepPos);
+    };
+
+    auto formatIncludes = [&](const std::set<StringType> &includesSet, bool bSysIncludes)
+    {
+        for(const auto &s : includesSet)
+        {
+            StringType grpName = getGroupName(s);
+            if (curGroup!=grpName)
+            {
+                curGroup = grpName;
+                if (!firstGroup)
+                    ss << genTpl.includesGroupSep;
+                firstGroup = false;
+            }
+
+            formatInclude(s, bSysIncludes);
+        }
+    };
+
+
+    ss << genTpl.includesBefore;
+
+    if (sysIncludesFirst)
+    {
+        formatIncludes(sysIncludesSet, true);
+        if (!sysIncludesSet.empty() && !userIncludesSet.empty())
+            ss << genTpl.includesBlockSep;
+        formatIncludes(userIncludesSet, false);
+    }
+    else
+    {
+        formatIncludes(userIncludesSet, false);
+        if (!sysIncludesSet.empty() && !userIncludesSet.empty())
+            ss << genTpl.includesBlockSep;
+        formatIncludes(sysIncludesSet, true);
+    }
+
+    ss << genTpl.includesAfter   ;
+
+    if (!allIncludes.empty())
+    {
+        ss << make_string<StringType>("\n");
+    }
+
+}
+
+//-----------------------------------------------------------------------------
 template<typename StreamType, typename StringType> inline
 void enum_generate_serialize( StreamType &ss
                             , const std::vector< std::tuple< StringType,StringType,StringType,StringType > > &vals
@@ -2976,7 +3725,6 @@ void enum_generate_serialize( StreamType &ss
                                    , valuesPrefix, genOptions, genTpl
                                    , pDups, pDupVals
                                    );
-
 
     if (genOptions&EnumGeneratorOptionFlags::generateDefType)
     {
