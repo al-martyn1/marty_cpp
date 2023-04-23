@@ -3630,7 +3630,7 @@ void enum_generate_includes( StreamType &ss
 
         bool sysInclude = unquote(fileName, (StringType::value_type)'<', (StringType::value_type)'>');
         if (!sysInclude)
-            unquote(fileName, (StringType::value_type)'\"', (StringType::value_type)'"');
+            unquote(fileName, (StringType::value_type)'\"', (StringType::value_type)'\"');
 
         if (processedIncludes.find(fileName)!=processedIncludes.end())
         {
