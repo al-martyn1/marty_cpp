@@ -395,9 +395,11 @@ StringType simple_trim(const StringType &str, const ConditionType &trimCondition
 {
     // if (str.empty())
     //     return str;
-    auto er = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
-    auto b  = trim_iter_impl(str.cbegin(), er.base(), trimCondition);
-    return StringType(b,er.base());
+    auto e = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
+    //auto b  = trim_iter_impl(str.cbegin(), er.base(), trimCondition);
+    auto b  = trim_iter_impl(str.cbegin(), e, trimCondition);
+    //return StringType(b,er.base());
+    return StringType(b,e);
 }
 
 template<typename StringType, typename ConditionType> inline
@@ -410,8 +412,10 @@ StringType simple_ltrim(const StringType &str, const ConditionType &trimConditio
 template<typename StringType, typename ConditionType> inline
 StringType simple_rtrim(const StringType &str, const ConditionType &trimCondition)
 {
-    auto er = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
-    return StringType(str.cbegin(),er.base());
+    // auto er = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
+    // return StringType(str.cbegin(),er.base());
+    auto e = trim_iter_impl(str.crbegin(), str.crend(), trimCondition).base();
+    return StringType(str.cbegin(),e);
 }
 
 //-----------------------------------------------------------------------------
