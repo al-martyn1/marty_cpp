@@ -432,7 +432,7 @@ template< class CharT, class Traits = std::char_traits<CharT>, class Allocator =
 inline std::basic_string< CharT, Traits, Allocator >
 toLower( const std::basic_string< CharT, Traits, Allocator > &str )
 {
-    std::basic_string< CharT, Traits, Allocator > resStr;
+    std::basic_string< CharT, Traits, Allocator > resStr; resStr.reserve(str.size());
     for( auto it = str.begin(); it != str.end(); ++it )
     {
         resStr.append( 1, toLower(*it) );
@@ -445,7 +445,7 @@ template< class CharT, class Traits = std::char_traits<CharT>, class Allocator =
 inline std::basic_string< CharT, Traits, Allocator >
 toUpper( const std::basic_string< CharT, Traits, Allocator > &str )
 {
-    std::basic_string< CharT, Traits, Allocator > resStr;
+    std::basic_string< CharT, Traits, Allocator > resStr; resStr.reserve(str.size());
     for( auto it = str.begin(); it != str.end(); ++it )
     {
         resStr.append( 1, toUpper(*it) );
