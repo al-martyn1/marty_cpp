@@ -177,19 +177,13 @@ public:
 
     SimpleStringRefStream& operator<<( const char_type *str )
     {
-        m_str.append(str);
+        m_str.append(make_string<string_type>(str));
         return *this;
     }
 
     SimpleStringRefStream& operator<<( char_type ch )
     {
         m_str.append(1, ch);
-        return *this;
-    }
-
-    SimpleStringRefStream& operator<<( const string_type &str )
-    {
-        m_str.append(str);
         return *this;
     }
 
@@ -244,19 +238,13 @@ public:
 
     SimpleStringStream& operator<<( const char_type *str )
     {
-        m_str.append(str);
+        m_str.append(make_string<string_type>(str));
         return *this;
     }
 
     SimpleStringStream& operator<<( char_type ch )
     {
         m_str.append(1, ch);
-        return *this;
-    }
-
-    SimpleStringStream& operator<<( const string_type &str )
-    {
-        m_str.append(str);
         return *this;
     }
 
@@ -309,11 +297,6 @@ public:
     }
 
     SimpleNulStream& operator<<( char_type ch )
-    {
-        return *this;
-    }
-
-    SimpleNulStream& operator<<( const string_type &str )
     {
         return *this;
     }
