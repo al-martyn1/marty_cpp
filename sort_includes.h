@@ -60,8 +60,8 @@ namespace sort_includes_utils {
 
 //------------------------------
 // В случае совпадения возвращает длину искомой строки, или 0, если не совпало (частичное совпадение также вернёт 0)
-template <typename IteratorType> inline
-std::size_t startsWith(IteratorType b, IteratorType e, const char *pCmpWith)
+template <typename IteratorType, typename CharType> inline
+std::size_t startsWith(IteratorType b, IteratorType e, const CharType *pCmpWith)
 {
     std::size_t idx = 0;
     while(pCmpWith[idx]!=0 && b!=e && pCmpWith[idx]==*b)
@@ -101,25 +101,39 @@ IteratorType eatSpaces(IteratorType b, IteratorType e)
 }
 
 //------------------------------
-inline
-std::string normalizeIncludeName(std::string name)
+template<typename StringType> inline
+StringType normalizeIncludeName(StringType name)
 {
     for(std::string::iterator it=name.begin(); it!=name.end(); ++it)
     {
-        if (*it=='\\')
-            *it = '/';
+        if (*it==(StringType::value_type)'\\')
+            *it = (StringType::value_type)'/';
     }
     return name;
 }
 
 //------------------------------
-inline
-std::string getIncludeNamePath(const std::string &name)
+template<typename StringType> inline
+StringType getIncludeNamePath(const StringType &name)
 {
-     auto sepPos = name.find_last_of('/' /* , name.size() */ );
+     auto sepPos = name.find_last_of((StringType::value_type)'/' /* , name.size() */ );
      if (sepPos==name.npos)
-         return std::string();
-     return std::string(name,0,sepPos);
+         return StringType();
+     return StringType(name,0,sepPos);
+}
+
+//------------------------------
+template<typename StringType> inline
+std::vector<StringType> make_string_vector(const std::vector<std::string> &strVec)
+{
+    std::vector<StringType> resVec; resVec.reserve(strVec.size());
+
+    for(const auto &str : strVec)
+    {
+        resVec.emplace_back(make_string<StringType>(str));
+    }
+
+    return resVec;
 }
 
 //------------------------------
@@ -130,57 +144,24 @@ std::string getIncludeNamePath(const std::string &name)
 
 
 //----------------------------------------------------------------------------
-template <typename IteratorType> inline
-SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, std::string *pFoundName = 0)
+template <typename StringType, typename IteratorType> inline
+SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, StringType *pFoundName = 0)
 {
+    typedef StringType::value_type char_type;
+    using sort_includes_utils::make_string_vector;
+
     b = sort_includes_utils::eatSpaces(b, e);
     if (b==e)
         return SourceLineType::emptyLine;
 
-    static std::vector<std::string> nosortMarkers   = { "//#-sort", "/*#-sort", "//#nosort", "/*#nosort"};
-    static std::vector<std::string>   sortMarkers   = { "//#+sort", "/*#+sort", "//#sort"  , "/*#sort"  };
-    static std::vector<std::string>   optSortPush   = { "//#optsortpush", "/*#optsortpush" };
-    static std::vector<std::string>   optSortPop    = { "//#optsortpop" , "/*#optsortpop"  };
-    static std::vector<std::string>   optSortGrp    = { "//#optsortgrp" , "/*#optsortgrp"  };
-    static std::vector<std::string>   optSortBlk    = { "//#optsortblk" , "/*#optsortblk"  };
-    static std::vector<std::string>   optSortUser   = { "//#optsortuser", "/*#optsortuser" };
-    static std::vector<std::string>   optSortSystem = { "//#optsortsys" , "/*#optsortsys"  };
-
-/*
-    optSortPush, // 5
-    optSortPop , // 6
-    optSortGrp0, // 7
-    optSortGrp1, // 8
-    optSortGrp2, // 9
-    optSortGrp3, // 10
-    optSortGrp4, // 11
-    optSortBlk0, // 12
-    optSortBlk1, // 13
-    optSortBlk2, // 14
-    optSortBlk3, // 15
-    optSortBlk4  // 16
-
-    optSortPush, // 5
-    optSortPop , // 6
-
-    optSortGrp0 = 16,
-    optSortGrp1,
-    optSortGrp2,
-    optSortGrp3,
-    optSortGrp4,
-    optSortGrp5,
-    optSortGrp6,
-    optSortGrp7,
-
-    optSortBlk0 = 32,
-    optSortBlk1,
-    optSortBlk2,
-    optSortBlk3,
-    optSortBlk4,
-    optSortBlk5,
-    optSortBlk6,
-    optSortBlk7
-*/
+    static std::vector<std::string> nosortMarkers   = make_string_vector<StringType>({ "//#-sort", "/*#-sort", "//#nosort", "/*#nosort"});
+    static std::vector<std::string>   sortMarkers   = make_string_vector<StringType>({ "//#+sort", "/*#+sort", "//#sort"  , "/*#sort"  });
+    static std::vector<std::string>   optSortPush   = make_string_vector<StringType>({ "//#optsortpush", "/*#optsortpush" });
+    static std::vector<std::string>   optSortPop    = make_string_vector<StringType>({ "//#optsortpop" , "/*#optsortpop"  });
+    static std::vector<std::string>   optSortGrp    = make_string_vector<StringType>({ "//#optsortgrp" , "/*#optsortgrp"  });
+    static std::vector<std::string>   optSortBlk    = make_string_vector<StringType>({ "//#optsortblk" , "/*#optsortblk"  });
+    static std::vector<std::string>   optSortUser   = make_string_vector<StringType>({ "//#optsortuser", "/*#optsortuser" });
+    static std::vector<std::string>   optSortSystem = make_string_vector<StringType>({ "//#optsortsys" , "/*#optsortsys"  });
 
 
     std::size_t 
@@ -216,9 +197,9 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, std::s
         if (b==e)
             return optSort;
 
-        if (*b>='0' && *b<='7')
+        if (*b>=(char_type)'0' && *b<=(char_type)'7')
         {
-            optSort = (SourceLineType)(unsigned(optSort) + unsigned(*b-'0'));
+            optSort = (SourceLineType)(unsigned(optSort) + unsigned(*b-(char_type)'0'));
         }
 
         return optSort;    
@@ -232,16 +213,16 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, std::s
         if (b==e)
             return optSort;
 
-        if (*b>='0' && *b<='7')
+        if (*b>=(char_type)'0' && *b<=(char_type)'7')
         {
-            optSort = (SourceLineType)(unsigned(optSort) + unsigned(*b-'0'));
+            optSort = (SourceLineType)(unsigned(optSort) + unsigned(*b-(char_type)'0'));
         }
 
         return optSort;    
     }
 
 
-    if (*b!='#')
+    if (*b!=(char_type)'#')
         return SourceLineType::genericLine;
 
     ++b;
@@ -253,7 +234,7 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, std::s
     if (b==e)
         return SourceLineType::genericLine;
 
-    prefixLen = sort_includes_utils::startsWith(b, e, "include");
+    prefixLen = sort_includes_utils::startsWith(b, e, make_string<StringType>("include").c_str());
     if (!prefixLen)
         return SourceLineType::genericLine;
 
@@ -265,13 +246,13 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, std::s
     if (b==e)
         return SourceLineType::genericLine;
 
-    if (*b!='\"' && *b!='<')
+    if (*b!=(char_type)'\"' && *b!=(char_type)'<')
         return SourceLineType::genericLine;
 
     if (pFoundName)
     {
-        std::string tmpName = std::string(b, e);
-        *pFoundName = simple_rtrim(tmpName, [](char ch) {return ch==' ' || ch=='\t' || ch=='\r' || ch=='\n';} );
+        StringType tmpName = StringType(b, e);
+        *pFoundName = simple_rtrim(tmpName, [](char ch) {return ch==(char_type)' ' || ch==(char_type)'\t' || ch==(char_type)'\r' || ch==(char_type)'\n';} );
     }
     
     return SourceLineType::includeLine;
@@ -279,17 +260,17 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, std::s
 }
 
 //----------------------------------------------------------------------------
-inline
-SourceLineType parseSourceLineForIncludes(const std::string &str, std::string *pFoundName = 0)
+template<typename StringType> inline
+SourceLineType parseSourceLineForIncludes(const StringType &str, StringType *pFoundName = 0)
 {
-    return parseSourceLineForIncludes(str.begin(), str.end(), pFoundName);
+    return parseSourceLineForIncludes<StringType, typename StringType::const_iterator>(str.begin(), str.end(), pFoundName);
 }
 
 //----------------------------------------------------------------------------
-inline
-std::vector<SourceLineType> parseSourceLinesForIncludes(const std::vector<std::string> &lines, std::unordered_map<std::size_t, std::string> *pNamesByLine = 0)
+template<typename StringType> inline
+std::vector<SourceLineType> parseSourceLinesForIncludes(const std::vector<StringType> &lines, std::unordered_map<std::size_t, StringType> *pNamesByLine = 0)
 {
-    auto addNameByLine = [&](std::size_t n, const std::string &name)
+    auto addNameByLine = [&](std::size_t n, const StringType &name)
     {
         if (!pNamesByLine)
             return;
@@ -301,7 +282,7 @@ std::vector<SourceLineType> parseSourceLinesForIncludes(const std::vector<std::s
 
     for(std::size_t n=0; n!=lines.size(); ++n)
     {
-        std::string name;
+        StringType name;
         SourceLineType slt = parseSourceLineForIncludes(lines[n], &name);
         if (slt==SourceLineType::includeLine)
             addNameByLine(n,name);
@@ -443,13 +424,13 @@ struct SortIncludeOptions
 };
 
 //----------------------------------------------------------------------------
-inline
-std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
-                                     , const std::vector<unsigned char>  &sortMarkers
-                                     , const std::vector<SourceLineType> &vecSlt
-                                     , const std::unordered_map<std::size_t, std::string> &namesByLine
-                                     , const SortIncludeOptions          &sortOptionsIn = SortIncludeOptions()
-                                     )
+template<typename StringType> inline
+std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
+                                    , const std::vector<unsigned char>  &sortMarkers
+                                    , const std::vector<SourceLineType> &vecSlt
+                                    , const std::unordered_map<std::size_t, StringType> &namesByLine
+                                    , const SortIncludeOptions          &sortOptionsIn = SortIncludeOptions()
+                                    )
 {
     if (lines.size()!=sortMarkers.size() || lines.size()!=vecSlt.size())
     {
@@ -460,7 +441,7 @@ std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
     sortOptions.emplace_back(sortOptionsIn);
 
 
-    std::vector<std::string> resLines; resLines.reserve(lines.size());
+    std::vector<StringType> resLines; resLines.reserve(lines.size());
 
     auto skipNonSort = [&](std::size_t n)
     {
@@ -515,18 +496,18 @@ std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
         return n;
     };
 
-    auto formatIncludes = [&](const std::map<std::string, std::size_t> &includesMap)
+    auto formatIncludes = [&](const std::map<StringType, std::size_t> &includesMap)
     {
         bool firstGroup = true;
-        std::string curGroup;
+        StringType curGroup;
 
-        std::map<std::string, std::size_t>::const_iterator it = includesMap.begin();
+        std::map<StringType, std::size_t>::const_iterator it = includesMap.begin();
         for(; it!=includesMap.end(); ++it)
         {
             if (it->second>=lines.size())
                 continue;
 
-            std::string grpName = sort_includes_utils::getIncludeNamePath(it->first);
+            StringType grpName = sort_includes_utils::getIncludeNamePath(it->first);
             if (curGroup!=grpName)
             {
                 curGroup = grpName;
@@ -547,20 +528,20 @@ std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
        ; n=skipNonSort(n)
        )
     {
-        std::map<std::string, std::size_t>    sysIncludesMap;
-        std::map<std::string, std::size_t>    userIncludesMap;
-        std::set<std::string>                 processedIncludes;
+        std::map<StringType, std::size_t>    sysIncludesMap;
+        std::map<StringType, std::size_t>    userIncludesMap;
+        std::set<StringType>                 processedIncludes;
 
         for(; n!=sortMarkers.size() && sortMarkers[n]!=0; ++n )
         {
             if (vecSlt[n]!=SourceLineType::includeLine)
                 continue;
 
-            std::unordered_map<std::size_t, std::string>::const_iterator nblIt = namesByLine.find(n);
+            std::unordered_map<std::size_t, StringType>::const_iterator nblIt = namesByLine.find(n);
             if (nblIt==namesByLine.end())
                 continue;
 
-            std::string fileName = nblIt->second;
+            StringType fileName = nblIt->second;
 
             bool sysInclude = unquote(fileName, '<', '>');
             if (!sysInclude)
@@ -590,14 +571,14 @@ std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
         {
             formatIncludes(sysIncludesMap);
             if (!sysIncludesMap.empty() && !userIncludesMap.empty())
-                resLines.insert(resLines.end(), sortOptions.back().sepBlockLines, std::string());
+                resLines.insert(resLines.end(), sortOptions.back().sepBlockLines, StringType());
             formatIncludes(userIncludesMap);
         }
         else
         {
             formatIncludes(userIncludesMap);
             if (!sysIncludesMap.empty() && !userIncludesMap.empty())
-                resLines.insert(resLines.end(), sortOptions.back().sepBlockLines, std::string());
+                resLines.insert(resLines.end(), sortOptions.back().sepBlockLines, StringType());
             formatIncludes(sysIncludesMap);
         }
     
@@ -607,12 +588,12 @@ std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
 }
 
 //----------------------------------------------------------------------------
-inline
-std::vector<std::string> sortIncludes( const std::vector<std::string>    &lines
-                                     , const SortIncludeOptions          &sortOptions = SortIncludeOptions()
-                                     )
+template<typename StringType> inline
+std::vector<StringType> sortIncludes( const std::vector<StringType>    &lines
+                                    , const SortIncludeOptions          &sortOptions = SortIncludeOptions()
+                                    )
 {
-    std::unordered_map<std::size_t, std::string> incNames;
+    std::unordered_map<std::size_t, StringType> incNames;
     std::vector<SourceLineType> vecSlt  = parseSourceLinesForIncludes(lines, &incNames);
     std::vector<unsigned char>  markers = findSortIncludeMarkers(vecSlt);
     return sortIncludes(lines, markers, vecSlt, incNames, sortOptions);
