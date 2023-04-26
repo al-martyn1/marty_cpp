@@ -3550,7 +3550,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
 }
 
 //-----------------------------------------------------------------------------
-template<typename StreamType, typename StringType> inline
+template<typename StringType, typename StreamType> inline
 void enum_generate_prolog( StreamType &ss
                          , unsigned                                 genOptions = 0
                          , const EnumGeneratorTemplate<StringType>  &genTpl    = EnumGeneratorTemplate<StringType>::defaultCpp()
@@ -3565,7 +3565,7 @@ void enum_generate_prolog( StreamType &ss
 }
 
 //-----------------------------------------------------------------------------
-template<typename StreamType, typename StringType> inline
+template<typename StringType, typename StreamType> inline
 void enum_generate_epilog( StreamType &ss
                          , unsigned                                 genOptions = 0
                          , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
@@ -3581,7 +3581,7 @@ void enum_generate_epilog( StreamType &ss
 
 //-----------------------------------------------------------------------------
 //
-template<typename StreamType, typename StringType> inline
+template<typename StringType, typename StreamType> inline
 void enum_generate_includes( StreamType &ss
                            , unsigned                                 genOptions
                            , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
@@ -3710,7 +3710,7 @@ void enum_generate_includes( StreamType &ss
 }
 
 //-----------------------------------------------------------------------------
-template<typename StreamType, typename StringType> inline
+template<typename StringType, typename StreamType> inline
 void enum_generate_serialize( StreamType &ss
                             , const std::vector< std::tuple< StringType,StringType,StringType,StringType > > &vals
                             , const StringType                         &indent
@@ -3785,8 +3785,7 @@ void enum_generate_serialize( StreamType &ss
 
 
 //-----------------------------------------------------------------------------
-//TODO: !!! add comment to vals
-template<typename StreamType, typename StringType> inline
+template<typename StringType, typename StreamType> inline
 void enum_generate_serialize( StreamType &ss
                             , const std::vector< std::tuple< StringType,enum_internal_uint_t,StringType > > &vals
                             , const StringType                         &indent
@@ -3825,7 +3824,7 @@ void enum_generate_serialize( StreamType &ss
 
 
 //-----------------------------------------------------------------------------
-template<typename StreamType, typename StringType> inline
+template<typename StringType, typename StreamType> inline
 void enum_generate_serialize( StreamType &ss
                             , const StringType                         &valsStr
                             , const StringType                         &indent
@@ -4003,13 +4002,13 @@ void enum_generate_serialize( StreamType &ss
         }
     }
 
-    enum_generate_serialize<StreamType,StringType>( ss, vals, indent, indentInc, enumName, underlayedTypeName, valuesNameStyle, serializedNameStyle, valuesPrefix, genOptions, genTpl, pDups, pDupVals );
+    enum_generate_serialize<StringType,StreamType>( ss, vals, indent, indentInc, enumName, underlayedTypeName, valuesNameStyle, serializedNameStyle, valuesPrefix, genOptions, genTpl, pDups, pDupVals );
 
     //enum_generate_serialized_enum_def( ss, vals, enumName, valuesNameStyle, valuesPrefix, enumClass );
 }
 
 //-----------------------------------------------------------------------------
-template<typename StreamType, typename StringType> inline
+template<typename StringType, typename StreamType> inline
 void enum_generate_serialize( StreamType &ss
                             , const StringType &valsStr
                             , const StringType &indent

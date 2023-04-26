@@ -13,6 +13,9 @@
 #include <cwctype>
 #include <cctype>
 
+
+#include "enums.h"
+
 //----------------------------------------------------------------------------
 
 
@@ -22,15 +25,15 @@
 namespace marty_cpp
 {
 
-enum class ELinefeedType
-{
-    unknown = -1,
-    lf      = 0,
-    cr,
-    crlf,
-    lfcr
-
-};
+// enum class ELinefeedType
+// {
+//     unknown = -1,
+//     lf      = 0,
+//     cr,
+//     crlf,
+//     lfcr
+//  
+// };
 
 //----------------------------------------------------------------------------
 //! Реализация нормализации различных видов (CR/LF/CRLF/LFCR) переводов строки к универсальному виду - LF
@@ -224,9 +227,20 @@ StringType stripTrailingSpaces(const StringType &str)
 }
 
 //----------------------------------------------------------------------------
+//! Реализация удаления (нормализация) конечных пробелов (до перевода строки)
+template<typename StringType> inline
+void stripTrailingSpaces(std::vector<StringType> &v)
+{
+    for(auto &s : v)
+    {
+        s = stripTrailingSpaces(s);
+    }
+}
+
+//----------------------------------------------------------------------------
 //! Разделяем текст на строки, разделитель строк - простой символ в любой кодировке, по умолчанию - LF (\n)
 template<typename StringType> inline
-std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyLineAfterLastLf = false, typename StringType::value_type lfChar=(typename StringType::value_type)'\n')
+std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyLineAfterLastLf = true, typename StringType::value_type lfChar=(typename StringType::value_type)'\n')
 {
     typedef typename StringType::value_type     char_type;
     typedef typename StringType::const_iterator iterator;
@@ -321,6 +335,17 @@ StringType expandTabsToSpaces(const StringType &str, std::size_t tabSize=4 )
 }
 
 //----------------------------------------------------------------------------
+//! Раскрываем табуляцию в пробелы.
+template<typename StringType> inline
+void expandTabsToSpaces(std::vector<StringType> &v, std::size_t tabSize=4 )
+{
+    for(auto &s : v)
+    {
+        s = expandTabsToSpaces(s, tabSize);
+    }
+}
+
+//----------------------------------------------------------------------------
 //! Заменяем ведущие пробелы на табы. Строка должна быть нормализована по переводам строки - CRLFLF -> LF etc
 template<typename StringType> inline
 StringType condenseSpacesToTabs(const StringType &str, std::size_t tabSize=4, std::size_t delta=(std::size_t)-1 )
@@ -401,6 +426,17 @@ StringType condenseSpacesToTabs(const StringType &str, std::size_t tabSize=4, st
 }
 
 //----------------------------------------------------------------------------
+//! Заменяем ведущие пробелы на табы. Строка должна быть нормализована по переводам строки - CRLFLF -> LF etc
+template<typename StringType> inline
+void condenseSpacesToTabs(std::vector<StringType> &v, std::size_t tabSize=4, std::size_t delta=(std::size_t)-1 )
+{
+    for(auto &s : v)
+    {
+        s = condenseSpacesToTabs(s, tabSize, delta);
+    }
+}
+
+//----------------------------------------------------------------------------
 //! Нормализация отступов - все не кратные заданному размеру табуляции отступы приводятся к кратному размеру
 template<typename StringType> inline
 StringType normalizeIndents(const StringType &str, std::size_t tabSize=4, std::size_t delta=(std::size_t)-1 )
@@ -409,6 +445,55 @@ StringType normalizeIndents(const StringType &str, std::size_t tabSize=4, std::s
     StringType condensed = condenseSpacesToTabs(expanded, tabSize, delta);
     return expandTabsToSpaces(condensed, tabSize);
 }
+
+//----------------------------------------------------------------------------
+//! Нормализация отступов - все не кратные заданному размеру табуляции отступы приводятся к кратному размеру
+template<typename StringType> inline
+void normalizeIndents(std::vector<StringType> &v, std::size_t tabSize=4, std::size_t delta=(std::size_t)-1 )
+{
+    for(auto &s : v)
+    {
+        s = normalizeIndents(s, tabSize, delta);
+    }
+}
+
+//----------------------------------------------------------------------------
+
+
+
+
+//----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType mergeLines(const std::vector<StringType> v, ELinefeedType lfType, bool addTrailingNewLine=false)
+{
+    StringType resText; resText.reserve(v.size()*16);
+
+    StringType lfStr;
+
+    switch(lfType)
+    {
+        case ELinefeedType::lf  :  lfStr = make_string<StringType>("\n"); break;
+        case ELinefeedType::cr  :  lfStr = make_string<StringType>("\r"); break;
+        case ELinefeedType::lfcr:  lfStr = make_string<StringType>("\n\r"); break;
+        // case ELinefeedType:::  lfStr = make_string<StringType>(""); break;
+        default                 :  lfStr = make_string<StringType>("\r\n");
+    }
+
+    for (std::size_t i=0; i!=v.size(); ++i)
+    {
+        if (i)
+            resText.append(lfStr);
+        resText.append(v[i]);
+    }
+
+    if (addTrailingNewLine)
+    {
+        resText.append(lfStr);
+    }
+
+    return resText;
+}
+
 //----------------------------------------------------------------------------
 
 

@@ -35,7 +35,7 @@ namespace marty_cpp
 
 
 //-----------------------------------------------------------------------------
-template<typename StreamType, typename StringType>
+template<typename StringType, typename StreamType>
 class NamespaceOutputWriteGuard
 {
     StreamType                       &m_oss           ;
@@ -143,8 +143,8 @@ public:
 };
 
 //------------------------------
-template<typename StreamType, typename StringType> inline
-NamespaceOutputWriteGuard<StreamType, StringType>
+template<typename StringType, typename StreamType> inline
+NamespaceOutputWriteGuard<StringType, StreamType>
 makeNamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsList
                              , NameStyle                    nsNameStyle = NameStyle::defaultStyle
@@ -152,12 +152,12 @@ makeNamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
                              )
 {
-    return NamespaceOutputWriteGuard<StreamType, StringType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);
+    return NamespaceOutputWriteGuard<StringType, StreamType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);
 }
 
 //------------------------------
-template<typename StreamType, typename StringType> inline
-NamespaceOutputWriteGuard<StreamType, StringType>
+template<typename StringType, typename StreamType> inline
+NamespaceOutputWriteGuard<StringType, StreamType>
 makeNamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsList
                              , const StringType             &nsNameStyle
@@ -165,7 +165,7 @@ makeNamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
                              )
 {
-    return NamespaceOutputWriteGuard<StreamType, StringType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);
+    return NamespaceOutputWriteGuard<StringType, StreamType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);
 }
 
 
