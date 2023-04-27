@@ -6,7 +6,7 @@
 
 namespace marty_cpp{
 
-enum  ELinefeedType
+enum class ELinefeedType
 {
     invalid   = -1,
     unknown   = -1,
@@ -16,25 +16,25 @@ enum  ELinefeedType
     lfcr      = 3,
     crlf      = 4
 
-}; // enum  ELinefeedType
+}; // enum class ELinefeedType
 
-MARTY_CPP_ENUM_SERIALIZE_BEGIN( ELinefeedType, std::map, 1 )
-    MARTY_CPP_ENUM_SERIALIZE_ITEM( cr       , "Cr"      );
-    MARTY_CPP_ENUM_SERIALIZE_ITEM( invalid  , "Invalid" );
-    MARTY_CPP_ENUM_SERIALIZE_ITEM( lfcr     , "Lfcr"    );
-    MARTY_CPP_ENUM_SERIALIZE_ITEM( detect   , "Detect"  );
-    MARTY_CPP_ENUM_SERIALIZE_ITEM( lf       , "Lf"      );
-    MARTY_CPP_ENUM_SERIALIZE_ITEM( crlf     , "Crlf"    );
-MARTY_CPP_ENUM_SERIALIZE_END( ELinefeedType, std::map, 1 )
+MARTY_CPP_ENUM_CLASS_SERIALIZE_BEGIN( ELinefeedType, std::map, 1 )
+    MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( ELinefeedType::cr       , "Cr"      );
+    MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( ELinefeedType::invalid  , "Invalid" );
+    MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( ELinefeedType::lfcr     , "Lfcr"    );
+    MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( ELinefeedType::detect   , "Detect"  );
+    MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( ELinefeedType::lf       , "Lf"      );
+    MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( ELinefeedType::crlf     , "Crlf"    );
+MARTY_CPP_ENUM_CLASS_SERIALIZE_END( ELinefeedType, std::map, 1 )
 
-MARTY_CPP_ENUM_DESERIALIZE_BEGIN( ELinefeedType, std::map, 1 )
-    MARTY_CPP_ENUM_DESERIALIZE_ITEM( cr       , "cr"      );
-    MARTY_CPP_ENUM_DESERIALIZE_ITEM( invalid  , "invalid" );
-    MARTY_CPP_ENUM_DESERIALIZE_ITEM( invalid  , "unknown" );
-    MARTY_CPP_ENUM_DESERIALIZE_ITEM( lfcr     , "lfcr"    );
-    MARTY_CPP_ENUM_DESERIALIZE_ITEM( detect   , "detect"  );
-    MARTY_CPP_ENUM_DESERIALIZE_ITEM( lf       , "lf"      );
-    MARTY_CPP_ENUM_DESERIALIZE_ITEM( crlf     , "crlf"    );
-MARTY_CPP_ENUM_DESERIALIZE_END( ELinefeedType, std::map, 1 )
+MARTY_CPP_ENUM_CLASS_DESERIALIZE_BEGIN( ELinefeedType, std::map, 1 )
+    MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( ELinefeedType::cr       , "cr"      );
+    MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( ELinefeedType::invalid  , "invalid" );
+    MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( ELinefeedType::invalid  , "unknown" );
+    MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( ELinefeedType::lfcr     , "lfcr"    );
+    MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( ELinefeedType::detect   , "detect"  );
+    MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( ELinefeedType::lf       , "lf"      );
+    MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( ELinefeedType::crlf     , "crlf"    );
+MARTY_CPP_ENUM_CLASS_DESERIALIZE_END( ELinefeedType, std::map, 1 )
 
 } // marty_cpp

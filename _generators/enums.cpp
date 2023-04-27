@@ -46,7 +46,8 @@ int main()
                            , NameStyle::camelStyle // pascalStyle
                            , NameStyle::all        // serializedNameStyle all - mix of all styles while deserializing, serialization uses same style as C/C++ constants
                            , std::string("") // name prefix
-                           , EnumGeneratorOptionFlags::generateDefAll // generateDefType | generateDefSerialize | generateDefDeserialize
+                           , EnumGeneratorOptionFlags::enumClass
+                           | EnumGeneratorOptionFlags::generateDefAll // generateDefType | generateDefSerialize | generateDefDeserialize
                            //| EnumGeneratorOptionFlags::generateDefSerializeExtra
                            | EnumGeneratorOptionFlags::lowercaseDeserelialize
                            //| EnumGeneratorOptionFlags::enumFlags
