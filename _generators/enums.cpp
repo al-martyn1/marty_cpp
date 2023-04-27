@@ -39,7 +39,7 @@ int main()
     auto ns = makeNamespaceOutputWriteGuard( std::cout, std::string("marty_cpp") );
 
     enum_generate_serialize( std::cout
-                           , std::string( "unknown=-1; detect=0; lf; cr; lfcr; crlf;"
+                           , std::string( "invalid,unknown=-1; detect=0; lf; cr; lfcr; crlf;"
                                         )
                            , std::string(), std::string("    ")
                            , std::string("ELinefeedType"), std::string() // std::string("std::uint8_t")
