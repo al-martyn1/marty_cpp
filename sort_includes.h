@@ -113,14 +113,14 @@ StringType normalizeIncludeName(StringType name)
 }
 
 //------------------------------
-template<typename StringType> inline
-StringType getIncludeNamePath(const StringType &name)
-{
-     auto sepPos = name.find_last_of((StringType::value_type)'/' /* , name.size() */ );
-     if (sepPos==name.npos)
-         return StringType();
-     return StringType(name,0,sepPos);
-}
+// template<typename StringType> inline
+// StringType getIncludeNamePath(const StringType &name)
+// {
+//      auto sepPos = name.find_last_of((StringType::value_type)'/' /* , name.size() */ );
+//      if (sepPos==name.npos)
+//          return StringType();
+//      return StringType(name,0,sepPos);
+// }
 
 //------------------------------
 template<typename StringType> inline
@@ -432,6 +432,8 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
                                     , const SortIncludeOptions          &sortOptionsIn = SortIncludeOptions()
                                     )
 {
+    typedef typename StringType::value_type  char_type;
+
     if (lines.size()!=sortMarkers.size() || lines.size()!=vecSlt.size())
     {
         throw std::runtime_error("marty_cpp::sortIncludes: size mismatch");
@@ -496,26 +498,30 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
         return n;
     };
 
-    auto formatIncludes = [&](const std::map<StringType, std::size_t> &includesMap)
+    auto formatIncludes = [&](const std::map<StringType, std::size_t, IncludeNameLess<StringType> > &includesMap)
     {
-        bool firstGroup = true;
+        bool first = true;
         StringType curGroup;
 
-        std::map<StringType, std::size_t>::const_iterator it = includesMap.begin();
+        std::map<StringType, std::size_t, IncludeNameLess<StringType> >::const_iterator it = includesMap.begin();
         for(; it!=includesMap.end(); ++it)
         {
             if (it->second>=lines.size())
                 continue;
 
-            StringType grpName = sort_includes_utils::getIncludeNamePath(it->first);
+            StringType grpName =  /* sort_includes_utils:: */ getIncludeNamePath(it->first);
+            if (first)
+            {
+                curGroup = grpName;
+                first = false;
+                resLines.emplace_back(lines[it->second]);
+                continue;
+            }
+
             if (curGroup!=grpName)
             {
                 curGroup = grpName;
-                if (!firstGroup)
-                {
-                    resLines.insert(resLines.end(), sortOptions.back().sepGroupLines, std::string());
-                }
-                firstGroup = false;
+                resLines.insert(resLines.end(), sortOptions.back().sepGroupLines, std::string());
             }
 
             resLines.emplace_back(lines[it->second]);
@@ -528,9 +534,9 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
        ; n=skipNonSort(n)
        )
     {
-        std::map<StringType, std::size_t>    sysIncludesMap;
-        std::map<StringType, std::size_t>    userIncludesMap;
-        std::set<StringType>                 processedIncludes;
+        std::map<StringType, std::size_t, IncludeNameLess<StringType> >    sysIncludesMap;
+        std::map<StringType, std::size_t, IncludeNameLess<StringType> >    userIncludesMap;
+        std::set<StringType, IncludeNameLess<StringType> >                 processedIncludes;
 
         for(; n!=sortMarkers.size() && sortMarkers[n]!=0; ++n )
         {
@@ -543,9 +549,9 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
 
             StringType fileName = nblIt->second;
 
-            bool sysInclude = unquote(fileName, '<', '>');
+            bool sysInclude = unquote(fileName, (char_type)'<', (char_type)'>');
             if (!sysInclude)
-                unquote(fileName, '\"', '\"');
+                unquote(fileName, (char_type)'\"', (char_type)'\"');
 
             if (fileName.empty())
                 continue;

@@ -18,6 +18,7 @@
 #include <sstream>
 #include <ios>
 #include <iomanip>
+#include <string_view>
 
 #include <cwctype>
 #include <cctype>
@@ -3580,6 +3581,51 @@ void enum_generate_epilog( StreamType &ss
 }
 
 //-----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType getIncludeNamePath(const StringType &name)
+{
+     auto sepPos = name.find_last_of((StringType::value_type)'/' /* , name.size() */ );
+     if (sepPos==name.npos)
+         return StringType();
+     return StringType(name,0,sepPos);
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType getIncludeNameFile(const StringType &name)
+{
+     auto sepPos = name.find_last_of((StringType::value_type)'/' /* , name.size() */ );
+     if (sepPos==name.npos)
+         return name;
+     return StringType(name,sepPos+1, name.npos);
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType>
+struct IncludeNameLess
+{
+    bool operator()(const StringType &n1, const StringType &n2) const
+    {
+        // typedef std::basic_string_view<typename StringType::value_type, typename StringType::traits_type>  StringViewType;
+        // StringViewType svn1 = StringViewType( n1.data(), n1.size())
+
+        StringType p1 = getIncludeNamePath(n1);
+        StringType p2 = getIncludeNamePath(n2);
+
+        if (p1<p2)
+            return true;
+
+        if (p1>p2)
+            return false;
+            
+        StringType f1 = getIncludeNameFile(n1);
+        StringType f2 = getIncludeNameFile(n2);
+
+        return f1<f2;
+    }
+};
+
+//-----------------------------------------------------------------------------
 //
 template<typename StringType, typename StreamType> inline
 void enum_generate_includes( StreamType &ss
@@ -3618,9 +3664,10 @@ void enum_generate_includes( StreamType &ss
         allIncludes.insert(allIncludes.end(), genTpl.setIncludes.begin(), genTpl.setIncludes.end());
     }
 
-    std::set<StringType>    userIncludesSet;
-    std::set<StringType>    sysIncludesSet;
-    std::set<StringType>    processedIncludes;
+    // IncludeNameLess
+    std::set<StringType, IncludeNameLess<StringType> >    userIncludesSet;
+    std::set<StringType, IncludeNameLess<StringType> >    sysIncludesSet;
+    std::set<StringType, IncludeNameLess<StringType> >    processedIncludes;
 
 
     std::vector<StringType>::const_iterator ait = allIncludes.begin();
@@ -3654,28 +3701,29 @@ void enum_generate_includes( StreamType &ss
         processedIncludes.insert(fileName);
     };
 
-    bool firstGroup = true;
-    StringType curGroup;
+    // bool firstGroup = true;
+    
 
-    auto getGroupName = [](const StringType &name) -> StringType
+    auto formatIncludes = [&](const std::set<StringType, IncludeNameLess<StringType> > &includesSet, bool bSysIncludes)
     {
-        auto sepPos = name.find_last_of((StringType::value_type)'/' /* , name.size() */ );
-        if (sepPos==name.npos)
-            return StringType();
-        return StringType(name,0,sepPos);
-    };
+        bool first = true;
+        StringType curGroup;
 
-    auto formatIncludes = [&](const std::set<StringType> &includesSet, bool bSysIncludes)
-    {
         for(const auto &s : includesSet)
         {
-            StringType grpName = getGroupName(s);
+            StringType grpName = getIncludeNamePath(s);
+            if (first)
+            {
+                curGroup = grpName;
+                first = false;
+                formatInclude(s, bSysIncludes);
+                continue;
+            }
+
             if (curGroup!=grpName)
             {
                 curGroup = grpName;
-                if (!firstGroup)
-                    ss << genTpl.includesGroupSep;
-                firstGroup = false;
+                ss << genTpl.includesGroupSep;
             }
 
             formatInclude(s, bSysIncludes);
