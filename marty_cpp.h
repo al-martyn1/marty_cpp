@@ -4,26 +4,24 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <cstring>
-#include <set>
-#include <map>
-#include <unordered_set>
-#include <unordered_map>
-#include <utility>
-#include <iterator>
 #include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <ios>
-#include <iomanip>
-#include <string_view>
-
-#include <cwctype>
 #include <cctype>
-
+#include <cstring>
+#include <cwctype>
+#include <iomanip>
+#include <ios>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string>
+#include <string_view>
 #include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 //----------------------------------------------------------------------------
 

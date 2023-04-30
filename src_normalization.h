@@ -4,17 +4,15 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <cstring>
-#include <utility>
-#include <iterator>
-
-#include <cwctype>
-#include <cctype>
-
-
 #include "enums.h"
+
+#include <cctype>
+#include <cstring>
+#include <cwctype>
+#include <iterator>
+#include <string>
+#include <utility>
+#include <vector>
 
 //----------------------------------------------------------------------------
 

@@ -4,23 +4,22 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <cstring>
-#include <set>
-#include <map>
-#include <unordered_set>
-#include <unordered_map>
-#include <utility>
-#include <iterator>
-#include <algorithm>
-#include <sstream>
-
-#include <cwctype>
-#include <cctype>
-
-#include "marty_ss.h"
 #include "marty_cpp.h"
+#include "marty_ss.h"
+
+#include <algorithm>
+#include <cctype>
+#include <cstring>
+#include <cwctype>
+#include <iterator>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 //----------------------------------------------------------------------------
 
