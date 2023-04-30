@@ -462,7 +462,7 @@ void normalizeIndents(std::vector<StringType> &v, std::size_t tabSize=4, std::si
 
 //----------------------------------------------------------------------------
 template<typename StringType> inline
-StringType mergeLines(const std::vector<StringType> v, ELinefeedType lfType, bool addTrailingNewLine=false)
+StringType mergeLines(const std::vector<StringType> &v, ELinefeedType lfType, bool addTrailingNewLine=false)
 {
     StringType resText; resText.reserve(v.size()*16);
 
