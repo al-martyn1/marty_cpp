@@ -331,7 +331,7 @@ std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyL
  */
 
 //----------------------------------------------------------------------------
-//! Раскрываем табуляцию в пробелы.
+//! Раскрываем табуляцию в пробелы. . Работает для всего текста
 template<typename StringType> inline
 	StringType expandTabsToSpaces(const StringType &str, std::size_t tabSize=4 )
 {
@@ -372,7 +372,7 @@ void expandTabsToSpaces(std::vector<StringType> &v, std::size_t tabSize=4 )
 }
 
 //----------------------------------------------------------------------------
-//! Заменяем ведущие пробелы на табы. Строка должна быть нормализована по переводам строки - CRLFLF -> LF etc
+//! Заменяем ведущие пробелы на табы. Строка должна быть нормализована по переводам строки - CRLFLF -> LF etc. Работает для всего текста
 template<typename StringType> inline
 StringType condenseSpacesToTabs(const StringType &str, std::size_t tabSize=4, std::size_t delta=(std::size_t)-1 )
 {
