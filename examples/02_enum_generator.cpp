@@ -66,10 +66,10 @@ int main( int argc, char* argv[] )
                            , std::string("") // name prefix
                            , EnumGeneratorOptionFlags::generateDefAll 
                            | EnumGeneratorOptionFlags::generateDefSerializeExtra
-                           | EnumGeneratorOptionFlags::lowercaseDeserelialize
+                           | EnumGeneratorOptionFlags::lowercaseDeserialize
                            | EnumGeneratorOptionFlags::enumClass
                            | EnumGeneratorOptionFlags::unsignedVals
-                           | EnumGeneratorOptionFlags::integerDeserelialize
+                           | EnumGeneratorOptionFlags::integerDeserialize
                            | EnumGeneratorOptionFlags::outputHex
                            // | EnumGeneratorOptionFlags::disableComments
                            );

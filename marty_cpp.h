@@ -2405,8 +2405,8 @@ struct EnumGeneratorOptionFlags
     static const unsigned useUnorderedMap              = 0x00000004;
     static const unsigned singleDef                    = 0x00000008;
     static const unsigned noExtraLinefeed              = 0x00000010;
-    static const unsigned lowercaseDeserelialize       = 0x00000020;
-    static const unsigned integerDeserelialize         = 0x00000040;
+    static const unsigned lowercaseDeserialize         = 0x00000020;
+    static const unsigned integerDeserialize           = 0x00000040;
 
     static const unsigned enumFlags                    = 0x00000080;
     static const unsigned disableComments              = 0x00000100;
@@ -2879,7 +2879,7 @@ struct EnumGeneratorTemplate
     {
         StringType mapType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_map" : "std::map" );
         StringType setType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_set" : "std::set" );
-        StringType lowerFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::lowercaseDeserelialize ? "1" : "0" );
+        StringType lowerFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::lowercaseDeserialize ? "1" : "0" );
 
         StringType res = replaceLeadingSpaceToIndentMacro(tpl);
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent );
@@ -2896,7 +2896,7 @@ struct EnumGeneratorTemplate
     {
         StringType mapType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_map" : "std::map" );
         StringType setType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_set" : "std::set" );
-        StringType lowerFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::lowercaseDeserelialize ? "1" : "0" );
+        StringType lowerFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::lowercaseDeserialize ? "1" : "0" );
 
         auto nameExpanded = expand_copy((options&EnumGeneratorOptionFlags::enumClass) ? (enumName + make_string<StringType>("::") + name) : name, nNameLen);
         auto valExpanded  = expand_copy(val, nValLen);
@@ -3424,7 +3424,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
             if (pos==s.size())
             {
                 // конвертация прошла успешно, у нас - имя, которое выглядит, как число
-                if (genOptions&EnumGeneratorOptionFlags::integerDeserelialize)
+                if (genOptions&EnumGeneratorOptionFlags::integerDeserialize)
                 {
                     // Но также у нас разрешена десериализация из чисел
                     // А имя, которое выглядит как число, может иметь константу, не соответствующую своему имени
@@ -3448,7 +3448,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
                            ? s
                            : formatName(s,nameStyle, false /* fixStartDigit */ )
                            ;
-            if (genOptions&EnumGeneratorOptionFlags::lowercaseDeserelialize)
+            if (genOptions&EnumGeneratorOptionFlags::lowercaseDeserialize)
                 tmp = toLower(tmp);
 
             res.insert(tmp);
@@ -3520,7 +3520,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
         }
 
         auto deserializeNames = generateDeserializeNames(name);
-        if (genOptions&EnumGeneratorOptionFlags::integerDeserelialize)
+        if (genOptions&EnumGeneratorOptionFlags::integerDeserialize)
         {
             try
             {
@@ -3886,6 +3886,8 @@ void enum_generate_serialize( StreamType &ss
                             , std::vector<StringType>                  *pDupVals = 0
                             )
 {
+    typedef typename StringType::value_type char_type;
+
     genOptions = enum_generate_adjust_gen_options(genOptions);
 
 
@@ -3895,8 +3897,7 @@ void enum_generate_serialize( StreamType &ss
 
     auto isSpaceChar = [](typename StringType::value_type ch)
                          {
-                             typedef typename StringType::value_type CharType; 
-                             return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
+                             return ch==(char_type)' ' || ch==(char_type)'\t' || ch==(char_type)'\r' || ch==(char_type)'\n';
                          };
 
     std::vector< std::tuple< StringType,StringType,StringType,StringType> > vals;
@@ -3982,7 +3983,21 @@ void enum_generate_serialize( StreamType &ss
         if (itemStr.empty() || itemStr[0]==(typename StringType::value_type)'#')
             continue;
 
-        itemStr = simple_string_replace<StringType>(itemStr, make_string<StringType>(":"), make_string<StringType>("="));
+        // itemStr = simple_string_replace<StringType>(itemStr, make_string<StringType>(":"), make_string<StringType>("="), 1);
+        //!!!
+        typename StringType::size_type equPos = itemStr.find_first_of((char_type)'=', 0);
+        typename StringType::size_type colPos = itemStr.find_first_of((char_type)':', 0);
+        typename StringType::size_type sepPos = 0;
+        if (equPos!=itemStr.npos && colPos!=itemStr.npos) // found both
+        {
+            auto sepPos = (equPos<colPos) ? equPos : colPos;
+            itemStr[sepPos] = (char_type)'=';
+        }
+        else // found one of or not found at all
+        {
+            if (colPos!=itemStr.npos)
+                itemStr[colPos] = (char_type)'=';
+        }
 
         std::vector<StringType> names;
         StringType valStrSrc;
