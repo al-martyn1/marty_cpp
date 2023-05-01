@@ -167,9 +167,9 @@ StringType normalizeCrLfToLf(const StringType &str, ELinefeedType *pDetectedLine
 }
 
 //----------------------------------------------------------------------------
-//! Реализация удаления (нормализация) конечных пробелов (до перевода строки)
+//! Реализация удаления (нормализация) конечных пробелов (до перевода строки) - на всем тексте, не разбитом на строки
 template<typename StringType> inline
-StringType stripTrailingSpaces(const StringType &str)
+StringType stripTextTrailingSpaces(const StringType &str)
 {
     typedef typename StringType::value_type     char_type;
     typedef typename StringType::const_iterator iterator;
@@ -225,9 +225,37 @@ StringType stripTrailingSpaces(const StringType &str)
 }
 
 //----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType stripLineTrailingSpaces(StringType str)
+{
+    typedef typename StringType::value_type       char_type;
+    typedef typename StringType::reverse_iterator reverse_iterator;
+    typedef typename StringType::iterator         iterator;
+
+	// const char_type CR = (char_type)'\r'; // CR - 0x0D
+	// const char_type LF = (char_type)'\n'; // LF - 0x0A
+    const char_type SP = (char_type)' ' ;
+    const char_type TB = (char_type)'\t' ;
+
+    reverse_iterator rit = str.rbegin();
+    for(; rit!=str.rend(); ++rit)
+    {
+        if (*rit==SP || *rit==TB)
+            continue;
+        break;
+    }
+
+    iterator it = rit.base();
+
+    str.erase(it, str.end());
+
+    return str;
+}
+
+//----------------------------------------------------------------------------
 //! Реализация удаления (нормализация) конечных пробелов (до перевода строки)
 template<typename StringType> inline
-void stripTrailingSpaces(std::vector<StringType> &v)
+void stripLineTrailingSpaces(std::vector<StringType> &v)
 {
     for(auto &s : v)
     {
@@ -305,7 +333,7 @@ std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyL
 //----------------------------------------------------------------------------
 //! Раскрываем табуляцию в пробелы.
 template<typename StringType> inline
-StringType expandTabsToSpaces(const StringType &str, std::size_t tabSize=4 )
+	StringType expandTabsToSpaces(const StringType &str, std::size_t tabSize=4 )
 {
     typedef typename StringType::value_type     char_type;
     typedef typename StringType::const_iterator iterator;
