@@ -58,7 +58,7 @@ int main()
     enum_generate_serialize( std::cout
                            , std::string( "invalid,unknown=-1;"
                                           "enumClass                                                  = marty_cpp::EnumGeneratorOptionFlags::enumClass;"
-                                          "unsigned,unsignedVals                                      = marty_cpp::EnumGeneratorOptionFlags::unsignedVals;"
+                                          "unsignedVals                                               = marty_cpp::EnumGeneratorOptionFlags::unsignedVals;"
                                           "umap,useUnorderedMap                                       = marty_cpp::EnumGeneratorOptionFlags::useUnorderedMap;"
                                           "singleName,singleDef                                       = marty_cpp::EnumGeneratorOptionFlags::singleDef;"
                                           "noExtraLinefeed,noxlf                                      = marty_cpp::EnumGeneratorOptionFlags::noExtraLinefeed;"
@@ -79,17 +79,17 @@ int main()
                                           "fmtDec,formatDec,outputDec                                 = marty_cpp::EnumGeneratorOptionFlags::outputDec;"
                                           "fmtHex,formatHex,outputHex                                 = marty_cpp::EnumGeneratorOptionFlags::outputHex;"
                                           "sys,system,sysFirst,systemFirst                            = marty_cpp::EnumGeneratorOptionFlags::generateSysIncludesFirst;"
-                                          "noPrologEpilog,noHeaderFooter,disablePrologEpilog          = marty_cpp::EnumGeneratorOptionFlags::disablePrologEpilog;"
+                                          //"noPe,noPrologEpilog,noHeaderFooter,disablePrologEpilog     = marty_cpp::EnumGeneratorOptionFlags::disablePrologEpilog;"
                                           //"=marty_cpp::EnumGeneratorOptionFlags::;"
                                         )
                            , std::string(), std::string("    ")
                            , std::string("EnumGeneratorOptionFlagsSerializable"), std::string("std::uint32_t") // std::string() // std::string("std::uint8_t")
-                           , NameStyle::pascalStyle // camelStyle // pascalStyle
+                           , NameStyle::camelStyle // pascalStyle
                            , NameStyle::all        // serializedNameStyle all - mix of all styles while deserializing, serialization uses same style as C/C++ constants
                            , std::string("") // name prefix
                            , EnumGeneratorOptionFlags::enumClass
                            | EnumGeneratorOptionFlags::generateDefAll // generateDefType | generateDefSerialize | generateDefDeserialize
-                           //| EnumGeneratorOptionFlags::generateDefSerializeExtra
+                           | EnumGeneratorOptionFlags::generateDefSerializeExtra // for set
                            | EnumGeneratorOptionFlags::lowercaseDeserialize
                            | EnumGeneratorOptionFlags::enumFlags
                            //| EnumGeneratorOptionFlags::outputHex

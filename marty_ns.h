@@ -63,7 +63,7 @@ class NamespaceOutputWriteGuard
         
             if (m_nsNameStyle!=NameStyle::defaultStyle)
                 n = formatName(n, m_nsNameStyle);
-            n = simple_string_replace<StringType>(tpl, make_string<StringType>("$"), n);
+            n = simple_string_replace<StringType>(tpl, make_string<StringType>("$(NS)"), n);
             m_oss<<n;
         }
     }
@@ -107,8 +107,8 @@ public:
     NamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsList
                              , NameStyle                    nsNameStyle      = NameStyle::defaultStyle
-                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace ${\n")
-                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
+                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace $(NS){\n")
+                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $(NS)\n")
                              )
     : m_oss            (oss)
     , m_nsNames        (parseNsNameList(nsList))
@@ -122,8 +122,8 @@ public:
     NamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsList
                              , const StringType             &nsNameStyle
-                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace ${\n")
-                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
+                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace $(NS){\n")
+                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $(NS)\n")
                              )
     : m_oss            (oss)
     , m_nsNames        (parseNsNameList(nsList))
@@ -147,8 +147,8 @@ NamespaceOutputWriteGuard<StringType, StreamType>
 makeNamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsList
                              , NameStyle                    nsNameStyle = NameStyle::defaultStyle
-                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace ${\n")
-                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
+                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace $(NS){\n")
+                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $(NS)\n")
                              )
 {
     return NamespaceOutputWriteGuard<StringType, StreamType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);
@@ -160,8 +160,8 @@ NamespaceOutputWriteGuard<StringType, StreamType>
 makeNamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsList
                              , const StringType             &nsNameStyle
-                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace ${\n")
-                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $\n")
+                             , const StringType             &nsBeginTemplate = make_string<StringType>("namespace $(NS){\n")
+                             , const StringType             &nsEndTemplate   = make_string<StringType>("} // $(NS)\n")
                              )
 {
     return NamespaceOutputWriteGuard<StringType, StreamType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);

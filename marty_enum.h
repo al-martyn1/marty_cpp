@@ -149,7 +149,6 @@ const mapType< std::string, enumTypeName >& enum_deserialize_impl_get_map_##enum
 //------------------------------
 #define MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doLower )     \
     }                                                                        \
-                                                                             \
     return _m;                                                               \
 }                                                                            \
                                                                              \

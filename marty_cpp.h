@@ -2444,8 +2444,11 @@ typedef std::uint64_t          enum_internal_uint_t;
 template<typename StringType>
 struct EnumGeneratorTemplate
 {
-    StringType globalProlog                ;
-    StringType globalEpilog                ;
+    StringType globalProlog                ; // file prolog
+    StringType globalEpilog                ; // file epilog
+
+    StringType nsBegin                     ;
+    StringType nsEnd                       ;
 
     StringType declBeginTemplate           ; // $(INDENT)enum $(CLASS) $(NAME)
     StringType declBeginUnderlyingTemplate ; // $(INDENT)enum $(CLASS) $(NAME) : $(UNDERLAYED)
@@ -2494,6 +2497,7 @@ struct EnumGeneratorTemplate
     StringType includesBlockSep            ;
 
     std::vector<StringType> declIncludes       ;
+    std::vector<StringType> declFlagIncludes   ;
     std::vector<StringType> serializeIncludes  ;
     std::vector<StringType> deserializeIncludes;
     std::vector<StringType> flagIncludes       ;
@@ -2538,7 +2542,7 @@ struct EnumGeneratorTemplate
                     ms<<fileName<<"("<<lineNo<<"): ";
             }
 
-            ms<<msgTypeOrAndNum<<" :";
+            ms<<msgTypeOrAndNum<<": ";
 
             return ms;
         };
@@ -2568,17 +2572,78 @@ struct EnumGeneratorTemplate
         EnumGeneratorTemplate<StringType> genTpl;
 
         StringType declIncludesStr       ;
+        StringType declFlagIncludesStr   ;
         StringType serializeIncludesStr  ;
         StringType deserializeIncludesStr;
         StringType flagIncludesStr       ;
         StringType setIncludesStr        ;
 
 
+        //TODO: !!! Сделать continuation при помощи завершающего бэкслеша
+
+        std::string collectedLine;
+        bool waitForParamStart = true;
+
         for(; lit!=textLines.end(); ++lit, ++lineNo)
         {
-            StringType line = simple_trim(*lit, isSpaceChar);
-            if (line.empty() || line[0]=='#' || line[0]==';')
-                continue;
+            if (waitForParamStart)
+            {
+                StringType line = simple_trim(*lit, isSpaceChar);
+                if (line.empty() || line[0]=='#' || line[0]==';')
+                    continue;
+
+                if (line.back()=='\\')
+                {
+                    line.erase(line.size()-1,1);
+                    collectedLine.append(line);
+                    //collectedLine.append(1, '\n');
+                    waitForParamStart = false;
+                    continue;
+                }
+                else // no backslash found - final line
+                {
+                    collectedLine.append(line);
+                }
+            }
+            else // process continuation
+            {
+                StringType line  = simple_rtrim(*lit, isSpaceChar); // только справа
+                StringType lline = simple_trim(*lit, isSpaceChar) ; // с обеих сторон
+                if (!lline.empty() && (lline[0]=='#' || lline[0]==';'))
+                {
+                    msg("warning") << "comment line found in continuation\n"; //!!! название?
+                }
+
+                if (line.back()=='\\')
+                {
+                    line.erase(line.size()-1,1);
+                    collectedLine.append(line);
+                    //collectedLine.append(1, '\n');
+                    waitForParamStart = false;
+                    continue;
+                }
+                else // no backslash found - final line
+                {
+                    collectedLine.append(line);
+                }
+
+
+            }
+
+            // process collectedLine here
+
+            std::string line = collectedLine;
+            collectedLine.clear();
+            waitForParamStart = true;
+
+
+        // }
+        //  
+        // for(; lit!=textLines.end(); ++lit, ++lineNo)
+        // {
+        //     StringType line = simple_trim(*lit, isSpaceChar);
+        //     if (line.empty() || line[0]=='#' || line[0]==';')
+        //         continue;
 
             //line = simple_string_replace(line, std::string(":"), std::string("="), 1);
 
@@ -2607,8 +2672,10 @@ struct EnumGeneratorTemplate
             if (nameValue.size()>1)
                 paramValue = simple_trim(nameValue[1], isSpaceChar);
 
-            if      (checkAssign(paramName, paramValue, "EnumGenerationProlog"                   , genTpl.globalProlog                )) {}
-            else if (checkAssign(paramName, paramValue, "EnumGenerationEpilog"                   , genTpl.globalEpilog                )) {}
+            if      (checkAssign(paramName, paramValue, "FileProlog"                             , genTpl.globalProlog                )) {}
+            else if (checkAssign(paramName, paramValue, "FileEpilog"                             , genTpl.globalEpilog                )) {}
+            else if (checkAssign(paramName, paramValue, "NamespaceBegin"                         , genTpl.nsBegin                     )) {}
+            else if (checkAssign(paramName, paramValue, "NamespaceEnd"                           , genTpl.nsEnd                       )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeclarationBegin"                   , genTpl.declBeginTemplate           )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeclarationWithUnderlyingTypeBegin" , genTpl.declBeginUnderlyingTemplate )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeclarationClassKeyword"            , genTpl.declClass                   )) {}
@@ -2636,6 +2703,7 @@ struct EnumGeneratorTemplate
             else if (checkAssign(paramName, paramValue, "EnumUserIncludeFormat"                  , genTpl.userIncludeTemplate         )) {}
             else if (checkAssign(paramName, paramValue, "EnumSystemIncludeFormat"                , genTpl.systemIncludeTemplate       )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeclarationIncludes"                , declIncludesStr                    )) {}
+            else if (checkAssign(paramName, paramValue, "EnumFlagDeclarationIncludes"            , declFlagIncludesStr                )) {}
             else if (checkAssign(paramName, paramValue, "EnumSerializationIncludes"              , serializeIncludesStr               )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeserializationIncludes"            , deserializeIncludesStr             )) {}
             else if (checkAssign(paramName, paramValue, "EnumFlagIncludes"                       , flagIncludesStr                    )) {}
@@ -2645,7 +2713,7 @@ struct EnumGeneratorTemplate
             else if (checkAssign(paramName, paramValue, "EnumIncludesEntrySeparator"             , genTpl.includesSep                 )) {}
             else if (checkAssign(paramName, paramValue, "EnumIncludesGroupSeparator"             , genTpl.includesGroupSep            )) {}
             else if (checkAssign(paramName, paramValue, "EnumIncludesBlockSeparator"             , genTpl.includesBlockSep            )) {}
-
+        
             else
             {
                 if (!ignoreUnknownParams)
@@ -2690,6 +2758,7 @@ struct EnumGeneratorTemplate
         };
 
         genTpl.declIncludes        = splitIncludes(declIncludesStr       );
+        genTpl.declFlagIncludes    = splitIncludes(declFlagIncludesStr   );
         genTpl.serializeIncludes   = splitIncludes(serializeIncludesStr  );
         genTpl.deserializeIncludes = splitIncludes(deserializeIncludesStr);
         genTpl.flagIncludes        = splitIncludes(flagIncludesStr       );
@@ -3637,9 +3706,15 @@ void enum_generate_includes( StreamType &ss
 
     std::vector<StringType> allIncludes;
 
+
     if (genOptions&EnumGeneratorOptionFlags::generateDefType)
     {
         allIncludes.insert(allIncludes.end(), genTpl.declIncludes.begin(), genTpl.declIncludes.end());
+
+        if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+        {
+            allIncludes.insert(allIncludes.end(), genTpl.declFlagIncludes.begin(), genTpl.declFlagIncludes.end());
+         }
     }
 
     if (genOptions&EnumGeneratorOptionFlags::generateDefSerialize)
@@ -3652,15 +3727,24 @@ void enum_generate_includes( StreamType &ss
         allIncludes.insert(allIncludes.end(), genTpl.deserializeIncludes.begin(), genTpl.deserializeIncludes.end());
     }
 
-    if (genOptions&EnumGeneratorOptionFlags::enumFlags)
-    {
-        allIncludes.insert(allIncludes.end(), genTpl.flagIncludes.begin(), genTpl.flagIncludes.end());
-    }
-
     if (genOptions&EnumGeneratorOptionFlags::generateDefSerializeSet || genOptions&EnumGeneratorOptionFlags::generateDefDeserializeSet)
     {
         allIncludes.insert(allIncludes.end(), genTpl.setIncludes.begin(), genTpl.setIncludes.end());
     }
+
+    if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+    {
+        if ( genOptions&EnumGeneratorOptionFlags::generateDefSerialize
+          || genOptions&EnumGeneratorOptionFlags::generateDefDeserialize
+          || genOptions&EnumGeneratorOptionFlags::generateDefSerializeSet
+          || genOptions&EnumGeneratorOptionFlags::generateDefDeserializeSet
+          )
+        {
+            allIncludes.insert(allIncludes.end(), genTpl.flagIncludes.begin(), genTpl.flagIncludes.end());
+        }
+    }
+
+
 
     // IncludeNameLess
     std::set<StringType, IncludeNameLess<StringType> >    userIncludesSet;
@@ -3676,6 +3760,11 @@ void enum_generate_includes( StreamType &ss
         bool sysInclude = unquote(fileName, (StringType::value_type)'<', (StringType::value_type)'>');
         if (!sysInclude)
             unquote(fileName, (StringType::value_type)'\"', (StringType::value_type)'\"');
+
+        if (fileName.empty())
+        {
+            continue;
+        }
 
         if (processedIncludes.find(fileName)!=processedIncludes.end())
         {
@@ -3984,7 +4073,6 @@ void enum_generate_serialize( StreamType &ss
             continue;
 
         // itemStr = simple_string_replace<StringType>(itemStr, make_string<StringType>(":"), make_string<StringType>("="), 1);
-        //!!!
         typename StringType::size_type equPos = itemStr.find_first_of((char_type)'=', 0);
         typename StringType::size_type colPos = itemStr.find_first_of((char_type)':', 0);
         typename StringType::size_type sepPos = 0;
@@ -4086,7 +4174,6 @@ void enum_generate_serialize( StreamType &ss
 {
     if (genOptions&EnumGeneratorOptionFlags::enumFlags)
         genOptions |= EnumGeneratorOptionFlags::enumClass;
-
 
     enum_generate_serialize( ss, valsStr, indent, indentInc, enumName, underlayedTypeName
                            , fromString<StringType>(valuesNameStyle, NameStyle::defaultStyle)

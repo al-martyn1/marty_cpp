@@ -521,7 +521,42 @@ StringType mergeLines(const std::vector<StringType> &v, ELinefeedType lfType, bo
 }
 
 //----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType converLfToOutputFormat(const StringType &str, ELinefeedType lfType)
+{
+    typedef typename StringType::value_type     char_type;
+    // typedef typename StringType::const_iterator const_iterator;
 
+    const char_type LF = (char_type)'\n'; // LF - 0x0A
+
+
+    StringType resText; resText.reserve(str.size() + str.size()/32);
+
+    StringType lfStr;
+
+    switch(lfType)
+    {
+        case ELinefeedType::lf  :  lfStr = make_string<StringType>("\n"); break;
+        case ELinefeedType::cr  :  lfStr = make_string<StringType>("\r"); break;
+        case ELinefeedType::lfcr:  lfStr = make_string<StringType>("\n\r"); break;
+        // case ELinefeedType:::  lfStr = make_string<StringType>(""); break;
+        default                 :  lfStr = make_string<StringType>("\r\n");
+    }
+
+    for(auto ch: str)
+    {
+        if (ch==LF)
+        {
+            resText.append(lfStr);
+        }
+        else
+        {
+            resText.append(1, ch);
+        }
+    }
+    
+    return resText;
+}
 
 
 
