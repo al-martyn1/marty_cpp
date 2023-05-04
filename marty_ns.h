@@ -42,6 +42,7 @@ class NamespaceOutputWriteGuard
     NameStyle                        m_nsNameStyle    ;
     StringType                       m_nsBeginTemplate;
     StringType                       m_nsEndTemplate  ;
+    StringType                       m_nsNameFormat   ;
 
     StringType                       m_indentSize     ;
 
@@ -63,6 +64,8 @@ class NamespaceOutputWriteGuard
         
             if (m_nsNameStyle!=NameStyle::defaultStyle)
                 n = formatName(n, m_nsNameStyle);
+
+            n = simple_string_replace<StringType>(m_nsNameFormat, make_string<StringType>("$(NS)"), n);
             n = simple_string_replace<StringType>(tpl, make_string<StringType>("$(NS)"), n);
             m_oss<<n;
         }
@@ -80,7 +83,7 @@ class NamespaceOutputWriteGuard
         // normalize NS separators
         nsList = simple_string_replace<StringType>(nsList, make_string<StringType>("::"), make_string<StringType>("/"));
         nsList = simple_string_replace<StringType>(nsList, make_string<StringType>(":" ), make_string<StringType>("/"));
-        nsList = simple_string_replace<StringType>(nsList, make_string<StringType>(":" ), make_string<StringType>("/"));
+        //nsList = simple_string_replace<StringType>(nsList, make_string<StringType>(":" ), make_string<StringType>("/"));
         nsList = simple_string_replace<StringType>(nsList, make_string<StringType>("\\"), make_string<StringType>("/"));
         return simple_seq_filter(simple_string_split(nsList, make_string<StringType>("/")), [&](auto s) { return !simple_trim(s, isSpaceChar).empty(); } );
     }
@@ -109,13 +112,17 @@ public:
                              , NameStyle                    nsNameStyle      = NameStyle::defaultStyle
                              , const StringType             &nsBeginTemplate = make_string<StringType>("namespace $(NS){\n")
                              , const StringType             &nsEndTemplate   = make_string<StringType>("} // $(NS)\n")
+                             , const StringType             &nsNameFormat    = StringType()
                              )
     : m_oss            (oss)
     , m_nsNames        (parseNsNameList(nsList))
     , m_nsNameStyle(nsNameStyle)
     , m_nsBeginTemplate(nsBeginTemplate)
     , m_nsEndTemplate  (nsEndTemplate)
+    , m_nsNameFormat   (nsNameFormat)
     {
+        if (m_nsNameFormat.empty())
+            m_nsNameFormat = make_string<StringType>("$(NS)");
         writeNsNames(m_nsNames.cbegin(),m_nsNames.cend(), m_nsBeginTemplate);
     } 
 
@@ -124,13 +131,17 @@ public:
                              , const StringType             &nsNameStyle
                              , const StringType             &nsBeginTemplate = make_string<StringType>("namespace $(NS){\n")
                              , const StringType             &nsEndTemplate   = make_string<StringType>("} // $(NS)\n")
+                             , const StringType             &nsNameFormat    = StringType()
                              )
     : m_oss            (oss)
     , m_nsNames        (parseNsNameList(nsList))
     , m_nsNameStyle(fromString<StringType>(nsNameStyle))
     , m_nsBeginTemplate(nsBeginTemplate)
     , m_nsEndTemplate  (nsEndTemplate)
+    , m_nsNameFormat   (nsNameFormat)
     {
+        if (m_nsNameFormat.empty())
+            m_nsNameFormat = make_string<StringType>("$(NS)");
         writeNsNames(m_nsNames.cbegin(),m_nsNames.cend(), m_nsBeginTemplate);
     } 
 
@@ -149,9 +160,10 @@ makeNamespaceOutputWriteGuard( StreamType                   &oss
                              , NameStyle                    nsNameStyle = NameStyle::defaultStyle
                              , const StringType             &nsBeginTemplate = make_string<StringType>("namespace $(NS){\n")
                              , const StringType             &nsEndTemplate   = make_string<StringType>("} // $(NS)\n")
+                             , const StringType             &nsNameFormat    = StringType()
                              )
 {
-    return NamespaceOutputWriteGuard<StringType, StreamType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);
+    return NamespaceOutputWriteGuard<StringType, StreamType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate, nsNameFormat);
 }
 
 //------------------------------
@@ -162,9 +174,10 @@ makeNamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsNameStyle
                              , const StringType             &nsBeginTemplate = make_string<StringType>("namespace $(NS){\n")
                              , const StringType             &nsEndTemplate   = make_string<StringType>("} // $(NS)\n")
+                             , const StringType             &nsNameFormat    = StringType()
                              )
 {
-    return NamespaceOutputWriteGuard<StringType, StreamType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate);
+    return NamespaceOutputWriteGuard<StringType, StreamType>(oss, nsList, nsNameStyle, nsBeginTemplate, nsEndTemplate, nsNameFormat);
 }
 
 

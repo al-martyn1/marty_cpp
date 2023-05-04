@@ -2444,12 +2444,19 @@ typedef std::uint64_t          enum_internal_uint_t;
 template<typename StringType>
 struct EnumGeneratorTemplate
 {
+    StringType octNumberFormat             ;
+    StringType decNumberFormat             ;
+    StringType hexNumberFormat             ;
+
     StringType globalProlog                ; // file prolog
     StringType globalEpilog                ; // file epilog
 
     StringType nsBegin                     ;
     StringType nsEnd                       ;
+    StringType nsNameFormat                ;
 
+    StringType enumNameFormat              ;
+    StringType enumFlagsNameFormat         ;
     StringType declBeginTemplate           ; // $(INDENT)enum $(CLASS) $(NAME)
     StringType declBeginUnderlyingTemplate ; // $(INDENT)enum $(CLASS) $(NAME) : $(UNDERLAYED)
 
@@ -2579,8 +2586,6 @@ struct EnumGeneratorTemplate
         StringType setIncludesStr        ;
 
 
-        //TODO: !!! Сделать continuation при помощи завершающего бэкслеша
-
         std::string collectedLine;
         bool waitForParamStart = true;
 
@@ -2672,10 +2677,18 @@ struct EnumGeneratorTemplate
             if (nameValue.size()>1)
                 paramValue = simple_trim(nameValue[1], isSpaceChar);
 
-            if      (checkAssign(paramName, paramValue, "FileProlog"                             , genTpl.globalProlog                )) {}
+            if      (checkAssign(paramName, paramValue, "OctNumberFormat"                        , genTpl.octNumberFormat             )) {}
+            else if (checkAssign(paramName, paramValue, "DecNumberFormat"                        , genTpl.decNumberFormat             )) {}
+            else if (checkAssign(paramName, paramValue, "HexNumberFormat"                        , genTpl.hexNumberFormat             )) {}
+            else if (checkAssign(paramName, paramValue, "FileProlog"                             , genTpl.globalProlog                )) {}
+            else if (checkAssign(paramName, paramValue, "FileProlog"                             , genTpl.globalProlog                )) {}
+            else if (checkAssign(paramName, paramValue, "FileProlog"                             , genTpl.globalProlog                )) {}
             else if (checkAssign(paramName, paramValue, "FileEpilog"                             , genTpl.globalEpilog                )) {}
             else if (checkAssign(paramName, paramValue, "NamespaceBegin"                         , genTpl.nsBegin                     )) {}
             else if (checkAssign(paramName, paramValue, "NamespaceEnd"                           , genTpl.nsEnd                       )) {}
+            else if (checkAssign(paramName, paramValue, "NamespaceNameFormat"                    , genTpl.nsNameFormat                )) {}
+            else if (checkAssign(paramName, paramValue, "EnumNameFormat"                         , genTpl.enumNameFormat              )) {}
+            else if (checkAssign(paramName, paramValue, "EnumFlagsNameFormat"                    , genTpl.enumFlagsNameFormat         )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeclarationBegin"                   , genTpl.declBeginTemplate           )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeclarationWithUnderlyingTypeBegin" , genTpl.declBeginUnderlyingTemplate )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeclarationClassKeyword"            , genTpl.declClass                   )) {}
@@ -2774,8 +2787,19 @@ struct EnumGeneratorTemplate
     {
         EnumGeneratorTemplate res;
 
+        res.octNumberFormat = make_string<StringType>("0$(VALUE)");
+        res.decNumberFormat = make_string<StringType>("$(VALUE)");
+        res.hexNumberFormat = make_string<StringType>("0x$(VALUE)");
+
         res.globalProlog  = make_string<StringType>("#pragma once\n\n");
         res.globalEpilog  = make_string<StringType>("\n");
+
+        res.nsBegin                      = make_string<StringType>("namespace $(NS){\n");
+        res.nsEnd                        = make_string<StringType>("} // $(NS)\n");
+        res.nsNameFormat                 = make_string<StringType>("N$(NS)");
+
+        res.enumNameFormat               = make_string<StringType>("E$(ENAMNAME)");
+        res.enumFlagsNameFormat          = make_string<StringType>("$(ENAMNAME)Flags");
 
         res.declBeginTemplate            = make_string<StringType>(" enum $(CLASS) $(ENAMNAME)");
         res.declBeginUnderlyingTemplate  = make_string<StringType>(" enum $(CLASS) $(ENAMNAME) : $(UNDERLYING)");
@@ -2879,6 +2903,167 @@ struct EnumGeneratorTemplate
         return res;
     }
 
+
+    StringType formatValueNumber( enum_internal_uint_t val, unsigned options, unsigned valFormat ) const
+    {
+        typedef typename StringType::value_type char_type;
+        typedef std::basic_stringstream<char_type>  stringstream;  // std::char_traits<char_type>, std::allocator<char_type>
+
+        stringstream oss;
+        StringType  numberFormat;
+
+        if ( /* val!=0 &&  */ (options&EnumGeneratorOptionFlags::unsignedVals || valFormat!=EnumGeneratorOptionFlags::outputDec))
+        {
+            unsigned    fmtWidth = 0;
+           
+            switch(valFormat)
+            {
+                case EnumGeneratorOptionFlags::outputHex:
+                    fmtWidth      = hexWidth;
+                    numberFormat  = hexNumberFormat;
+           
+                    if (fmtWidth&1)
+                        fmtWidth += 1;
+                    if (!fmtWidth)
+                        fmtWidth = 2;
+                    if (fmtWidth>32)
+                        fmtWidth = 32;
+                    oss << std::uppercase << std::hex << std::setw(fmtWidth) << std::setfill('0') << (enum_internal_uint_t)val;
+                    break;
+           
+                case EnumGeneratorOptionFlags::outputOct:
+                    fmtWidth      = octWidth;
+                    numberFormat  = octNumberFormat;
+                    if (fmtWidth<3)
+                        fmtWidth = 3;
+                    if (fmtWidth>32)
+                        fmtWidth = 32;
+                    oss << std::oct << std::setw(fmtWidth) << std::setfill('0') << (enum_internal_uint_t)val;
+                    break;
+           
+                default: // EnumGeneratorOptionFlags::outputDec:
+                    numberFormat  = decNumberFormat;
+                    oss << std::dec << (enum_internal_uint_t)val;
+                    break;
+            }
+        }
+        else
+        {
+            numberFormat  = decNumberFormat;
+            oss << std::dec << (enum_internal_int_t)val;
+        }
+
+        if (numberFormat.empty())
+            numberFormat = make_string<StringType>("$(VALUE)");
+
+        return simple_string_replace( numberFormat, make_string<StringType>("$(VALUE)"), oss.str() );
+
+    }
+
+    StringType formatValueNumber( enum_internal_uint_t val, unsigned genOptions, unsigned curValFormat
+                                , const StringType &underlyingTypeName
+                                // , const EnumGeneratorTemplate<StringType> &genTpl
+                                ) const
+    {
+        typedef typename StringType::value_type char_type;
+        typedef std::basic_stringstream<char_type>  stringstream;  // std::char_traits<char_type>, std::allocator<char_type>
+     
+        unsigned 
+        optValFormat = genOptions   & EnumGeneratorOptionFlags::outputFormatMask;
+        curValFormat = curValFormat & EnumGeneratorOptionFlags::outputFormatMask;
+     
+        unsigned appliedValFormat = (optValFormat==EnumGeneratorOptionFlags::outputAuto) ? curValFormat : optValFormat;
+        if (appliedValFormat==EnumGeneratorOptionFlags::outputAuto)
+            appliedValFormat = EnumGeneratorOptionFlags::outputDec;
+     
+        genOptions = enum_generate_adjust_gen_options(genOptions);
+     
+     
+        stringstream oss;
+     
+        //std::basic_stringstream< typename StringType::value_type, typename StringType::traits_type, typename StringType::allocator_type >  oss;
+        //SimpleStringStream<StringType> oss;
+        if ((enum_internal_uint_t)val==(enum_internal_uint_t)-1)
+        {
+            //TODO: !!! Нужен каст к underlaying типу, если он задан. Сюда надо будет передавать шаблоны и строку underlaying типа
+            // return make_string<StringType>("-1");
+            // oss << make_string<StringType>("-1");
+     
+            if (underlyingTypeName.empty() || genOptions&EnumGeneratorOptionFlags::unsignedVals==0)
+            {
+                oss << make_string<StringType>("-1");
+            }
+            else
+            {
+                oss << formatCastToUnderlying(underlyingTypeName, make_string<StringType>("-1"));
+            }
+        }
+        else
+        {
+            oss << formatValueNumber( val, genOptions, appliedValFormat );
+
+            #if 0
+            if (genOptions&EnumGeneratorOptionFlags::unsignedVals || appliedValFormat!=EnumGeneratorOptionFlags::outputDec)
+            {
+                unsigned  fmtWidth = 0;
+     
+                switch(appliedValFormat)
+                {
+                    case EnumGeneratorOptionFlags::outputHex:
+                        fmtWidth = genTpl.hexWidth;
+                        if (fmtWidth&1)
+                            fmtWidth += 1;
+                        if (!fmtWidth)
+                            fmtWidth = 2;
+                        if (fmtWidth>32)
+                            fmtWidth = 32;
+                        oss << "0x" << std::uppercase << std::hex << std::setw(fmtWidth) << std::setfill('0') << (enum_internal_uint_t)val;
+                        // std::cout << "Formatting hex, input: " << (unsigned)val << " " << 42 << "\n";
+                        // std::cout << "Formatted (1): " << std::hex << (unsigned)val << " " << 42 << "\n";
+                        // std::cout << "Formatted (2): " << std::hex << val           << " " << 42 << "\n";
+                        // std::cout << "Formatted (3): " << oss.str() << "\n";
+                        break;
+     
+                    case EnumGeneratorOptionFlags::outputOct:
+                        fmtWidth = genTpl.octWidth;
+                        if (fmtWidth<3)
+                            fmtWidth = 3;
+                        if (fmtWidth>32)
+                            fmtWidth = 32;
+                        oss << "0" << std::oct << std::setw(fmtWidth) << std::setfill('0') << (enum_internal_uint_t)val;
+                        break;
+     
+                    default: // EnumGeneratorOptionFlags::outputDec:
+                        oss << std::dec << (enum_internal_uint_t)val;
+                        break;
+                }
+            }
+            else
+            {
+                oss << std::dec << (enum_internal_int_t)val;
+            }
+            #endif
+     
+        }
+     
+        StringType strRes = oss.str();
+        return strRes;
+    }
+
+
+
+
+
+
+
+
+    StringType formatEnumName(const StringType &enumName, unsigned options) const
+    {
+        StringType nameTpl = (options&EnumGeneratorOptionFlags::enumFlags) ? enumFlagsNameFormat : enumNameFormat;
+        return simple_string_replace( nameTpl, make_string<StringType>("$(ENAMNAME)"), enumName );
+    }
+
+
     StringType formatDeclBegin( const StringType &indent, const StringType &enumName, const StringType &underlyingTypeName, unsigned options ) const
     {
         StringType res = replaceLeadingSpaceToIndentMacro(underlyingTypeName.empty() ? declBeginTemplate : declBeginUnderlyingTemplate);
@@ -2887,7 +3072,7 @@ struct EnumGeneratorTemplate
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
         res = simple_string_replace( res, make_string<StringType>("$(CLASS)"), makeClassMacroVal(options) );
         res = simple_string_replace( res, make_string<StringType>("$(PPCLASS)"), makePpClassMacroVal(options) );
-        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), enumName );
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), formatEnumName(enumName,options) );
         return res;
     }
 
@@ -2911,7 +3096,7 @@ struct EnumGeneratorTemplate
     {
         StringType res = replaceLeadingSpaceToIndentMacro(declFlagsTemplate);
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent );
-        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), enumName );
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), formatEnumName(enumName,options) );
         return res;
     }
 
@@ -2956,7 +3141,7 @@ struct EnumGeneratorTemplate
         res = simple_string_replace( res, make_string<StringType>("$(MAPTYPE)")  , mapType );
         res = simple_string_replace( res, make_string<StringType>("$(SETTYPE)")  , setType );
         res = simple_string_replace( res, make_string<StringType>("$(UPPERFLAG)"), lowerFlag );
-        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , name );
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , formatEnumName(name,options) );
 
         return res;
     }
@@ -3022,7 +3207,7 @@ struct EnumGeneratorTemplate
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent   );
         res = simple_string_replace( res, make_string<StringType>("$(PPCLASS)")  , makePpClassMacroVal(options) );
         res = simple_string_replace( res, make_string<StringType>("$(SETTYPE)")  , setType  );
-        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , enumName );
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , formatEnumName(enumName,options) );
         return res;
     }
 
@@ -3291,6 +3476,8 @@ StringType enum_generate_number_convert( enum_internal_uint_t val, unsigned genO
                                        , const EnumGeneratorTemplate<StringType> &genTpl
                                        )
 {
+    return genTpl.formatValueNumber( val, genOptions, curValFormat, underlyingTypeName );
+    #if 0
     typedef typename StringType::value_type char_type;
     typedef std::basic_stringstream<char_type>  stringstream;  // std::char_traits<char_type>, std::allocator<char_type>
 
@@ -3326,6 +3513,7 @@ StringType enum_generate_number_convert( enum_internal_uint_t val, unsigned genO
     }
     else
     {
+        //!!!
         if (genOptions&EnumGeneratorOptionFlags::unsignedVals || appliedValFormat!=EnumGeneratorOptionFlags::outputDec)
         {
             unsigned  fmtWidth = 0;
@@ -3370,6 +3558,7 @@ StringType enum_generate_number_convert( enum_internal_uint_t val, unsigned genO
 
     StringType strRes = oss.str();
     return strRes;
+    #endif
 }
 
 //-----------------------------------------------------------------------------
