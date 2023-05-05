@@ -2513,6 +2513,110 @@ struct EnumGeneratorTemplate
     unsigned     hexWidth = 8;
     unsigned     octWidth = 3;
 
+    template<typename string_type>
+    static
+    bool checkAssignParamImpl(string_type paramName, string_type paramValue, const string_type &expectedName, StringType &assignTo)
+    {
+        if (toUpper(expectedName)!=paramName)
+            return false;
+
+        auto isSpaceChar = [](typename string_type::value_type ch)
+                             {
+                                 typedef typename string_type::value_type CharType; 
+                                 return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
+                             };
+
+        paramName  = simple_trim(paramName ,isSpaceChar);
+
+        paramValue = simple_trim(paramValue,isSpaceChar);
+        if (is_quoted(paramValue, '\"'))
+            unquote(paramValue, '\"');
+
+        paramValue = cUnescapeString(paramValue);
+
+        assignTo = make_string<StringType>(paramValue);
+        return true;
+    };
+
+    template<typename string_type>
+    bool checkAssignParam(const string_type &paramName, const string_type &paramValue)
+    {
+        if      (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("OctNumberFormat"                        ) , octNumberFormat             )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("DecNumberFormat"                        ) , decNumberFormat             )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("HexNumberFormat"                        ) , hexNumberFormat             )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("FileProlog"                             ) , globalProlog                )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("FileProlog"                             ) , globalProlog                )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("FileProlog"                             ) , globalProlog                )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("FileEpilog"                             ) , globalEpilog                )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("NamespaceBegin"                         ) , nsBegin                     )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("NamespaceEnd"                           ) , nsEnd                       )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("NamespaceNameFormat"                    ) , nsNameFormat                )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumNameFormat"                         ) , enumNameFormat              )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumFlagsNameFormat"                    ) , enumFlagsNameFormat         )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumDeclarationBegin"                   ) , declBeginTemplate           )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumDeclarationWithUnderlyingTypeBegin" ) , declBeginUnderlyingTemplate )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumDeclarationClassKeyword"            ) , declClass                   )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("TypeCast"                               ) , castTemplate                )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumScopeBegin"                         ) , scopeBeginTemplate          )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumScopeEnd"                           ) , scopeEndTemplate            )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemDeclarationSeparatorBeforeFirst") , declItemSepBeforeFirst      )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemDeclarationSeparatorBefore"     ) , declItemSepBefore           )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemDeclarationSeparatorAfter"      ) , declItemSepAfter            )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemDeclaration"                    ) , declItemTemplate            )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemComment"                        ) , declItemCommentTemplate     )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumFlagsDeclaration"                   ) , declFlagsTemplate           )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumSerializationBegin"                 ) , serializeBeginTemplate      )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumSerializationEnd"                   ) , serializeEndTemplate        )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumSerializationItem"                  ) , serializeItemTemplate       )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumDeserializationBegin"               ) , deserializeBeginTemplate    )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumDeserializationEnd"                 ) , deserializeEndTemplate      )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumDeserializationItem"                ) , deserializeItemTemplate     )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemSerializeBeforeFirst"           ) , serializeItemSepBeforeFirst )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemSerializeBefore"                ) , serializeItemSepBefore      )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemSerializeAfter"                 ) , serializeItemSepAfter       )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumSerializeSet"                       ) , serializeSetTemplate        )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumDeserializeSet"                     ) , deserializeSetTemplate      )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumSerializeSetType"                   ) , setSerializeSetType         )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumUserIncludeFormat"                  ) , userIncludeTemplate         )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumSystemIncludeFormat"                ) , systemIncludeTemplate       )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumIncludesBefore"                     ) , includesBefore              )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumIncludesAfter"                      ) , includesAfter               )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumIncludesEntrySeparator"             ) , includesSep                 )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumIncludesGroupSeparator"             ) , includesGroupSep            )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumIncludesBlockSeparator"             ) , includesBlockSep            )) { return true; }
+
+        return false;
+    }
+
+    template<typename string_type>
+    bool checkAssignParam(string_type paramNameValueStr)
+    {
+        auto eqPos    = paramNameValueStr.find("=", 0);
+        auto colonPos = paramNameValueStr.find(":", 0);
+        auto sepPos   = std::min(eqPos,colonPos);
+        paramNameValueStr[sepPos]  = '=';
+
+        std::vector< std::string > nameValue = simple_string_split(paramNameValueStr, std::string("="), 1 );
+        if (nameValue.size()<1 || nameValue[0].empty())
+        {
+            return false;
+        }
+
+        // nameValue[0] = simple_trim(nameValue[0], isSpaceChar);
+        // if (nameValue[0].empty())
+        // {
+        //     return false;
+        // }
+
+        std::string paramName  = toUpper(nameValue[0]);
+
+        std::string paramValue;
+        if (nameValue.size()>1)
+            paramValue = nameValue[1]; // simple_trim(nameValue[1], isSpaceChar);
+
+        return checkAssignParam(paramName, paramValue);
+    }
+
     template<typename MessageStream> static
     std::tuple<bool,EnumGeneratorTemplate>
     parseTemplateOptionsText( const std::string &text
@@ -2556,21 +2660,16 @@ struct EnumGeneratorTemplate
 
         std::map<std::string,bool> paramsAssigned;
 
+
         auto checkAssign = [&](const std::string &paramName, std::string paramValue, const std::string &expectedName, StringType &assignTo) -> bool
         {
+            // Если параметр не устанавливали, то задаем assigned=false
             if (paramsAssigned.find(expectedName)==paramsAssigned.end())
                 paramsAssigned[expectedName] = false;
 
-            if (toUpper(expectedName)!=paramName)
+            if (!checkAssignParamImpl(paramName, paramValue, expectedName, assignTo))
                 return false;
 
-            paramValue = simple_trim(paramValue,isSpaceChar);
-            if (is_quoted(paramValue, '\"'))
-                unquote(paramValue, '\"');
-
-            paramValue = cUnescapeString(paramValue);
-
-            assignTo = make_string<StringType>(paramValue);
             paramsAssigned[expectedName] = true;
             return true;
         };
@@ -2715,18 +2814,19 @@ struct EnumGeneratorTemplate
             else if (checkAssign(paramName, paramValue, "EnumSerializeSetType"                   , genTpl.setSerializeSetType         )) {}
             else if (checkAssign(paramName, paramValue, "EnumUserIncludeFormat"                  , genTpl.userIncludeTemplate         )) {}
             else if (checkAssign(paramName, paramValue, "EnumSystemIncludeFormat"                , genTpl.systemIncludeTemplate       )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesBefore"                     , genTpl.includesBefore              )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesAfter"                      , genTpl.includesAfter               )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesEntrySeparator"             , genTpl.includesSep                 )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesGroupSeparator"             , genTpl.includesGroupSep            )) {}
+            else if (checkAssign(paramName, paramValue, "EnumIncludesBlockSeparator"             , genTpl.includesBlockSep            )) {}
+
             else if (checkAssign(paramName, paramValue, "EnumDeclarationIncludes"                , declIncludesStr                    )) {}
             else if (checkAssign(paramName, paramValue, "EnumFlagDeclarationIncludes"            , declFlagIncludesStr                )) {}
             else if (checkAssign(paramName, paramValue, "EnumSerializationIncludes"              , serializeIncludesStr               )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeserializationIncludes"            , deserializeIncludesStr             )) {}
             else if (checkAssign(paramName, paramValue, "EnumFlagIncludes"                       , flagIncludesStr                    )) {}
             else if (checkAssign(paramName, paramValue, "EnumSetIncludes"                        , setIncludesStr                     )) {}
-            else if (checkAssign(paramName, paramValue, "EnumIncludesBefore"                     , genTpl.includesBefore              )) {}
-            else if (checkAssign(paramName, paramValue, "EnumIncludesAfter"                      , genTpl.includesAfter               )) {}
-            else if (checkAssign(paramName, paramValue, "EnumIncludesEntrySeparator"             , genTpl.includesSep                 )) {}
-            else if (checkAssign(paramName, paramValue, "EnumIncludesGroupSeparator"             , genTpl.includesGroupSep            )) {}
-            else if (checkAssign(paramName, paramValue, "EnumIncludesBlockSeparator"             , genTpl.includesBlockSep            )) {}
-        
+            
             else
             {
                 if (!ignoreUnknownParams)
