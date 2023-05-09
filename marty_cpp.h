@@ -2457,6 +2457,7 @@ struct EnumGeneratorTemplate
 
     StringType enumNameFormat              ;
     StringType enumFlagsNameFormat         ;
+    StringType declEnumDescriptionComment  ;
     StringType declBeginTemplate           ; // $(INDENT)enum $(CLASS) $(NAME)
     StringType declBeginUnderlyingTemplate ; // $(INDENT)enum $(CLASS) $(NAME) : $(UNDERLAYED)
 
@@ -2551,6 +2552,7 @@ struct EnumGeneratorTemplate
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("NamespaceBegin"                         ) , nsBegin                     )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("NamespaceEnd"                           ) , nsEnd                       )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("NamespaceNameFormat"                    ) , nsNameFormat                )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumDescriptionCommentFormat"           ) , declEnumDescriptionComment  )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumNameFormat"                         ) , enumNameFormat              )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumFlagsNameFormat"                    ) , enumFlagsNameFormat         )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumDeclarationBegin"                   ) , declBeginTemplate           )) { return true; }
@@ -2786,6 +2788,7 @@ struct EnumGeneratorTemplate
             else if (checkAssign(paramName, paramValue, "NamespaceBegin"                         , genTpl.nsBegin                     )) {}
             else if (checkAssign(paramName, paramValue, "NamespaceEnd"                           , genTpl.nsEnd                       )) {}
             else if (checkAssign(paramName, paramValue, "NamespaceNameFormat"                    , genTpl.nsNameFormat                )) {}
+            else if (checkAssign(paramName, paramValue, "EnumDescriptionCommentFormat"           , genTpl.declEnumDescriptionComment  )) {}
             else if (checkAssign(paramName, paramValue, "EnumNameFormat"                         , genTpl.enumNameFormat              )) {}
             else if (checkAssign(paramName, paramValue, "EnumFlagsNameFormat"                    , genTpl.enumFlagsNameFormat         )) {}
             else if (checkAssign(paramName, paramValue, "EnumDeclarationBegin"                   , genTpl.declBeginTemplate           )) {}
@@ -2897,6 +2900,8 @@ struct EnumGeneratorTemplate
         res.nsBegin                      = make_string<StringType>("namespace $(NS){\n");
         res.nsEnd                        = make_string<StringType>("} // $(NS)\n");
         res.nsNameFormat                 = make_string<StringType>("N$(NS)");
+
+        res.declEnumDescriptionComment   = make_string<StringType>("/*! $(COMMENT) */");
 
         res.enumNameFormat               = make_string<StringType>("E$(ENAMNAME)");
         res.enumFlagsNameFormat          = make_string<StringType>("$(ENAMNAME)Flags");
@@ -3151,12 +3156,6 @@ struct EnumGeneratorTemplate
     }
 
 
-
-
-
-
-
-
     StringType formatEnumName(const StringType &enumName, unsigned options) const
     {
         StringType nameTpl = (options&EnumGeneratorOptionFlags::enumFlags) ? enumFlagsNameFormat : enumNameFormat;
@@ -3210,6 +3209,23 @@ struct EnumGeneratorTemplate
         return nItem ? serializeItemSepBefore : serializeItemSepBeforeFirst;
     }
 
+    static
+    StringType lfReplaceHelper(StringType str)
+    {
+        str = simple_string_replace(str, make_string<StringType>("\r\n"), make_string<StringType>(" "));
+        str = simple_string_replace(str, make_string<StringType>("\n\r"), make_string<StringType>(" "));
+        str = simple_string_replace(str, make_string<StringType>("\n")  , make_string<StringType>(" "));
+        str = simple_string_replace(str, make_string<StringType>("\r")  , make_string<StringType>(" "));
+        return str;
+    }
+
+    StringType formatComment(const StringType &indent, StringType comment) const
+    {
+        StringType res = replaceLeadingSpaceToIndentMacro(declEnumDescriptionComment);
+        res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
+        return simple_string_replace( res, make_string<StringType>("$(COMMENT)"), lfReplaceHelper(comment) );
+    }
+
     StringType formatDeclItem( std::size_t nItem, const StringType &indent, const StringType &name, const StringType &val, const StringType &itemCommentText, unsigned options, std::size_t nNameLen = 32 ) const
     {
         StringType commentTextFormatted;
@@ -3224,7 +3240,7 @@ struct EnumGeneratorTemplate
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMNAME)"), nameExpanded );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMVAL)"), val );
-        res = simple_string_replace( res, make_string<StringType>("$(ITEMCOMMENT)"), commentTextFormatted );
+        res = simple_string_replace( res, make_string<StringType>("$(ITEMCOMMENT)"), lfReplaceHelper(commentTextFormatted) );
         return getDeclItemSepBefore(nItem) + res + declItemSepAfter;
 
     }
