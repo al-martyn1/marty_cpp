@@ -52,7 +52,7 @@ public:
     , mtrCategory(mtrc)
     {}
 
-    base_error(const base_error &e) 
+    base_error(const base_error &e)
     : base_exception_t(e)
     , id(e.id)
     , name(e.name)
@@ -98,7 +98,7 @@ public:
 
     generic_serialization_error( const char *errName, const char *errMsg, const char *typeName_, const std::string &val, int id_ = 0, const std::string &mtrc="marty_cpp" )
     : base_error( errName
-                , std::string(errMsg) + std::string(", type: ") + std::string(typeName_) + std::string(", value: '") + val + std::string("'") 
+                , std::string(errMsg) + std::string(", type: ") + std::string(typeName_) + std::string(", value: '") + val + std::string("'")
                 , id_
                 , mtrc
                 )
@@ -108,7 +108,7 @@ public:
 
     generic_serialization_error( const char *errName, const std::string &errMsg, const char *typeName_, const std::string &val, int id_ = 0, const std::string &mtrc="marty_cpp" )
     : base_error( errName
-                , errMsg + std::string(", type: ") + std::string(typeName_) + std::string(", value: '") + val + std::string("'") 
+                , errMsg + std::string(", type: ") + std::string(typeName_) + std::string(", value: '") + val + std::string("'")
                 , id_
                 , mtrc
                 )

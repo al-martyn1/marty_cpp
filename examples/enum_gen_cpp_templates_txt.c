@@ -1,4 +1,4 @@
-static const char enum_gen_cpp_templates_txt[2851] = 
+static const char enum_gen_cpp_templates_txt[2851] =
     "EnumGenerationProlog                    = #pragma once\\n\n"
     "EnumGenerationEpilog                    = \\n\n"
     "\n"

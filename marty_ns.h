@@ -51,7 +51,7 @@ class NamespaceOutputWriteGuard
     {
         auto isSpaceChar = [](typename StringType::value_type ch)
                              {
-                                 typedef typename StringType::value_type CharType; 
+                                 typedef typename StringType::value_type CharType;
                                  return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
                              };
 
@@ -61,7 +61,7 @@ class NamespaceOutputWriteGuard
             auto n = simple_trim(*b, isSpaceChar);
             if (n.empty())
                 continue;
-        
+
             if (m_nsNameStyle!=NameStyle::defaultStyle)
                 n = formatName(n, m_nsNameStyle);
 
@@ -76,7 +76,7 @@ class NamespaceOutputWriteGuard
     {
         auto isSpaceChar = [](typename StringType::value_type ch)
                              {
-                                 typedef typename StringType::value_type CharType; 
+                                 typedef typename StringType::value_type CharType;
                                  return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
                              };
 
@@ -93,7 +93,7 @@ public:
 
     typedef StringType string_type;
 
-    /* typename  */ 
+    /* typename  */
     typename string_type::size_type indentSize(typename StringType::size_type nLevelSize = 4) const
     {
         return nLevelSize*m_nsNames.size();
@@ -124,7 +124,7 @@ public:
         if (m_nsNameFormat.empty())
             m_nsNameFormat = make_string<StringType>("$(NS)");
         writeNsNames(m_nsNames.cbegin(),m_nsNames.cend(), m_nsBeginTemplate);
-    } 
+    }
 
     NamespaceOutputWriteGuard( StreamType                   &oss
                              , const StringType             &nsList
@@ -143,12 +143,12 @@ public:
         if (m_nsNameFormat.empty())
             m_nsNameFormat = make_string<StringType>("$(NS)");
         writeNsNames(m_nsNames.cbegin(),m_nsNames.cend(), m_nsBeginTemplate);
-    } 
+    }
 
     ~NamespaceOutputWriteGuard()
     {
         writeNsNames(m_nsNames.crbegin(),m_nsNames.crend(), m_nsEndTemplate);
-    } 
+    }
 
 };
 

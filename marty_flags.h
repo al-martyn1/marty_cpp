@@ -238,7 +238,7 @@ void deserializeEnumFlagsImpl( EnumType &enumVal // deserialize to
 
     auto isSpaceChar = [](char ch)
                          {
-                             typedef char CharType; 
+                             typedef char CharType;
                              return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
                          };
 

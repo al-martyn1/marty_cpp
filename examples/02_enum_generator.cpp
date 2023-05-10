@@ -64,7 +64,7 @@ int main( int argc, char* argv[] )
                            , NameStyle::pascalStyle
                            , NameStyle::all
                            , std::string("") // name prefix
-                           , EnumGeneratorOptionFlags::generateDefAll 
+                           , EnumGeneratorOptionFlags::generateDefAll
                            | EnumGeneratorOptionFlags::generateDefSerializeExtra
                            | EnumGeneratorOptionFlags::lowercaseDeserialize
                            | EnumGeneratorOptionFlags::enumClass

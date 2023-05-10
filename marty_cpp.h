@@ -165,7 +165,7 @@ enum class NameStyle
     hyphenPascalMixedUnderscoredStyle ,
     cppCamelMixedUnderscoredStyle  ,
     cppPascalMixedUnderscoredStyle ,
-    defineUnderscoredStyle         , 
+    defineUnderscoredStyle         ,
     sqlUnderscoredStyle            = defineUnderscoredStyle,
 
     end
@@ -263,7 +263,7 @@ NameStyle fromString(const StringType &str, NameStyle defVal = NameStyle::invali
         }
     }
 
-    //std::unordered_map<StringType,NameStyle>::const_iterator 
+    //std::unordered_map<StringType,NameStyle>::const_iterator
     auto it = m.find(toUpper(str));
     if (it==m.end())
         return defVal;
@@ -355,12 +355,12 @@ inline NameStyleSet makeAllNameStylesSet( bool onlyValidStyles=false )
         allNameStyles.insert( NameStyle::invalidName                );
         allNameStyles.insert( NameStyle::all                        );
     }
-    
+
     allNameStyles.insert( NameStyle::hyphenStyle                    );
     allNameStyles.insert( NameStyle::cppStyle                       );
     allNameStyles.insert( NameStyle::camelStyle                     );
     allNameStyles.insert( NameStyle::pascalStyle                    );
-    
+
     allNameStyles.insert( NameStyle::hyphenCamelMixedStyle          );
     allNameStyles.insert( NameStyle::hyphenPascalMixedStyle         );
     allNameStyles.insert( NameStyle::cppCamelMixedStyle             );
@@ -508,7 +508,7 @@ inline bool isDigit(char    ch, int ss) { return digitToInt(ch, ss)<0 ? false : 
 inline bool isDigit(wchar_t ch, int ss) { return digitToInt(ch, ss)<0 ? false : true; }
 
 //----------------------------------------------------------------------------
-inline 
+inline
 bool isValidIdentChar( char ch, bool allowNonAsciiIdents, const std::string &forceAllowedChars )
 {
     if (forceAllowedChars.find(ch)!=forceAllowedChars.npos)
@@ -534,7 +534,7 @@ bool isValidIdentChar( char ch, bool allowNonAsciiIdents, const std::string &for
     return true; // Alphanum or '_' char
 }
 
-inline 
+inline
 bool isValidIdentChar( wchar_t ch, bool allowNonAsciiIdents, const std::wstring &forceAllowedChars )
 {
     if (forceAllowedChars.find(ch)!=forceAllowedChars.npos)
@@ -591,7 +591,7 @@ OutputIterator cEscapeChar(CharType ch, CharType chNext, OutputIterator outIt)
         case '\r': appendToOutput("\\r"); break;
         case '\t': appendToOutput("\\t"); break;
         case '\v': appendToOutput("\\v"); break;
-        case    0: 
+        case    0:
                    if (chNext==0 || !isDigit(chNext,8)) // Текущий символ - последний или следующий символ - не восьмеричная цифра
                        appendToOutput("\\0"); // Достаточно одной таблэтки
                    else
@@ -758,7 +758,7 @@ void cUnescapeStringImpl( const CharType *pStr, std::size_t sz, OutputIterator o
                 }
                 break;
 
-                case 'x' : 
+                case 'x' :
                 case 'X' : // hex value
                 {
                     ++i;
@@ -964,7 +964,7 @@ trimUnderscoresTrailing( const std::basic_string< CharT, Traits, Allocator > &st
     auto endItPrev = endIt;
     if (endItPrev!=str.begin())
        --endItPrev;
-    
+
     for(; endIt!=beginIt && *endItPrev==(CharT)'_'; --endIt, --endItPrev ) { }
 
     return std::basic_string< CharT, Traits, Allocator >( beginIt, endIt );
@@ -1131,7 +1131,7 @@ NameStyle detectNameStyle( const std::basic_string< CharT, Traits, Allocator > &
     }
 
 }
- 
+
 inline NameStyle detectNameStyle( const char    * pStr )   { return detectNameStyle( std::string(pStr ) ); }
 inline NameStyle detectNameStyle( const wchar_t * pStr )   { return detectNameStyle( std::wstring(pStr) ); }
 
@@ -1160,7 +1160,7 @@ splitName( const std::basic_string< CharT, Traits, Allocator > &str )
     auto endItPrev = endIt;
     if (endItPrev!=str.begin())
        --endItPrev;
-    
+
     for(; endIt!=beginIt && *endItPrev==(CharT)'_'; --endIt, --endItPrev ) { }
 
     auto postfixBegin = str.end();
@@ -1456,7 +1456,7 @@ formatName( const std::basic_string< CharT, Traits, Allocator > &str, NameStyle 
             {
                 strRes.append(1, (CharT)'_');
             }
-            else if ( nameStyle==NameStyle::hyphenStyle 
+            else if ( nameStyle==NameStyle::hyphenStyle
               || nameStyle==NameStyle::hyphenUnderscoredStyle
               || nameStyle==NameStyle::hyphenCamelMixedStyle
               || nameStyle==NameStyle::hyphenCamelMixedUnderscoredStyle
@@ -1507,7 +1507,7 @@ formatName( const std::basic_string< CharT, Traits, Allocator > &str, NameStyle 
             default                             :
                  strRes.append(*it);
 
-        
+
         }
     }
 
@@ -1556,7 +1556,7 @@ formatName( const std::basic_string< CharT, Traits, Allocator > &str, NameStyle 
 
 inline std::string  formatName( const char    * pStr, NameStyle nameStyle, bool fixStartDigit = true ) { return formatName( std::string(pStr ), nameStyle, fixStartDigit ); }
 inline std::wstring formatName( const wchar_t * pStr, NameStyle nameStyle, bool fixStartDigit = true ) { return formatName( std::wstring(pStr), nameStyle, fixStartDigit ); }
-                                   
+
 //----------------------------------------------------------------------------
 
 
@@ -2064,7 +2064,7 @@ template<typename CharType> CharType get_pair_right_char(CharType ch)
 
 //-----------------------------------------------------------------------------
 //! Возвращает раскавыченную строку
-/*! 
+/*!
     Строка заключена в одинаковые символы кавычек, внутри они дублируются
     Используется в bat-файлах, и тп
  */
@@ -2119,8 +2119,8 @@ bool unquoteSimpleQuoted( StringType &str //!< Строка для раскав�
 }
 
 //-----------------------------------------------------------------------------
-//! Возвращает true, если строка закавычена. 
-/*! 
+//! Возвращает true, если строка закавычена.
+/*!
     Если quotEnd не равен нулю, то кавычки используются как задано, иначе - автоопределение.
  */
 template<typename StringType> inline
@@ -2145,8 +2145,8 @@ bool is_quoted( const StringType &s                        //!< Строка д�
 }
 
 //-----------------------------------------------------------------------------
-//! Возвращает true, если строка была закавычена, и раскавычивает её. 
-/*! 
+//! Возвращает true, если строка была закавычена, и раскавычивает её.
+/*!
     Если quotEnd не равен нулю, то кавычки используются как задано, иначе - автоопределение.
  */
 template<typename StringType> inline
@@ -2157,12 +2157,12 @@ bool unquote( StringType &s                               //!< Строка дл
 {
     if (!is_quoted(s, quotStart, quotEnd))
         return false;
-    
+
     s.erase( s.size()-1 );
     s.erase( 0, 1 );
     //trim(s);
     return true;
-    
+
 }
 
 //-----------------------------------------------------------------------------
@@ -2177,8 +2177,8 @@ StringType unquoted( StringType s                         //!< Строка дл
 }
 
 //-----------------------------------------------------------------------------
-//! Возвращает true, если строка была закавычена, и раскавычивает её. 
-/*! 
+//! Возвращает true, если строка была закавычена, и раскавычивает её.
+/*!
     Используются первые символы параметров strStart и strEnd. Если quotEnd не равен нулю, то кавычки используются как задано, иначе - автоопределение.
  */
 template<typename StringType> inline
@@ -2210,7 +2210,7 @@ StringType unquoted( StringType s                     //!< Строка для �
 //-----------------------------------------------------------------------------
 template<typename StringType> inline
 StringType quote( const StringType &s
-                , typename StringType::value_type quotStart  
+                , typename StringType::value_type quotStart
                 , typename StringType::value_type quotEnd = 0
                 )
 {
@@ -2223,7 +2223,7 @@ StringType quote( const StringType &s
 //-----------------------------------------------------------------------------
 template<typename StringType> inline
 StringType quote( const StringType &s
-                , StringType quotStart  
+                , StringType quotStart
                 , StringType quotEnd
                 )
 {
@@ -2523,7 +2523,7 @@ struct EnumGeneratorTemplate
 
         auto isSpaceChar = [](typename string_type::value_type ch)
                              {
-                                 typedef typename string_type::value_type CharType; 
+                                 typedef typename string_type::value_type CharType;
                                  return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
                              };
 
@@ -2635,7 +2635,7 @@ struct EnumGeneratorTemplate
 
         auto isSpaceChar = [](typename StringType::value_type ch)
                              {
-                                 typedef typename StringType::value_type CharType; 
+                                 typedef typename StringType::value_type CharType;
                                  return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
                              };
 
@@ -2744,7 +2744,7 @@ struct EnumGeneratorTemplate
 
 
         // }
-        //  
+        //
         // for(; lit!=textLines.end(); ++lit, ++lineNo)
         // {
         //     StringType line = simple_trim(*lit, isSpaceChar);
@@ -2829,7 +2829,7 @@ struct EnumGeneratorTemplate
             else if (checkAssign(paramName, paramValue, "EnumDeserializationIncludes"            , deserializeIncludesStr             )) {}
             else if (checkAssign(paramName, paramValue, "EnumFlagIncludes"                       , flagIncludesStr                    )) {}
             else if (checkAssign(paramName, paramValue, "EnumSetIncludes"                        , setIncludesStr                     )) {}
-            
+
             else
             {
                 if (!ignoreUnknownParams)
@@ -2949,7 +2949,7 @@ struct EnumGeneratorTemplate
         res.includesSep                  = make_string<StringType>("\n");
         res.includesGroupSep             = make_string<StringType>("\n");
         res.includesBlockSep             = make_string<StringType>("\n");
-        
+
         return res;
     }
 
@@ -3020,13 +3020,13 @@ struct EnumGeneratorTemplate
         if ( /* val!=0 &&  */ (options&EnumGeneratorOptionFlags::unsignedVals || valFormat!=EnumGeneratorOptionFlags::outputDec))
         {
             unsigned    fmtWidth = 0;
-           
+
             switch(valFormat)
             {
                 case EnumGeneratorOptionFlags::outputHex:
                     fmtWidth      = hexWidth;
                     numberFormat  = hexNumberFormat;
-           
+
                     if (fmtWidth&1)
                         fmtWidth += 1;
                     if (!fmtWidth)
@@ -3035,7 +3035,7 @@ struct EnumGeneratorTemplate
                         fmtWidth = 32;
                     oss << std::uppercase << std::hex << std::setw(fmtWidth) << std::setfill('0') << (enum_internal_uint_t)val;
                     break;
-           
+
                 case EnumGeneratorOptionFlags::outputOct:
                     fmtWidth      = octWidth;
                     numberFormat  = octNumberFormat;
@@ -3045,7 +3045,7 @@ struct EnumGeneratorTemplate
                         fmtWidth = 32;
                     oss << std::oct << std::setw(fmtWidth) << std::setfill('0') << (enum_internal_uint_t)val;
                     break;
-           
+
                 default: // EnumGeneratorOptionFlags::outputDec:
                     numberFormat  = decNumberFormat;
                     oss << std::dec << (enum_internal_uint_t)val;
@@ -3072,20 +3072,20 @@ struct EnumGeneratorTemplate
     {
         typedef typename StringType::value_type char_type;
         typedef std::basic_stringstream<char_type>  stringstream;  // std::char_traits<char_type>, std::allocator<char_type>
-     
-        unsigned 
+
+        unsigned
         optValFormat = genOptions   & EnumGeneratorOptionFlags::outputFormatMask;
         curValFormat = curValFormat & EnumGeneratorOptionFlags::outputFormatMask;
-     
+
         unsigned appliedValFormat = (optValFormat==EnumGeneratorOptionFlags::outputAuto) ? curValFormat : optValFormat;
         if (appliedValFormat==EnumGeneratorOptionFlags::outputAuto)
             appliedValFormat = EnumGeneratorOptionFlags::outputDec;
-     
+
         genOptions = enum_generate_adjust_gen_options(genOptions);
-     
-     
+
+
         stringstream oss;
-     
+
         //std::basic_stringstream< typename StringType::value_type, typename StringType::traits_type, typename StringType::allocator_type >  oss;
         //SimpleStringStream<StringType> oss;
         if ((enum_internal_uint_t)val==(enum_internal_uint_t)-1)
@@ -3093,7 +3093,7 @@ struct EnumGeneratorTemplate
             //TODO: !!! Нужен каст к underlaying типу, если он задан. Сюда надо будет передавать шаблоны и строку underlaying типа
             // return make_string<StringType>("-1");
             // oss << make_string<StringType>("-1");
-     
+
             if (underlyingTypeName.empty() || genOptions&EnumGeneratorOptionFlags::unsignedVals==0)
             {
                 oss << make_string<StringType>("-1");
@@ -3111,7 +3111,7 @@ struct EnumGeneratorTemplate
             if (genOptions&EnumGeneratorOptionFlags::unsignedVals || appliedValFormat!=EnumGeneratorOptionFlags::outputDec)
             {
                 unsigned  fmtWidth = 0;
-     
+
                 switch(appliedValFormat)
                 {
                     case EnumGeneratorOptionFlags::outputHex:
@@ -3128,7 +3128,7 @@ struct EnumGeneratorTemplate
                         // std::cout << "Formatted (2): " << std::hex << val           << " " << 42 << "\n";
                         // std::cout << "Formatted (3): " << oss.str() << "\n";
                         break;
-     
+
                     case EnumGeneratorOptionFlags::outputOct:
                         fmtWidth = genTpl.octWidth;
                         if (fmtWidth<3)
@@ -3137,7 +3137,7 @@ struct EnumGeneratorTemplate
                             fmtWidth = 32;
                         oss << "0" << std::oct << std::setw(fmtWidth) << std::setfill('0') << (enum_internal_uint_t)val;
                         break;
-     
+
                     default: // EnumGeneratorOptionFlags::outputDec:
                         oss << std::dec << (enum_internal_uint_t)val;
                         break;
@@ -3148,9 +3148,9 @@ struct EnumGeneratorTemplate
                 oss << std::dec << (enum_internal_int_t)val;
             }
             #endif
-     
+
         }
-     
+
         StringType strRes = oss.str();
         return strRes;
     }
@@ -3429,8 +3429,8 @@ void enum_generate_serialize_enum_def( StreamType &ss
        return std::get<0>(*it).size();
     };
 
-    std::size_t maxNameLen = vals.empty() 
-                           ? (std::size_t)0 
+    std::size_t maxNameLen = vals.empty()
+                           ? (std::size_t)0
                            //: std::max_element(vals.begin(), vals.end(), []( const auto &p1, const auto &p2 ){ return p1.first.size()<p2.first.size(); } )->first.size()
                            : findMaxValsElement()
                            ;
@@ -3485,8 +3485,8 @@ void enum_generate_serialize_enum_serialize( StreamType &ss
 
     ss << genTpl.formatSerializeBegin( indent, enumName, genOptions );
 
-    std::size_t maxNameLen = serializeVals.empty() 
-                           ? (std::size_t)0 
+    std::size_t maxNameLen = serializeVals.empty()
+                           ? (std::size_t)0
                            : std::max_element(serializeVals.begin(), serializeVals.end(), []( const auto &p1, const auto &p2 ){ return p1.first.size()<p2.first.size(); } )->first.size()
                            ;
 
@@ -3495,8 +3495,8 @@ void enum_generate_serialize_enum_serialize( StreamType &ss
 
     maxNameLen = (maxNameLen+2)>48 ? 48 : (maxNameLen+2);
 
-    std::size_t maxValLen  = serializeVals.empty() 
-                           ? (std::size_t)0 
+    std::size_t maxValLen  = serializeVals.empty()
+                           ? (std::size_t)0
                            : std::max_element(serializeVals.begin(), serializeVals.end(), []( const auto &p1, const auto &p2 ){ return p1.second.size()<p2.second.size(); } )->second.size()
                            ;
     maxValLen = (maxValLen+2)>48 ? 48 : (maxValLen+2);
@@ -3544,13 +3544,13 @@ void enum_generate_serialize_enum_deserialize( StreamType &ss
     auto setItemsMaxLen = []( const std::unordered_set<StringType> &s )
     {
         return s.empty()
-             ? (std::size_t)0 
+             ? (std::size_t)0
              : std::max_element(s.begin(), s.end(), []( const auto &s1, const auto &s2 ){ return s1.size()<s2.size(); } )->size()
              ;
     };
 
-    std::size_t maxNameLen = deserializeVals.empty() 
-                           ? (std::size_t)0 
+    std::size_t maxNameLen = deserializeVals.empty()
+                           ? (std::size_t)0
                            : std::max_element(deserializeVals.begin(), deserializeVals.end(), []( const auto &p1, const auto &p2 ){ return p1.first.size()<p2.first.size(); } )->first.size()
                            ;
 
@@ -3559,8 +3559,8 @@ void enum_generate_serialize_enum_deserialize( StreamType &ss
 
     maxNameLen = (maxNameLen+2)>48 ? 48 : (maxNameLen+2);
 
-    std::size_t maxValLen  = deserializeVals.empty() 
-                           ? (std::size_t)0 
+    std::size_t maxValLen  = deserializeVals.empty()
+                           ? (std::size_t)0
                            : setItemsMaxLen(std::max_element(deserializeVals.begin(), deserializeVals.end(), [&]( const auto &p1, const auto &p2 ){ return setItemsMaxLen(p1.second)<setItemsMaxLen(p2.second); } )->second)
                            ;
     maxValLen = (maxValLen+2)>48 ? 48 : (maxValLen+2);
@@ -3597,7 +3597,7 @@ StringType enum_generate_number_convert( enum_internal_uint_t val, unsigned genO
     typedef typename StringType::value_type char_type;
     typedef std::basic_stringstream<char_type>  stringstream;  // std::char_traits<char_type>, std::allocator<char_type>
 
-    unsigned 
+    unsigned
     optValFormat = genOptions   & EnumGeneratorOptionFlags::outputFormatMask;
     curValFormat = curValFormat & EnumGeneratorOptionFlags::outputFormatMask;
 
@@ -3743,7 +3743,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
     }
 
     // Если значение нельзя сконвертировать в число, значит там - не число.
-    // Там возможна ссылка на какое-то из значений enum'а, или, возможно, какое-то выражение 
+    // Там возможна ссылка на какое-то из значений enum'а, или, возможно, какое-то выражение
     // с их использованием
     auto formatEnumValue = [&]( const StringType &s )
     {
@@ -3760,7 +3760,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
         {
             // Если у нас число, то конвертация пройдёт успешно, и ничего делать не нужно
             // А если выскочит исключение, то это какой-то идентификатор, и его надо проапдейтить в соответствии с правилами
-            
+
             try
             {
                 std::size_t pos = 0;
@@ -3783,7 +3783,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
             }
 
         }
-    
+
         return res;
     };
 
@@ -3810,7 +3810,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
                     return res; // В данном случае числовые имена нельзя рассматривать, как годные строки для (де)сериализации
                 }
             }
-                
+
         }
         catch(...)
         {
@@ -3879,7 +3879,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
 
         if (firstValOccurence)
         {
-            StringType serializedName = serializedNameStyle==NameStyle::unknownStyle 
+            StringType serializedName = serializedNameStyle==NameStyle::unknownStyle
                                       ? name
                                       : ( serializedNameStyle==NameStyle::all
                                         ? formatName(name,NameStyle::pascalStyle, false /* fixStartDigit */ )
@@ -3989,7 +3989,7 @@ struct IncludeNameLess
 
         if (p1>p2)
             return false;
-            
+
         StringType f1 = getIncludeNameFile(n1);
         StringType f2 = getIncludeNameFile(n2);
 
@@ -4094,7 +4094,7 @@ void enum_generate_includes( StreamType &ss
     };
 
     // bool firstGroup = true;
-    
+
 
     auto formatIncludes = [&](const std::set<StringType, IncludeNameLess<StringType> > &includesSet, bool bSysIncludes)
     {
@@ -4252,7 +4252,7 @@ void enum_generate_serialize( StreamType &ss
         StringType strVal = enum_generate_number_convert<StringType>(val, genOptions, EnumGeneratorOptionFlags::outputAuto, underlayedTypeName, genTpl);
         strVals.emplace_back(name, strVal, strVal, comment); //!!! std::make_tuple
     }
-    
+
     enum_generate_serialize( ss, strVals
                            , indent, indentInc
                            , enumName, underlayedTypeName
@@ -4398,7 +4398,7 @@ void enum_generate_serialize( StreamType &ss
 
         if (!splitNameValComment(itemStr, names, valStrSrc, commentStr))
              continue;
-        
+
 
         bool lastValUpdated = false;
         for( auto &name: names)

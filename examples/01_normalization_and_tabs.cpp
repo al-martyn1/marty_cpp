@@ -84,7 +84,7 @@ int main( int argc, char* argv[] )
     };
 
     std::cout << "Unescaped tests\n\n";
-    unescapeTest(std::string("\0000" ,2)); // 
+    unescapeTest(std::string("\0000" ,2)); //
     unescapeTest(std::string("\\0000",4));
     unescapeTest(std::string("\\xD!" ,4)); // \r!
     unescapeTest(std::string("\\r!"  ,3)); // \r!

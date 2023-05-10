@@ -164,7 +164,7 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, String
     static std::vector<std::string>   optSortSystem = make_string_vector<StringType>({ "//#optsortsys" , "/*#optsortsys"  });
 
 
-    std::size_t 
+    std::size_t
     prefixLen = sort_includes_utils::startsWithOneOf(b, e, sortMarkers.begin(), sortMarkers.end());
     if (prefixLen)
         return SourceLineType::sortOn;
@@ -202,7 +202,7 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, String
             optSort = (SourceLineType)(unsigned(optSort) + unsigned(*b-(char_type)'0'));
         }
 
-        return optSort;    
+        return optSort;
     }
 
     prefixLen = sort_includes_utils::startsWithOneOf(b, e, optSortBlk.begin(), optSortBlk.end());
@@ -218,7 +218,7 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, String
             optSort = (SourceLineType)(unsigned(optSort) + unsigned(*b-(char_type)'0'));
         }
 
-        return optSort;    
+        return optSort;
     }
 
 
@@ -254,7 +254,7 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, String
         StringType tmpName = StringType(b, e);
         *pFoundName = simple_rtrim(tmpName, [](char ch) {return ch==(char_type)' ' || ch==(char_type)'\t' || ch==(char_type)'\r' || ch==(char_type)'\n';} );
     }
-    
+
     return SourceLineType::includeLine;
 
 }
@@ -461,7 +461,7 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
                     if (sortOptions.size()>1)
                         sortOptions.pop_back();
                     break;
-                
+
                 case SourceLineType::optSortUser  :
                     sortOptions.back().sysIncludesFirst = false;
                     break;
@@ -469,7 +469,7 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
                 case SourceLineType::optSortSystem:
                     sortOptions.back().sysIncludesFirst = true;
                     break;
-                
+
                 case SourceLineType::optSortGrp0:
                 case SourceLineType::optSortGrp1:
                 case SourceLineType::optSortGrp2:
@@ -480,7 +480,7 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
                 case SourceLineType::optSortGrp7:
                     sortOptions.back().sepGroupLines = std::size_t(vecSlt[n]) - std::size_t(SourceLineType::optSortGrp0);
                     break;
-                
+
                 case SourceLineType::optSortBlk0:
                 case SourceLineType::optSortBlk1:
                 case SourceLineType::optSortBlk2:
@@ -560,7 +560,7 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
 
             if (processedIncludes.find(fileName)!=processedIncludes.end())
                 continue;
-           
+
             processedIncludes.insert(fileName);
 
             if (sysInclude)
@@ -587,7 +587,7 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
                 resLines.insert(resLines.end(), sortOptions.back().sepBlockLines, StringType());
             formatIncludes(sysIncludesMap);
         }
-    
+
     } // for
 
     return resLines;

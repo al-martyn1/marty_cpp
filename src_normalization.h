@@ -30,7 +30,7 @@ namespace marty_cpp
 //     cr,
 //     crlf,
 //     lfcr
-//  
+//
 // };
 
 //----------------------------------------------------------------------------
@@ -141,7 +141,7 @@ StringType normalizeCrLfToLf(const StringType &str, ELinefeedType *pDetectedLine
         {
             // nIt - nextIt
             auto nIt = it; ++nIt; // CR - in all encodings - 1 char len
-            
+
             if (nIt==itEnd)
             {
                 // нет следующего символа, текущий - последний - не надо вставлять пробел вместо CR
@@ -232,8 +232,8 @@ StringType stripLineTrailingSpaces(StringType str)
     typedef typename StringType::reverse_iterator reverse_iterator;
     typedef typename StringType::iterator         iterator;
 
-	// const char_type CR = (char_type)'\r'; // CR - 0x0D
-	// const char_type LF = (char_type)'\n'; // LF - 0x0A
+    // const char_type CR = (char_type)'\r'; // CR - 0x0D
+    // const char_type LF = (char_type)'\n'; // LF - 0x0A
     const char_type SP = (char_type)' ' ;
     const char_type TB = (char_type)'\t' ;
 
@@ -299,7 +299,7 @@ std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyL
         prevLf = false;
     }
 
-    
+
     if (!curStr.empty() || prevLf)
     {
         resVec.emplace_back(curStr);
@@ -333,7 +333,7 @@ std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyL
 //----------------------------------------------------------------------------
 //! Раскрываем табуляцию в пробелы. . Работает для всего текста
 template<typename StringType> inline
-	StringType expandTabsToSpaces(const StringType &str, std::size_t tabSize=4 )
+    StringType expandTabsToSpaces(const StringType &str, std::size_t tabSize=4 )
 {
     typedef typename StringType::value_type     char_type;
     typedef typename StringType::const_iterator iterator;
@@ -554,7 +554,7 @@ StringType converLfToOutputFormat(const StringType &str, ELinefeedType lfType)
             resText.append(1, ch);
         }
     }
-    
+
     return resText;
 }
 
