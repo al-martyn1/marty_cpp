@@ -1,6 +1,13 @@
 #pragma once
 
 #include "marty_cpp.h"
+//
+#include "marty_enum.h"
+//
+#include "marty_enum.h"
+//
+#include "marty_flags.h"
+//
 
 #include <exception>
 #include <stdexcept>
