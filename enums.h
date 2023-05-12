@@ -1,18 +1,5 @@
 #pragma once
 
-#include "marty_cpp/marty_enum.h"
-#include "marty_cpp/marty_flag_ops.h"
-#include "marty_cpp/marty_flags.h"
-
-#include <exception>
-#include <map>
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-
-
 
 namespace marty_cpp{
 
