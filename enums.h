@@ -1,6 +1,5 @@
 #pragma once
 
-
 namespace marty_cpp{
 
 enum class ELinefeedType
