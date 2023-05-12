@@ -3262,13 +3262,20 @@ struct EnumGeneratorTemplate
         return res;
     }
 
-    StringType formatSerializeItemTemplateImpl( const StringType &tpl, std::size_t nItem, const StringType &indent, const StringType &enumName, const StringType &name, const StringType &val, unsigned options, std::size_t nNameLen = 32, std::size_t nValLen = 32 ) const
+    StringType formatSerializeItemTemplateImpl( const StringType &tpl, std::size_t nItem, const StringType &indent
+                                              , const StringType &enumName, const StringType &name
+                                              , const StringType &val, unsigned options
+                                              , std::size_t nNameLen = 32, std::size_t nValLen = 32 ) const
     {
         StringType mapType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_map" : "std::map" );
         StringType setType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_set" : "std::set" );
         StringType lowerFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::lowercaseDeserialize ? "1" : "0" );
 
-        auto nameExpanded = expand_copy((options&EnumGeneratorOptionFlags::enumClass) ? (enumName + make_string<StringType>("::") + name) : name, nNameLen);
+        auto nameExpanded = expand_copy( (options&EnumGeneratorOptionFlags::enumClass) 
+                                       ? ( formatEnumName(enumName,options) /* enumName */ + make_string<StringType>("::") + name)
+                                       : name
+                                       , nNameLen
+                                       );
         auto valExpanded  = expand_copy(val, nValLen);
 
         StringType res = replaceLeadingSpaceToIndentMacro(tpl);
