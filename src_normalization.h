@@ -14,6 +14,8 @@
 //
 #include "marty_enum.h"
 //
+#include "marty_flags.h"
+//
 #include "enums.h"
 //
 
