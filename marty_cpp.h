@@ -202,7 +202,8 @@ StringType toString( NameStyle ns, const StringType &unknownStr = make_string<St
 {
     switch(ns)
     {
-        case NameStyle::invalidName                    : return make_string<StringType>("InvalidName");
+        case NameStyle::invalidName                    : //return make_string<StringType>("InvalidName");
+                                                         return make_string<StringType>("DefaultStyle");
 
         case NameStyle::all                            : return make_string<StringType>("All");
 
