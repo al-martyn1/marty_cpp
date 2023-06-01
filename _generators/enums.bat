@@ -21,7 +21,7 @@
 
 @set GEN_FLAGS2=--enum-flags=extra,flags
 
-umba-enum-gen @enums.rsp %GEN_FLAGS% -N=marty_cpp -E=LinefeedType -F=invalid,unknown=-1;detect=0;lf;cr;lfcr;crlf; ^
+umba-enum-gen @enums.rsp %GEN_FLAGS% -N=marty_cpp -E=LinefeedType -F=invalid,unknown=-1;detect=0;lf;cr;lfcr;crlf;linefeed_remove ^
 %GEN_FLAGS2% --underlaying-type=std::uint32_t --override-template-parameter=EnumFlagsNameFormat:$(ENAMNAME) -E=EnumGeneratorOptionFlagsSerializable -F=@EnumGeneratorOptionFlagsSerializable.txt ^
 ..\enums.h
 

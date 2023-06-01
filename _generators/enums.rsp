@@ -7,3 +7,5 @@
 --enum-name-style=PascalStyle
 --enum-values-style=CamelStyle
 --enum-serialize-style=All
+
+--override-template-parameter=EnumNameFormat:E$(ENAMNAME)

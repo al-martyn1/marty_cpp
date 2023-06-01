@@ -511,11 +511,12 @@ StringType mergeLines(const std::vector<StringType> &v, ELinefeedType lfType, bo
 
     switch(lfType)
     {
-        case ELinefeedType::lf  :  lfStr = make_string<StringType>("\n"); break;
-        case ELinefeedType::cr  :  lfStr = make_string<StringType>("\r"); break;
-        case ELinefeedType::lfcr:  lfStr = make_string<StringType>("\n\r"); break;
+        case ELinefeedType::lf             :  lfStr = make_string<StringType>("\n"  ); break;
+        case ELinefeedType::cr             :  lfStr = make_string<StringType>("\r"  ); break;
+        case ELinefeedType::lfcr           :  lfStr = make_string<StringType>("\n\r"); break;
+        case ELinefeedType::linefeedRemove :  lfStr = make_string<StringType>(""    ); break;
         // case ELinefeedType:::  lfStr = make_string<StringType>(""); break;
-        default                 :  lfStr = make_string<StringType>("\r\n");
+        default                            :  lfStr = make_string<StringType>("\r\n");
     }
 
     for (std::size_t i=0; i!=v.size(); ++i)
