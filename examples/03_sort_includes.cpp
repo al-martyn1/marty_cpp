@@ -5,27 +5,27 @@
 // https://google.github.io/styleguide/cppguide.html#Names_and_Order_of_Includes
 // https://github.com/yandex/CMICOT/blob/master/CPP_STYLE_GUIDE.md#include
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <list>
-#include <queue>
-#include <deque>
-#include <vector>
-#include <map>
-#include <set>
-#include <unordered_set>
-#include <unordered_map>
-#include <algorithm>
-#include <iterator>
-#include <random>
-#include <cstdlib>
-#include <exception>
-#include <stdexcept>
-
 #include "../../marty_cpp/sort_includes.h"
+
+#include <algorithm>
+#include <cstdlib>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <list>
+#include <map>
+#include <queue>
+#include <random>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 
 using namespace std;

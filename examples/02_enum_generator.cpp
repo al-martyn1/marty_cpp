@@ -2,31 +2,31 @@
     \brief Тестирование генератора enum'ов marty_cpp::enum_generate_*
 */
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <list>
-#include <queue>
-#include <deque>
-#include <vector>
-#include <map>
-#include <set>
-#include <unordered_set>
-#include <unordered_map>
-#include <algorithm>
-#include <iterator>
-#include <random>
-#include <cstdlib>
-#include <exception>
-#include <stdexcept>
+#include "enum_gen_cpp_templates_txt.c"
 
 #include "../../marty_cpp/marty_cpp.h"
 #include "../../marty_cpp/marty_enum.h"
 #include "../../marty_cpp/marty_ns.h"
 
-#include "enum_gen_cpp_templates_txt.c"
+#include <algorithm>
+#include <cstdlib>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <list>
+#include <map>
+#include <queue>
+#include <random>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 
 int main( int argc, char* argv[] )

@@ -2,27 +2,27 @@
     \brief Тестируем cEscapeString, нормализацию CR LF, нормализацию trailing spaces, condenseSpacesToTabs, normalizeIndents
 */
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <list>
-#include <queue>
-#include <deque>
-#include <vector>
-#include <map>
-#include <set>
-#include <unordered_set>
-#include <unordered_map>
-#include <algorithm>
-#include <iterator>
-#include <random>
-#include <cstdlib>
-#include <exception>
-#include <stdexcept>
-
 #include "../../marty_cpp/c_escape.h"
+
+#include <algorithm>
+#include <cstdlib>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <list>
+#include <map>
+#include <queue>
+#include <random>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 // #define ENABLE_ONLY_ESCAPE_TEST
 
@@ -41,8 +41,8 @@
 
 #ifndef ENABLE_ONLY_ESCAPE_TEST
     #include "../../marty_utext/i_symbol_traits.h"
-    #include "../../marty_utext/symbol_traits_impl.h"
     #include "../../marty_utext/normalization.h"
+    #include "../../marty_utext/symbol_traits_impl.h"
 #endif
 
 
