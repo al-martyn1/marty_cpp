@@ -12,6 +12,7 @@
 #include <cstring>
 #include <cwctype>
 #include <iterator>
+#include <ios>
 #include <map>
 #include <set>
 #include <sstream>
@@ -157,7 +158,7 @@ template< typename EnumType
         > inline
 std::string serializeEnumFlagsImpl( EnumType enumVal
                                   , EnumTypeSerializer serializer
-                                  , const char *seps // используем только первый элемент
+                                  , const char *seps // РёСЃРїРѕР»СЊР·СѓРµРј С‚РѕР»СЊРєРѕ РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚
                                   )
 {
     const char sepChar = (seps && seps[0]) ? '|' : seps[0];
@@ -181,7 +182,9 @@ std::string serializeEnumFlagsImpl( EnumType enumVal
         auto enumValStr = serializer(testVal);
         if (enumValStr.empty())
         {
-            throw std::runtime_error("serializeEnumFlagsImpl: try to serialize unknown flag");
+            std::ostringstream oss;
+            oss << std::showbase << std::hex << (EnumUnderlyingUnsignedType)testVal;
+            throw std::runtime_error("serializeEnumFlagsImpl: try to serialize unknown flag: " + oss.str());
         }
 
         if (!res.empty())
@@ -203,7 +206,7 @@ template< typename EnumType
         > inline
 std::string serializeEnumFlagsImpl( EnumType enumVal
                                   , EnumTypeSerializer serializer
-                                  , const std::string &seps // используем только первый элемент
+                                  , const std::string &seps // РёСЃРїРѕР»СЊР·СѓРµРј С‚РѕР»СЊРєРѕ РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚
                                   )
 {
     return serializeEnumFlagsImpl(enumVal, serializer, seps.c_str());
