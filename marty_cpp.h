@@ -29,6 +29,19 @@
 
 
 //----------------------------------------------------------------------------
+#ifndef MARTY_ARG_USED
+
+    //! Подавление варнинга о неиспользованном аргументе
+    #define MARTY_ARG_USED(x)                   (void)(x)
+
+#endif
+
+//----------------------------------------------------------------------------
+
+
+
+
+//----------------------------------------------------------------------------
 namespace marty_cpp
 {
 
@@ -287,6 +300,19 @@ inline NameStyle getNameStyleUnderlinedBuddy( NameStyle ns )
         case NameStyle::cppPascalMixedStyle    : return NameStyle::cppPascalMixedUnderscoredStyle;
         case NameStyle::defineStyle            : return NameStyle::defineUnderscoredStyle        ;
 
+        case NameStyle::begin                  : [[fallthrough]];
+        case NameStyle::end                    : [[fallthrough]];
+        case NameStyle::all                    : [[fallthrough]];
+        case NameStyle::hyphenUnderscoredStyle : [[fallthrough]];
+        case NameStyle::cppUnderscoredStyle    : [[fallthrough]];
+        case NameStyle::camelUnderscoredStyle  : [[fallthrough]];
+        case NameStyle::pascalUnderscoredStyle : [[fallthrough]];
+        case NameStyle::hyphenCamelMixedUnderscoredStyle: [[fallthrough]];
+        case NameStyle::hyphenPascalMixedUnderscoredStyle: [[fallthrough]];
+        case NameStyle::cppCamelMixedUnderscoredStyle: [[fallthrough]];
+        case NameStyle::cppPascalMixedUnderscoredStyle: [[fallthrough]];
+        case NameStyle::defineUnderscoredStyle : [[fallthrough]];
+
         default                                : return ns; // return untouched value
     }
 }
@@ -311,6 +337,19 @@ inline NameStyle getNameStyleNotUnderlinedBuddy( NameStyle ns )
         case NameStyle::cppCamelMixedUnderscoredStyle     : return NameStyle::cppCamelMixedStyle ;
         case NameStyle::cppPascalMixedUnderscoredStyle    : return NameStyle::cppPascalMixedStyle;
         case NameStyle::defineUnderscoredStyle            : return NameStyle::defineStyle        ;
+
+        case NameStyle::begin                             : [[fallthrough]];
+        case NameStyle::end                               : [[fallthrough]];
+        case NameStyle::all                               : [[fallthrough]];
+        case NameStyle::hyphenStyle                       : [[fallthrough]];
+        case NameStyle::cppStyle                          : [[fallthrough]];
+        case NameStyle::camelStyle                        : [[fallthrough]];
+        case NameStyle::pascalStyle                       : [[fallthrough]];
+        case NameStyle::hyphenCamelMixedStyle             : [[fallthrough]];
+        case NameStyle::hyphenPascalMixedStyle            : [[fallthrough]];
+        case NameStyle::cppCamelMixedStyle                : [[fallthrough]];
+        case NameStyle::cppPascalMixedStyle               : [[fallthrough]];
+        case NameStyle::defineStyle                       : [[fallthrough]];
 
         default                                           : return ns; // return untouched value
     }
@@ -383,6 +422,7 @@ inline NameStyleSet makeAllNameStylesSet( bool onlyValidStyles=false )
 
 inline NameStyleSet makeAllNameStyles( bool onlyValidStyles=false )
 {
+    MARTY_ARG_USED(onlyValidStyles);
     return makeAllNameStylesSet();
 }
 
@@ -425,8 +465,8 @@ inline bool    isUpper( wchar_t ch )  { return (ch>=L'A' && ch<=L'Z'); }
 inline char    toLower( char ch )     { return isUpper(ch) ? ch-'A'+'a' : ch; }
 inline char    toUpper( char ch )     { return isLower(ch) ? ch-'a'+'A' : ch; }
 
-inline wchar_t toLower( wchar_t ch )  { return isUpper(ch) ? ch-L'A'+L'a' : ch; }
-inline wchar_t toUpper( wchar_t ch )  { return isLower(ch) ? ch-L'a'+L'A' : ch; }
+inline wchar_t toLower( wchar_t ch )  { return (wchar_t)(isUpper(ch) ? ch-L'A'+L'a' : ch); }
+inline wchar_t toUpper( wchar_t ch )  { return (wchar_t)(isLower(ch) ? ch-L'a'+L'A' : ch); }
 
 template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
 inline std::basic_string< CharT, Traits, Allocator >
@@ -1122,12 +1162,26 @@ NameStyle detectNameStyle( const std::basic_string< CharT, Traits, Allocator > &
         case NameStyle::hyphenStyle           :  return NameStyle::hyphenUnderscoredStyle           ;
         case NameStyle::hyphenCamelMixedStyle :  return NameStyle::hyphenCamelMixedUnderscoredStyle ;
         case NameStyle::hyphenPascalMixedStyle:  return NameStyle::hyphenPascalMixedUnderscoredStyle;
-        case NameStyle::cppStyle           :  return NameStyle::cppUnderscoredStyle           ;
-        case NameStyle::camelStyle         :  return NameStyle::camelUnderscoredStyle         ;
-        case NameStyle::pascalStyle        :  return NameStyle::pascalUnderscoredStyle        ;
-        case NameStyle::cppCamelMixedStyle :  return NameStyle::cppCamelMixedUnderscoredStyle ;
-        case NameStyle::cppPascalMixedStyle:  return NameStyle::cppPascalMixedUnderscoredStyle;
-        case NameStyle::defineStyle        :  return NameStyle::defineUnderscoredStyle        ;
+        case NameStyle::cppStyle              :  return NameStyle::cppUnderscoredStyle              ;
+        case NameStyle::camelStyle            :  return NameStyle::camelUnderscoredStyle            ;
+        case NameStyle::pascalStyle           :  return NameStyle::pascalUnderscoredStyle           ;
+        case NameStyle::cppCamelMixedStyle    :  return NameStyle::cppCamelMixedUnderscoredStyle    ;
+        case NameStyle::cppPascalMixedStyle   :  return NameStyle::cppPascalMixedUnderscoredStyle   ;
+        case NameStyle::defineStyle           :  return NameStyle::defineUnderscoredStyle           ;
+
+        case NameStyle::begin                 : [[fallthrough]];
+        case NameStyle::end                   : [[fallthrough]];
+        case NameStyle::all                   : [[fallthrough]];
+        case NameStyle::hyphenUnderscoredStyle: [[fallthrough]];
+        case NameStyle::cppUnderscoredStyle   : [[fallthrough]];
+        case NameStyle::camelUnderscoredStyle : [[fallthrough]];
+        case NameStyle::pascalUnderscoredStyle: [[fallthrough]];
+        case NameStyle::hyphenCamelMixedUnderscoredStyle : [[fallthrough]];
+        case NameStyle::hyphenPascalMixedUnderscoredStyle: [[fallthrough]];
+        case NameStyle::cppCamelMixedUnderscoredStyle    : [[fallthrough]];
+        case NameStyle::cppPascalMixedUnderscoredStyle   : [[fallthrough]];
+        case NameStyle::defineUnderscoredStyle: [[fallthrough]];
+
         default: return baseStyle;
     }
 
@@ -1505,6 +1559,10 @@ formatName( const std::basic_string< CharT, Traits, Allocator > &str, NameStyle 
                  strRes.append(toUpper(*it));
                  break;
 
+            case NameStyle::begin: [[fallthrough]];
+            case NameStyle::end  : [[fallthrough]];
+            case NameStyle::all  : [[fallthrough]];
+
             default                             :
                  strRes.append(*it);
 
@@ -1529,6 +1587,20 @@ formatName( const std::basic_string< CharT, Traits, Allocator > &str, NameStyle 
         case NameStyle::hyphenCamelMixedStyle :
         case NameStyle::hyphenPascalMixedStyle:
              return fixName(strRes, fixStartDigit, make_string<StringType>("-")); // Don't add underscore prefix/suffix
+
+        case NameStyle::begin: [[fallthrough]];
+        case NameStyle::end  : [[fallthrough]];
+        case NameStyle::all  : [[fallthrough]];
+        case NameStyle::cppUnderscoredStyle              : [[fallthrough]];
+        case NameStyle::camelUnderscoredStyle            : [[fallthrough]];
+        case NameStyle::pascalUnderscoredStyle           : [[fallthrough]];
+        case NameStyle::hyphenCamelMixedUnderscoredStyle : [[fallthrough]];
+        case NameStyle::hyphenPascalMixedUnderscoredStyle: [[fallthrough]];
+        case NameStyle::cppCamelMixedUnderscoredStyle    : [[fallthrough]];
+        case NameStyle::cppPascalMixedUnderscoredStyle   : [[fallthrough]];
+        case NameStyle::defineUnderscoredStyle           : [[fallthrough]];
+
+        default: {}
     }
 
     // add prefix
@@ -3095,7 +3167,7 @@ struct EnumGeneratorTemplate
             // return make_string<StringType>("-1");
             // oss << make_string<StringType>("-1");
 
-            if (underlyingTypeName.empty() || genOptions&EnumGeneratorOptionFlags::unsignedVals==0)
+            if (underlyingTypeName.empty() || (genOptions&EnumGeneratorOptionFlags::unsignedVals)==0)
             {
                 oss << make_string<StringType>("-1");
             }
@@ -3419,6 +3491,9 @@ void enum_generate_serialize_enum_def( StreamType &ss
                             , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
                             )
 {
+    MARTY_ARG_USED(valuesPrefix);
+    MARTY_ARG_USED(valuesNameStyle);
+
     genOptions = enum_generate_adjust_gen_options(genOptions);
 
 
@@ -3488,6 +3563,11 @@ void enum_generate_serialize_enum_serialize( StreamType &ss
                             , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
                             )
 {
+    MARTY_ARG_USED(valuesPrefix);
+    MARTY_ARG_USED(serializedNameStyle);
+    MARTY_ARG_USED(valuesNameStyle);
+    MARTY_ARG_USED(underlayedTypeName);
+
     genOptions = enum_generate_adjust_gen_options(genOptions);
 
 
@@ -3544,6 +3624,11 @@ void enum_generate_serialize_enum_deserialize( StreamType &ss
                             , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
                             )
 {
+    MARTY_ARG_USED(valuesPrefix);
+    MARTY_ARG_USED(serializedNameStyle);
+    MARTY_ARG_USED(valuesNameStyle);
+    MARTY_ARG_USED(underlayedTypeName);
+
     genOptions = enum_generate_adjust_gen_options(genOptions);
 
 
@@ -3727,6 +3812,11 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
                                     , std::vector<StringType>                                                   *pDupVals = 0
                                     )
 {
+    MARTY_ARG_USED(enumName);
+    MARTY_ARG_USED(underlayedTypeName);
+    MARTY_ARG_USED(valuesPrefix);
+    MARTY_ARG_USED(genTpl);
+
     NameStyleSet deserializeNameStyles;
 
     genOptions = enum_generate_adjust_gen_options(genOptions);
@@ -4391,7 +4481,8 @@ void enum_generate_serialize( StreamType &ss
         typename StringType::size_type sepPos = 0;
         if (equPos!=itemStr.npos && colPos!=itemStr.npos) // found both
         {
-            auto sepPos = (equPos<colPos) ? equPos : colPos;
+            //auto 
+            sepPos = (equPos<colPos) ? equPos : colPos;
             itemStr[sepPos] = (char_type)'=';
         }
         else // found one of or not found at all

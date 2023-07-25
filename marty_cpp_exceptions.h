@@ -59,6 +59,8 @@ public:
     , mtrCategory(e.mtrCategory)
     {}
 
+    base_error& operator=(const base_error& e) = delete;
+
 }; // class base_error
 
 
@@ -83,6 +85,8 @@ public:
     : base_error(e)
     , fileName(e.fileName)
     {}
+
+    file_not_exist_or_empty& operator=(const file_not_exist_or_empty& e) = delete;
 
 };
 
@@ -122,6 +126,8 @@ public:
     , value(e.value)
     {}
 
+    generic_serialization_error& operator=(const generic_serialization_error& e) = delete;
+
 };
 
 
@@ -139,6 +145,8 @@ public:
     enum_deserialization_error(const enum_deserialization_error &e)
     : generic_serialization_error(e)
     {}
+
+    enum_deserialization_error& operator=(const enum_deserialization_error& e) = delete;
 
 };
 

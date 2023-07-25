@@ -43,6 +43,16 @@
 #endif
 
 //----------------------------------------------------------------------------
+#ifndef MARTY_ARG_USED
+
+    //! Подавление варнинга о неиспользованном аргументе
+    #define MARTY_ARG_USED(x)                   (void)(x)
+
+#endif
+
+//----------------------------------------------------------------------------
+
+
 
 
 
@@ -582,6 +592,7 @@ void deserializeEnumSetImpl( EnumSetType &enumValsSet
                            , char quotChar = '\''
                            )
 {
+    MARTY_ARG_USED(quotChar);
     char sep = ',';
     if (seps && *seps)
     {

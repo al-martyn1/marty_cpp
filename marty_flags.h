@@ -109,6 +109,7 @@ std::string enum_serialize( enumTypeName enumVal, const std::string &seps)      
 inline                                                                       \
 enumTypeName enum_deserialize_flags_##enumTypeName( const std::string &str, const char *seps = ",|+", char quotChar = '\'' ) \
 {                                                                            \
+    MARTY_ARG_USED(quotChar);                                                    \
     auto deser = [](const std::string &str)                                  \
     { return enum_deserialize_##enumTypeName(str); };                        \
     enumTypeName e;                                                          \
@@ -119,6 +120,7 @@ enumTypeName enum_deserialize_flags_##enumTypeName( const std::string &str, cons
 inline                                                                       \
 enumTypeName enum_deserialize_flags_##enumTypeName( const std::string &str, const std::string &seps, char quotChar = '\'' )  \
 {                                                                            \
+    MARTY_ARG_USED(quotChar);                                                    \
     auto deser = [](const std::string &str)                                  \
     { return enum_deserialize_##enumTypeName(str); };                        \
     enumTypeName e;                                                          \

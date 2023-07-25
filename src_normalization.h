@@ -141,10 +141,10 @@ StringType normalizeCrLfToLf(const StringType &str, ELinefeedType *pDetectedLine
     {
         if (*it!=CR)
         {
-            std::size_t spaceLen = (*it==SP) ? 1 : 0;
+            std::size_t spaceLen = (*it==SP) ? 1u : 0u;
             prevSpace = spaceLen>0;
 
-            std::size_t symbLen = spaceLen;
+            // std::size_t symbLen = spaceLen; // not used
 
             auto itNext = it; std::advance(itNext, 1);
             resStr.append(it, itNext); // добавляем текущий символ
@@ -161,8 +161,8 @@ StringType normalizeCrLfToLf(const StringType &str, ELinefeedType *pDetectedLine
             }
             else
             {
-                std::size_t nextSpaceLen = (*nIt==SP || *nIt==CR || *nIt==LF) ? 1 : 0; // pSymbolTraits->isSpaceOrLinefeedSymbol(nIt, itEnd);
-                bool nextSpace = nextSpaceLen>0;
+                std::size_t nextSpaceLen = (*nIt==SP || *nIt==CR || *nIt==LF) ? 1u : 0u; // pSymbolTraits->isSpaceOrLinefeedSymbol(nIt, itEnd);
+                bool nextSpace = nextSpaceLen>0u;
                 if (!prevSpace && !nextSpace) // не пробел до и не пробел после - CR заменяется на пробел
                     resStr.append(1, SP);
             }

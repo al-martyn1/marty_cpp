@@ -200,7 +200,7 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, String
     if (prefixLen)
     {
         SourceLineType optSort = SourceLineType::optSortGrp0;
-        b += prefixLen;
+        b += (std::ptrdiff_t)prefixLen;
         if (b==e)
             return optSort;
 
@@ -216,7 +216,7 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, String
     if (prefixLen)
     {
         SourceLineType optSort = SourceLineType::optSortBlk0;
-        b += prefixLen;
+        b += (std::ptrdiff_t)prefixLen;
         if (b==e)
             return optSort;
 
@@ -245,7 +245,7 @@ SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, String
     if (!prefixLen)
         return SourceLineType::genericLine;
 
-    b += prefixLen;
+    b += (std::ptrdiff_t)prefixLen;
     if (b==e)
         return SourceLineType::genericLine;
 
@@ -349,14 +349,14 @@ std::vector<unsigned char> findSortIncludeMarkers(const std::vector<SourceLineTy
         {
             case SourceLineType::sortOn:
                 ++sortLevel;
-                sortFlags.emplace_back(0); // do not sort current line with sort mode ctrl
+                sortFlags.emplace_back((unsigned char)0u); // do not sort current line with sort mode ctrl
                 backTraceEmptyLines(n);
                 prevInclude = false;
                 break;
 
             case SourceLineType::sortOff:
                 --sortLevel;
-                sortFlags.emplace_back(0); // do not sort current line with sort mode ctrl
+                sortFlags.emplace_back((unsigned char)0u); // do not sort current line with sort mode ctrl
                 backTraceEmptyLines(n);
                 prevInclude = false;
                 break;
@@ -384,13 +384,13 @@ std::vector<unsigned char> findSortIncludeMarkers(const std::vector<SourceLineTy
             case SourceLineType::optSortBlk5:
             case SourceLineType::optSortBlk6:
             case SourceLineType::optSortBlk7:
-                sortFlags.emplace_back(0); // do not sort current line with sort mode ctrl
+                sortFlags.emplace_back((unsigned char)0u); // do not sort current line with sort mode ctrl
                 backTraceEmptyLines(n);
                 prevInclude = false;
                 break;
 
             case SourceLineType::genericLine:
-                sortFlags.emplace_back(0); // do not sort generic lines
+                sortFlags.emplace_back((unsigned char)0u); // do not sort generic lines
                 backTraceEmptyLines(n);
                 prevInclude = false;
                 break;
@@ -398,16 +398,16 @@ std::vector<unsigned char> findSortIncludeMarkers(const std::vector<SourceLineTy
             case SourceLineType::emptyLine:
                 if (prevInclude)
                 {
-                    sortFlags.emplace_back(sortLevel>0 ? 1 : 0);
+                    sortFlags.emplace_back((unsigned char)(sortLevel>0 ? 1 : 0));
                 }
                 else
                 {
-                    sortFlags.emplace_back(0);
+                    sortFlags.emplace_back((unsigned char)0u);
                 }
                 break;
 
             case SourceLineType::includeLine:
-                sortFlags.emplace_back(sortLevel>0 ? 1 : 0);
+                sortFlags.emplace_back((unsigned char)(sortLevel>0 ? 1 : 0));
                 prevInclude = true;
                 break;
 
@@ -498,6 +498,14 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
                 case SourceLineType::optSortBlk7:
                     sortOptions.back().sepBlockLines = std::size_t(vecSlt[n]) - std::size_t(SourceLineType::optSortBlk0);
                     break;
+
+                case SourceLineType::genericLine: [[fallthrough]];
+                case SourceLineType::emptyLine  : [[fallthrough]];
+                case SourceLineType::includeLine: [[fallthrough]];
+                case SourceLineType::sortOn     : [[fallthrough]];
+                case SourceLineType::sortOff    : [[fallthrough]];
+
+                default: {}
             }
 
             ++n;
