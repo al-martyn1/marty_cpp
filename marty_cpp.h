@@ -2386,8 +2386,16 @@ public:
         return *this;
     }
 
+    #if defined(_MSC_VER)
+        #pragma warning(push)
+        #pragma warning(disable:4996) // warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+    #endif
+
     MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL(SimpleStringRefStream)
 
+    #if defined(_MSC_VER)
+        #pragma warning(pop)
+    #endif
 
 }; // template<StringType> class SimpleStringRefStream
 
@@ -2441,8 +2449,16 @@ public:
         return *this;
     }
 
+    #if defined(_MSC_VER)
+        #pragma warning(push)
+        #pragma warning(disable:4996) // warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+    #endif
+
     MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL(SimpleStringStream)
 
+    #if defined(_MSC_VER)
+        #pragma warning(pop)
+    #endif
 
 }; // template<StringType> class SimpleStringStream
 
