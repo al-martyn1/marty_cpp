@@ -197,7 +197,16 @@ std::string serializeEnumFlagsImpl( EnumType enumVal
     }
 
     if (res.empty())
-        res = "0";
+    {
+        try
+        {
+            res = serializer((EnumType)0);
+        }
+        catch(...)
+        {
+            res = "0";
+        }
+    }
 
     return res;
 }
