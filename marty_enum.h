@@ -55,6 +55,12 @@
 
 
 
+// template<typename EnumType> inline
+// EnumType enum_deserialize_unsafe(const std::string &str)
+// {
+//     throw std::runtime_error( "enum_deserialize_unsafe not specialized for this type")
+// }
+
 
 
 //----------------------------------------------------------------------------
@@ -211,6 +217,15 @@ enumTypeName enum_deserialize_##enumTypeName( const std::string &str, enumTypeNa
                                                                              \
     return it->second;                                                       \
 }
+
+// Начал пилить прикольно, но потом понял, что оно не сработает
+#if 0
+template<> inline
+enumTypeName enum_deserialize_unsafe<enumTypeName>(const std::string &str)
+{
+    return enum_deserialize_##enumTypeName( str )
+}
+#endif
 
 
 
