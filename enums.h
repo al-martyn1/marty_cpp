@@ -15,6 +15,8 @@ enum class ELinefeedType
 
 }; // enum class ELinefeedType
 
+MARTY_CPP_MAKE_ENUM_IS_FLAGS_FOR_NON_FLAGS_ENUM(ELinefeedType)
+
 MARTY_CPP_ENUM_CLASS_SERIALIZE_BEGIN( ELinefeedType, std::map, 1 )
     MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( ELinefeedType::cr              , "Cr"             );
     MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( ELinefeedType::invalid         , "Invalid"        );
