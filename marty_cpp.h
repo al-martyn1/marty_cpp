@@ -2585,6 +2585,7 @@ struct EnumGeneratorTemplate
     StringType declItemCommentTemplate     ; // /* $(ITEMCOMMENTTEXT) */
 
     StringType declFlagsTemplate           ;
+    StringType declNonFlagsTemplate        ;
 
 
     StringType serializeBeginTemplate      ;
@@ -2676,6 +2677,7 @@ struct EnumGeneratorTemplate
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemDeclaration"                    ) , declItemTemplate            )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumItemComment"                        ) , declItemCommentTemplate     )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumFlagsDeclaration"                   ) , declFlagsTemplate           )) { return true; }
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumNonFlagsDeclaration"                ) , declNonFlagsTemplate        )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumSerializationBegin"                 ) , serializeBeginTemplate      )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumSerializationEnd"                   ) , serializeEndTemplate        )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumSerializationItem"                  ) , serializeItemTemplate       )) { return true; }
@@ -2912,6 +2914,7 @@ struct EnumGeneratorTemplate
             else if (checkAssign(paramName, paramValue, "EnumItemDeclaration"                    , genTpl.declItemTemplate            )) {}
             else if (checkAssign(paramName, paramValue, "EnumItemComment"                        , genTpl.declItemCommentTemplate     )) {}
             else if (checkAssign(paramName, paramValue, "EnumFlagsDeclaration"                   , genTpl.declFlagsTemplate           )) {}
+            else if (checkAssign(paramName, paramValue, "EnumNonFlagsDeclaration"                , genTpl.declNonFlagsTemplate        )) {}
             else if (checkAssign(paramName, paramValue, "EnumSerializationBegin"                 , genTpl.serializeBeginTemplate      )) {}
             else if (checkAssign(paramName, paramValue, "EnumSerializationEnd"                   , genTpl.serializeEndTemplate        )) {}
             else if (checkAssign(paramName, paramValue, "EnumSerializationItem"                  , genTpl.serializeItemTemplate       )) {}
@@ -3034,6 +3037,7 @@ struct EnumGeneratorTemplate
         res.declItemCommentTemplate      = make_string<StringType>(" /* $(ITEMCOMMENTTEXT) */");
 
         res.declFlagsTemplate            = make_string<StringType>("MARTY_CPP_MAKE_ENUM_FLAGS($(ENAMNAME))\n");
+        res.declNonFlagsTemplate         = make_string<StringType>("MARTY_CPP_MAKE_ENUM_IS_FLAGS_FOR_NON_FLAGS_ENUM($(ENAMNAME))\n");
 
         res.serializeBeginTemplate       = make_string<StringType>(" MARTY_CPP_ENUM$(PPCLASS)_SERIALIZE_BEGIN( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n");
         res.serializeEndTemplate         = make_string<StringType>(" MARTY_CPP_ENUM$(PPCLASS)_SERIALIZE_END( $(ENAMNAME), $(MAPTYPE), $(UPPERFLAG) )\n");
@@ -3303,6 +3307,14 @@ struct EnumGeneratorTemplate
     StringType formatDeclFlags( const StringType &indent, const StringType &enumName, unsigned options ) const
     {
         StringType res = replaceLeadingSpaceToIndentMacro(declFlagsTemplate);
+        res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent );
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), formatEnumName(enumName,options) );
+        return res;
+    }
+
+    StringType formatDeclNonFlags( const StringType &indent, const StringType &enumName, unsigned options ) const
+    {
+        StringType res = replaceLeadingSpaceToIndentMacro(declNonFlagsTemplate);
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)")   , indent );
         res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), formatEnumName(enumName,options) );
         return res;
@@ -3579,6 +3591,11 @@ void enum_generate_serialize_enum_def( StreamType &ss
     {
         ss << "\n";
         ss << genTpl.formatDeclFlags(indent,enumName,genOptions);
+    }
+    else // enum, not flags
+    {
+        ss << "\n";
+        ss << genTpl.formatDeclNonFlags(indent,enumName,genOptions);
     }
 
 }

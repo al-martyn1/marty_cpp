@@ -142,7 +142,6 @@ void enum_deserialize_flags( enumTypeName &e, const std::string &str, const std:
 
 
 
-
 //----------------------------------------------------------------------------
 
 

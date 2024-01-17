@@ -73,6 +73,18 @@
 
 
 //----------------------------------------------------------------------------
+#define MARTY_CPP_MAKE_ENUM_IS_FLAGS_FOR_NON_FLAGS_ENUM(enumTypeName) \
+inline                                                                \
+bool enum_is_flags(enumTypeName)                                      \
+{                                                                     \
+    return false;                                                     \
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
 #define MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )     \
 inline                                                                       \
 mapType< enumTypeName, std::string > make_map_enum_serialize_##enumTypeName()\

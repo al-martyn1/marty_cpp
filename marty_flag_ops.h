@@ -6,6 +6,12 @@
 // https://stackoverflow.com/questions/1448396/how-to-use-enums-as-flags-in-c
 
 #define MARTY_CPP_MAKE_ENUM_FLAGS(TEnum)                                                       \
+    inline                                                                                     \
+    bool enum_is_flags(TEnum)                                                                  \
+    {                                                                                          \
+        return true;                                                                           \
+    }                                                                                          \
+                                                                                               \
     inline constexpr bool operator==(TEnum a, std::underlying_type<TEnum>::type b)             \
     {                                                                                          \
         using TUnder = typename std::underlying_type<TEnum>::type;                             \
