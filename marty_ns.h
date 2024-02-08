@@ -63,7 +63,7 @@ class NamespaceOutputWriteGuard
                 continue;
 
             if (m_nsNameStyle!=NameStyle::defaultStyle)
-                n = formatName(n, m_nsNameStyle);
+                n = formatName(n, m_nsNameStyle, true, true /* fix startDigit, keywords */);
 
             n = simple_string_replace<StringType>(m_nsNameFormat, make_string<StringType>("$(NS)"), n);
             n = simple_string_replace<StringType>(tpl, make_string<StringType>("$(NS)"), n);

@@ -1371,9 +1371,131 @@ splitNamesNotNames( OutputIterator outIter, const std::basic_string< CharT, Trai
 
 
 //----------------------------------------------------------------------------
+template<typename StringType>
+std::unordered_set<StringType> makeCppKeywordsSet()
+{
+    std::unordered_set<StringType> s;
+
+    s.insert(make_string<StringType>("namespace"));
+    s.insert(make_string<StringType>("class"));
+    s.insert(make_string<StringType>("struct"));
+    s.insert(make_string<StringType>("enum"));
+    s.insert(make_string<StringType>("typedef"));
+    s.insert(make_string<StringType>("using"));
+    s.insert(make_string<StringType>("typename"));
+    s.insert(make_string<StringType>("typeid"));
+    s.insert(make_string<StringType>("union"));
+
+    s.insert(make_string<StringType>("operator"));
+    s.insert(make_string<StringType>("this"));
+
+    s.insert(make_string<StringType>("virtual"));
+    s.insert(make_string<StringType>("private"));
+    s.insert(make_string<StringType>("protected"));
+    s.insert(make_string<StringType>("public"));
+
+    s.insert(make_string<StringType>("delete"));
+    s.insert(make_string<StringType>("new"));
+
+    s.insert(make_string<StringType>("switch"));
+    s.insert(make_string<StringType>("case"));
+    s.insert(make_string<StringType>("break"));
+    s.insert(make_string<StringType>("default"));
+    s.insert(make_string<StringType>("if"));
+    s.insert(make_string<StringType>("else"));
+    s.insert(make_string<StringType>("do"));
+    s.insert(make_string<StringType>("while"));
+    s.insert(make_string<StringType>("for"));
+    s.insert(make_string<StringType>("continue"));
+    s.insert(make_string<StringType>("goto"));
+    s.insert(make_string<StringType>("return"));
+
+    s.insert(make_string<StringType>("try"));
+    s.insert(make_string<StringType>("catch"));
+    s.insert(make_string<StringType>("noexcept"));
+    s.insert(make_string<StringType>("throw"));
+
+    s.insert(make_string<StringType>("template"));
+
+    s.insert(make_string<StringType>("auto"));
+    s.insert(make_string<StringType>("decltype"));
+    s.insert(make_string<StringType>("register"));
+
+    s.insert(make_string<StringType>("void"));
+    s.insert(make_string<StringType>("bool"));
+    s.insert(make_string<StringType>("int"));
+    s.insert(make_string<StringType>("unsigned"));
+    s.insert(make_string<StringType>("signed"));
+    s.insert(make_string<StringType>("long"));
+    s.insert(make_string<StringType>("short"));
+    s.insert(make_string<StringType>("char"));
+    s.insert(make_string<StringType>("wchar_t"));
+    s.insert(make_string<StringType>("float"));
+    s.insert(make_string<StringType>("double"));
+
+    s.insert(make_string<StringType>("false"));
+    s.insert(make_string<StringType>("true"));
+    s.insert(make_string<StringType>("sizeof"));
+
+    // https://en.cppreference.com/w/cpp/keyword
+// co_await (C++20)
+// co_return (C++20)
+// co_yield (C++20)
+
+    s.insert(make_string<StringType>("alignas "));
+    s.insert(make_string<StringType>("alignof"));
+
+    s.insert(make_string<StringType>("asm"));
+
+    s.insert(make_string<StringType>("compl"));
+    s.insert(make_string<StringType>("concept"));
+    s.insert(make_string<StringType>("const"));
+    s.insert(make_string<StringType>("consteval"));
+    s.insert(make_string<StringType>("constexpr"));
+    s.insert(make_string<StringType>("constinit"));
+    s.insert(make_string<StringType>("static_assert"));
+
+    s.insert(make_string<StringType>("const_cast"));
+    s.insert(make_string<StringType>("dynamic_cast"));
+    s.insert(make_string<StringType>("reinterpret_cast"));
+    s.insert(make_string<StringType>("static_cast"));
+
+    s.insert(make_string<StringType>("explicit"));
+    s.insert(make_string<StringType>("export"));
+    s.insert(make_string<StringType>("extern"));
+    s.insert(make_string<StringType>("friend"));
+    s.insert(make_string<StringType>("static"));
+    s.insert(make_string<StringType>("inline"));
+    s.insert(make_string<StringType>("mutable"));
+    s.insert(make_string<StringType>("volatile"));
+
+    s.insert(make_string<StringType>("and"));
+    s.insert(make_string<StringType>("and_eq"));
+    s.insert(make_string<StringType>("bitand"));
+    s.insert(make_string<StringType>("bitor"));
+    s.insert(make_string<StringType>("not"));
+    s.insert(make_string<StringType>("not_eq"));
+    s.insert(make_string<StringType>("or_eq"));
+    s.insert(make_string<StringType>("or"));
+    s.insert(make_string<StringType>("xor"));
+    s.insert(make_string<StringType>("xor_eq"));
+
+    s.insert(make_string<StringType>("nullptr"));
+
+    s.insert(make_string<StringType>("reflexpr"));
+    s.insert(make_string<StringType>("requires"));
+    s.insert(make_string<StringType>("synchronized"));
+    s.insert(make_string<StringType>("thread_local"));
+
+    // s.insert(make_string<StringType>(""));
+
+    return s;
+}
+
+//----------------------------------------------------------------------------
 template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
 inline std::basic_string< CharT, Traits, Allocator >
-fixName( const std::basic_string< CharT, Traits, Allocator > &str, bool fixStartDigit, const std::basic_string< CharT, Traits, Allocator > &forceAllowedChars )
+fixName( const std::basic_string< CharT, Traits, Allocator > &str, bool fixStartDigit, bool fixKeywords, const std::basic_string< CharT, Traits, Allocator > &forceAllowedChars )
 {
     typedef std::basic_string< CharT, Traits, Allocator >   string_type;
 
@@ -1440,6 +1562,18 @@ fixName( const std::basic_string< CharT, Traits, Allocator > &str, bool fixStart
         }
     }
 
+
+    static // std::unordered_set<string_type>
+    auto keywordsSet = makeCppKeywordsSet<string_type>();
+
+    if (fixKeywords)
+    {
+        if (keywordsSet.find(toLower(res))!=keywordsSet.end())
+        {
+            res.insert(0, 1, (CharT)'_');
+        }
+    }
+
     return res;
 
 }
@@ -1447,9 +1581,9 @@ fixName( const std::basic_string< CharT, Traits, Allocator > &str, bool fixStart
 //------------------------------
 template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
 inline std::basic_string< CharT, Traits, Allocator >
-fixName( const std::basic_string< CharT, Traits, Allocator > &str, bool fixStartDigit = true )
+fixName( const std::basic_string< CharT, Traits, Allocator > &str, bool fixStartDigit, bool fixKeywords )
 {
-    return fixName(str, fixStartDigit, std::basic_string< CharT, Traits, Allocator >() );
+    return fixName(str, fixStartDigit, fixKeywords, std::basic_string< CharT, Traits, Allocator >() );
 }
 
 //----------------------------------------------------------------------------
@@ -1460,7 +1594,7 @@ fixName( const std::basic_string< CharT, Traits, Allocator > &str, bool fixStart
 //----------------------------------------------------------------------------
 template< class CharT, class Traits = std::char_traits<CharT>, class Allocator = std::allocator<CharT> >
 inline std::basic_string< CharT, Traits, Allocator >
-formatName( const std::basic_string< CharT, Traits, Allocator > &str, NameStyle nameStyle, bool fixStartDigit = true )
+formatName( const std::basic_string< CharT, Traits, Allocator > &str, NameStyle nameStyle, bool fixStartDigit /*  = true */, bool fixKeywords )
 {
     typedef std::basic_string< CharT, Traits, Allocator >  StringType;
     std::vector< StringType > nameParts = splitName(str);
@@ -1581,12 +1715,13 @@ formatName( const std::basic_string< CharT, Traits, Allocator > &str, NameStyle 
         case NameStyle::cppCamelMixedStyle :
         case NameStyle::cppPascalMixedStyle:
         case NameStyle::defineStyle        :
-             return fixName(strRes,fixStartDigit); // Don't add underscore prefix/suffix
+             return fixName(strRes,fixStartDigit, fixKeywords); // Don't add underscore prefix/suffix
+
         case NameStyle::hyphenStyle           :
         case NameStyle::hyphenUnderscoredStyle:
         case NameStyle::hyphenCamelMixedStyle :
         case NameStyle::hyphenPascalMixedStyle:
-             return fixName(strRes, fixStartDigit, make_string<StringType>("-")); // Don't add underscore prefix/suffix
+             return fixName(strRes, fixStartDigit, fixKeywords, make_string<StringType>("-")); // Don't add underscore prefix/suffix
 
         case NameStyle::begin: [[fallthrough]];
         case NameStyle::end  : [[fallthrough]];
@@ -1622,13 +1757,13 @@ formatName( const std::basic_string< CharT, Traits, Allocator > &str, NameStyle 
       || nameStyle==NameStyle::hyphenPascalMixedStyle
       || nameStyle==NameStyle::hyphenPascalMixedUnderscoredStyle
       )
-        return fixName(strRes, fixStartDigit, make_string<StringType>("-"));
+        return fixName(strRes, fixStartDigit, fixKeywords, make_string<StringType>("-"));
 
-    return fixName(strRes,fixStartDigit);
+    return fixName(strRes,fixStartDigit, fixKeywords);
 }
 
-inline std::string  formatName( const char    * pStr, NameStyle nameStyle, bool fixStartDigit = true ) { return formatName( std::string(pStr ), nameStyle, fixStartDigit ); }
-inline std::wstring formatName( const wchar_t * pStr, NameStyle nameStyle, bool fixStartDigit = true ) { return formatName( std::wstring(pStr), nameStyle, fixStartDigit ); }
+inline std::string  formatName( const char    * pStr, NameStyle nameStyle, bool fixStartDigit, bool fixKeywords ) { return formatName( std::string(pStr ), nameStyle, fixStartDigit, fixKeywords ); }
+inline std::wstring formatName( const wchar_t * pStr, NameStyle nameStyle, bool fixStartDigit, bool fixKeywords ) { return formatName( std::wstring(pStr), nameStyle, fixStartDigit, fixKeywords ); }
 
 //----------------------------------------------------------------------------
 
@@ -3473,7 +3608,8 @@ template<typename StringType> inline
 StringType makeEnamValueString(const StringType &name, const StringType &prefix, NameStyle nameStyle)
 {
     auto fixStartDigit = prefix.empty();
-    auto fixedName     = fixName(name,fixStartDigit);
+    bool fixKeyword = true;
+    auto fixedName     = fixName(name,fixStartDigit, fixKeyword);
     auto filteredName  = filterName(fixedName);
 
     bool noMidPrefix = false;
@@ -3484,7 +3620,7 @@ StringType makeEnamValueString(const StringType &name, const StringType &prefix,
     }
     else
     {
-        filteredName = formatName(filteredName,nameStyle,fixStartDigit);
+        filteredName = formatName(filteredName,nameStyle,fixStartDigit,fixKeyword);
     }
 
     StringType midPrefix;
@@ -3971,7 +4107,7 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
         {
             StringType tmp = nameStyle==NameStyle::unknownStyle
                            ? s
-                           : formatName(s,nameStyle, false /* fixStartDigit */ )
+                           : formatName(s,nameStyle, false /* fixStartDigit */, false /* fixKeywords */)
                            ;
             if (genOptions&EnumGeneratorOptionFlags::lowercaseDeserialize)
                 tmp = toLower(tmp);
@@ -4033,8 +4169,8 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
             StringType serializedName = serializedNameStyle==NameStyle::unknownStyle
                                       ? name
                                       : ( serializedNameStyle==NameStyle::all
-                                        ? formatName(name,NameStyle::pascalStyle, false /* fixStartDigit */ )
-                                        : formatName(name,serializedNameStyle, false /* fixStartDigit */ )
+                                        ? formatName(name,NameStyle::pascalStyle, false /* fixStartDigit */, false /* fixKeywords */)
+                                        : formatName(name,serializedNameStyle, false /* fixStartDigit */, false /* fixKeywords */)
                                         )
                                       ;
             serializeVals[formattedEnumName] = serializedName;
