@@ -376,7 +376,7 @@ template<typename StringType> inline
 //----------------------------------------------------------------------------
 //! Раскрываем табуляцию в пробелы.
 template<typename StringType> inline
-void expandTabsToSpaces(std::vector<StringType> &v, std::size_t tabSize=4 )
+void expandTabsToSpaces(std::vector<StringType> &v, std::size_t tabSize=4u )
 {
     for(auto &s : v)
     {
@@ -387,29 +387,29 @@ void expandTabsToSpaces(std::vector<StringType> &v, std::size_t tabSize=4 )
 //----------------------------------------------------------------------------
 //! Заменяем ведущие пробелы на табы. Строка должна быть нормализована по переводам строки - CRLFLF -> LF etc. Работает для всего текста
 template<typename StringType> inline
-StringType condenseSpacesToTabs(const StringType &str, std::size_t tabSize=4, std::size_t delta=(std::size_t)-1 )
+StringType condenseSpacesToTabs(const StringType &str, std::size_t tabSize=4u, std::size_t delta=(std::size_t)-1 )
 {
     typedef typename StringType::value_type     char_type;
     typedef typename StringType::const_iterator iterator;
 
-    if (tabSize>16)
+    if (tabSize>16u)
     {
-        tabSize = 16;
+        tabSize = 16u;
     }
 
-    if (tabSize<1)
+    if (tabSize<1u)
     {
-        tabSize = 1;
+        tabSize = 1u;
     }
 
     if (delta==(std::size_t)-1)
     {
-        delta = tabSize/2;
+        delta = tabSize/2u;
     }
 
     if (delta>=tabSize)
     {
-        delta = 0;
+        delta = 0u;
     }
 
     const std::size_t restLim = tabSize-delta;
@@ -467,7 +467,7 @@ StringType condenseSpacesToTabs(const StringType &str, std::size_t tabSize=4, st
 //----------------------------------------------------------------------------
 //! Заменяем ведущие пробелы на табы. Строка должна быть нормализована по переводам строки - CRLFLF -> LF etc
 template<typename StringType> inline
-void condenseSpacesToTabs(std::vector<StringType> &v, std::size_t tabSize=4, std::size_t delta=(std::size_t)-1 )
+void condenseSpacesToTabs(std::vector<StringType> &v, std::size_t tabSize=4u, std::size_t delta=(std::size_t)-1 )
 {
     for(auto &s : v)
     {
@@ -478,7 +478,7 @@ void condenseSpacesToTabs(std::vector<StringType> &v, std::size_t tabSize=4, std
 //----------------------------------------------------------------------------
 //! Нормализация отступов - все не кратные заданному размеру табуляции отступы приводятся к кратному размеру
 template<typename StringType> inline
-StringType normalizeIndents(const StringType &str, std::size_t tabSize=4, std::size_t delta=(std::size_t)-1 )
+StringType normalizeIndents(const StringType &str, std::size_t tabSize=4u, std::size_t delta=(std::size_t)-1 )
 {
     StringType expanded  = expandTabsToSpaces(str, tabSize);
     StringType condensed = condenseSpacesToTabs(expanded, tabSize, delta);
@@ -488,7 +488,7 @@ StringType normalizeIndents(const StringType &str, std::size_t tabSize=4, std::s
 //----------------------------------------------------------------------------
 //! Нормализация отступов - все не кратные заданному размеру табуляции отступы приводятся к кратному размеру
 template<typename StringType> inline
-void normalizeIndents(std::vector<StringType> &v, std::size_t tabSize=4, std::size_t delta=(std::size_t)-1 )
+void normalizeIndents(std::vector<StringType> &v, std::size_t tabSize=4u, std::size_t delta=(std::size_t)-1 )
 {
     for(auto &s : v)
     {
@@ -505,7 +505,7 @@ void normalizeIndents(std::vector<StringType> &v, std::size_t tabSize=4, std::si
 template<typename StringType> inline
 StringType mergeLines(const std::vector<StringType> &v, ELinefeedType lfType, bool addTrailingNewLine=false)
 {
-    StringType resText; resText.reserve(v.size()*16);
+    StringType resText; resText.reserve(v.size()*16u);
 
     StringType lfStr;
 
@@ -514,12 +514,15 @@ StringType mergeLines(const std::vector<StringType> &v, ELinefeedType lfType, bo
         case ELinefeedType::lf             :  lfStr = make_string<StringType>("\n"  ); break;
         case ELinefeedType::cr             :  lfStr = make_string<StringType>("\r"  ); break;
         case ELinefeedType::lfcr           :  lfStr = make_string<StringType>("\n\r"); break;
+        case ELinefeedType::crlf           :  lfStr = make_string<StringType>("\r\n"); break;
         case ELinefeedType::linefeedRemove :  lfStr = make_string<StringType>(""    ); break;
         // case ELinefeedType:::  lfStr = make_string<StringType>(""); break;
+        case ELinefeedType::detect         :  [[fallthrough]];
+        case ELinefeedType::invalid        :  [[fallthrough]];
         default                            :  lfStr = make_string<StringType>("\r\n");
     }
 
-    for (std::size_t i=0; i!=v.size(); ++i)
+    for (std::size_t i=0u; i!=v.size(); ++i)
     {
         if (i)
             resText.append(lfStr);
@@ -550,10 +553,22 @@ StringType converLfToOutputFormat(const StringType &str, ELinefeedType lfType)
 
     switch(lfType)
     {
-        case ELinefeedType::lf  :  lfStr = make_string<StringType>("\n"); break;
-        case ELinefeedType::cr  :  lfStr = make_string<StringType>("\r"); break;
-        case ELinefeedType::lfcr:  lfStr = make_string<StringType>("\n\r"); break;
+        case ELinefeedType::lf      :  lfStr = make_string<StringType>("\n"  ); break;
+        case ELinefeedType::cr      :  lfStr = make_string<StringType>("\r"  ); break;
+        case ELinefeedType::crlf    :  lfStr = make_string<StringType>("\r\n"); break;
+        case ELinefeedType::lfcr    :  lfStr = make_string<StringType>("\n\r"); break;
+        case ELinefeedType::detect  :
+            #if defined(WIN32) || defined(_WIN32)
+                lfStr = make_string<StringType>("\r\n"); break;
+            #else
+                lfStr = make_string<StringType>("\n"); break;
+            #endif
+            break;
+
         // case ELinefeedType:::  lfStr = make_string<StringType>(""); break;
+        case ELinefeedType::invalid        : [[fallthrough]];
+        case ELinefeedType::linefeedRemove : [[fallthrough]]; // Я уже забыл, чо это
+
         default                 :  lfStr = make_string<StringType>("\r\n");
     }
 
