@@ -162,7 +162,7 @@ std::string serializeEnumFlagsImpl( EnumType enumVal
                                   , const char *seps // используем только первый элемент
                                   )
 {
-    const char sepChar = (seps && seps[0]) ? '|' : seps[0];
+    const char sepChar = (seps && seps[0]) ? seps[0] : '|';
 
     std::string res;
 
