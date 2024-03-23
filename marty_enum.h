@@ -87,7 +87,7 @@ bool enum_is_flags(enumTypeName)                                      \
 //----------------------------------------------------------------------------
 #define MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )     \
 inline                                                                       \
-mapType< enumTypeName, std::string > make_map_enum_serialize_##enumTypeName()\
+mapType< enumTypeName, std::string > enum_serialize_make_map_##enumTypeName()\
 {                                                                            \
      /* static  */ mapType< enumTypeName, std::string >  _m;                 \
     if (_m.empty())                                                          \
@@ -105,11 +105,19 @@ mapType< enumTypeName, std::string > make_map_enum_serialize_##enumTypeName()\
 }                                                                            \
                                                                              \
 inline                                                                       \
+mapType< enumTypeName, std::string > enum_serialize_get_map_##enumTypeName() \
+{                                                                            \
+    static mapType< enumTypeName, std::string > m = enum_serialize_make_map_##enumTypeName();\
+    return m;                                                               \
+}                                                                            \
+                                                                             \
+                                                                             \
+inline                                                                       \
 std::string enum_serialize_##enumTypeName( enumTypeName v )                  \
 {                                                                            \
-    static mapType< enumTypeName, std::string > _m = make_map_enum_serialize_##enumTypeName();\
-    mapType< enumTypeName, std::string >::const_iterator it = _m.find(v);    \
-    if (it==_m.end())                                                        \
+    const auto &m = enum_serialize_get_map_##enumTypeName();                 \
+    mapType< enumTypeName, std::string >::const_iterator it = m.find(v);     \
+    if (it==m.end())                                                         \
         return std::string();                                                \
                                                                              \
     return it->second;                                                       \
@@ -170,7 +178,7 @@ std::string enum_serialize_set( const setType<enumTypeName> &s, const std::strin
 //----------------------------------------------------------------------------
 #define MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )   \
 inline                                                                       \
-mapType< std::string, enumTypeName > make_map_enum_deserialize_impl_get_map_##enumTypeName( )\
+mapType< std::string, enumTypeName > enum_deserialize_make_map_##enumTypeName( )\
 {                                                                            \
     static bool lowerCaseConvert = doLower ? true : false;                   \
      /* static */  mapType< std::string, enumTypeName >  _m;                 \
@@ -189,11 +197,10 @@ mapType< std::string, enumTypeName > make_map_enum_deserialize_impl_get_map_##en
     return _m;                                                               \
 }                                                                            \
                                                                              \
-                                                                             \
 inline                                                                       \
-const mapType< std::string, enumTypeName >& enum_deserialize_impl_get_map_##enumTypeName( ) \
+const mapType< std::string, enumTypeName >& enum_deserialize_get_map_##enumTypeName( ) \
 {                                                                                           \
-    static mapType< std::string, enumTypeName > _m = make_map_enum_deserialize_impl_get_map_##enumTypeName(); \
+    static mapType< std::string, enumTypeName > _m = enum_deserialize_make_map_##enumTypeName(); \
     return _m;                                                                              \
 }                                                                            \
                                                                              \
@@ -209,7 +216,7 @@ mapType< std::string, enumTypeName >::const_iterator enum_deserialize_impl_find_
 inline                                                                       \
 enumTypeName enum_deserialize_##enumTypeName( const std::string &str )       \
 {                                                                            \
-    const auto & _m = enum_deserialize_impl_get_map_##enumTypeName( );       \
+    const auto & _m = enum_deserialize_get_map_##enumTypeName( );       \
                                                                              \
     auto it = enum_deserialize_impl_find_##enumTypeName(_m, str);            \
     if (it==_m.end())                                                        \
@@ -221,7 +228,7 @@ enumTypeName enum_deserialize_##enumTypeName( const std::string &str )       \
 inline                                                                       \
 enumTypeName enum_deserialize_##enumTypeName( const std::string &str, enumTypeName defVal ) \
 {                                                                            \
-    const auto & _m = enum_deserialize_impl_get_map_##enumTypeName( );       \
+    const auto & _m = enum_deserialize_get_map_##enumTypeName( );            \
                                                                              \
     auto it = enum_deserialize_impl_find_##enumTypeName(_m, str);            \
     if (it==_m.end())                                                        \
