@@ -105,7 +105,7 @@ mapType< enumTypeName, std::string > enum_serialize_make_map_##enumTypeName()\
 }                                                                            \
                                                                              \
 inline                                                                       \
-mapType< enumTypeName, std::string > enum_serialize_get_map_##enumTypeName() \
+const mapType< enumTypeName, std::string >& enum_serialize_get_map_##enumTypeName() \
 {                                                                            \
     static mapType< enumTypeName, std::string > m = enum_serialize_make_map_##enumTypeName();\
     return m;                                                               \
