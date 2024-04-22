@@ -1036,7 +1036,7 @@ NameStyle detectNameStyleImpl( const std::basic_string< CharT, Traits, Allocator
     bool hasLower      = false;
     bool hasUpper      = false;
     bool hasUnderscore = false;
-    bool isFirstAlpha  = false;
+    //bool isFirstAlpha  = false;
 
     std::size_t charCount  = 0;
     std::size_t alphaCount = 0;
@@ -1057,7 +1057,7 @@ NameStyle detectNameStyleImpl( const std::basic_string< CharT, Traits, Allocator
             if (!charCount)
             {
                 isValid      = true;
-                isFirstAlpha = true;
+                //isFirstAlpha = true;
             }
 
             if (!alphaCount && isUpper(ch))
@@ -2297,7 +2297,7 @@ template<typename CharType> CharType get_pair_right_char(CharType ch)
     Используется в bat-файлах, и тп
  */
 template<typename StringType> inline
-bool unquoteSimpleQuoted( StringType &str //!< Строка для раскавычивания
+StringType unquoteSimpleQuoted( StringType &str //!< Строка для раскавычивания
                         )
 {
     if (str.size()<2)
@@ -2308,9 +2308,9 @@ bool unquoteSimpleQuoted( StringType &str //!< Строка для раскав�
     if (str.front()!=quotChar || str.back()!=quotChar)
         return str;
 
-    std::string::size_type pos = 1, endPos = str.size()-1;
+    typename StringType::size_type pos = 1, endPos = str.size()-1;
 
-    std::string res; res.reserve(endPos-pos);
+    StringType res; res.reserve(endPos-pos);
 
     bool prevQuot = false;
 
@@ -2682,6 +2682,26 @@ struct EnumGeneratorOptionFlags
 
 typedef std::int64_t           enum_internal_int_t;
 typedef std::uint64_t          enum_internal_uint_t;
+
+
+//-----------------------------------------------------------------------------
+inline
+unsigned enum_generate_adjust_gen_options(unsigned genOptions)
+{
+    if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+        genOptions |= EnumGeneratorOptionFlags::enumClass;
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefSerializeSet)
+        genOptions |= EnumGeneratorOptionFlags::generateDefSerialize;
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDefDeserializeSet)
+        genOptions |= EnumGeneratorOptionFlags::generateDefDeserialize;
+
+    return genOptions;
+}
+
+// genOptions = enum_generate_adjust_gen_options(genOptions);
+// if (genOptions&EnumGeneratorOptionFlags::enumFlags)
 
 
 //-----------------------------------------------------------------------------
@@ -3640,24 +3660,6 @@ StringType makeEnamValueString(const StringType &name, const StringType &prefix,
     return prefix + midPrefix + filteredName;
 }
 
-//-----------------------------------------------------------------------------
-inline
-unsigned enum_generate_adjust_gen_options(unsigned genOptions)
-{
-    if (genOptions&EnumGeneratorOptionFlags::enumFlags)
-        genOptions |= EnumGeneratorOptionFlags::enumClass;
-
-    if (genOptions&EnumGeneratorOptionFlags::generateDefSerializeSet)
-        genOptions |= EnumGeneratorOptionFlags::generateDefSerialize;
-
-    if (genOptions&EnumGeneratorOptionFlags::generateDefDeserializeSet)
-        genOptions |= EnumGeneratorOptionFlags::generateDefDeserialize;
-
-    return genOptions;
-}
-
-// genOptions = enum_generate_adjust_gen_options(genOptions);
-// if (genOptions&EnumGeneratorOptionFlags::enumFlags)
 
 
 //-----------------------------------------------------------------------------
@@ -4243,7 +4245,7 @@ void enum_generate_epilog( StreamType &ss
 template<typename StringType> inline
 StringType getIncludeNamePath(const StringType &name)
 {
-     auto sepPos = name.find_last_of((StringType::value_type)'/' /* , name.size() */ );
+     auto sepPos = name.find_last_of((typename StringType::value_type)'/' ); /* , name.size() */ 
      if (sepPos==name.npos)
          return StringType();
      return StringType(name,0,sepPos);
@@ -4253,7 +4255,7 @@ StringType getIncludeNamePath(const StringType &name)
 template<typename StringType> inline
 StringType getIncludeNameFile(const StringType &name)
 {
-     auto sepPos = name.find_last_of((StringType::value_type)'/' /* , name.size() */ );
+     auto sepPos = name.find_last_of((typename StringType::value_type)'/' ); /* , name.size() */
      if (sepPos==name.npos)
          return name;
      return StringType(name,sepPos+1, name.npos);
@@ -4344,14 +4346,14 @@ void enum_generate_includes( StreamType &ss
     std::set<StringType, IncludeNameLess<StringType> >    processedIncludes;
 
 
-    std::vector<StringType>::const_iterator ait = allIncludes.begin();
+    typename std::vector<StringType>::const_iterator ait = allIncludes.begin();
     for(; ait!=allIncludes.end(); ++ait)
     {
         StringType fileName = *ait;
 
-        bool sysInclude = unquote(fileName, (StringType::value_type)'<', (StringType::value_type)'>');
+        bool sysInclude = unquote(fileName, (typename StringType::value_type)'<', (typename StringType::value_type)'>');
         if (!sysInclude)
-            unquote(fileName, (StringType::value_type)'\"', (StringType::value_type)'\"');
+            unquote(fileName, (typename StringType::value_type)'\"', (typename StringType::value_type)'\"');
 
         if (fileName.empty())
         {

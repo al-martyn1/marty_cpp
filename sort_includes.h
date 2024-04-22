@@ -113,8 +113,8 @@ StringType normalizeIncludeName(StringType name)
 {
     for(std::string::iterator it=name.begin(); it!=name.end(); ++it)
     {
-        if (*it==(StringType::value_type)'\\')
-            *it = (StringType::value_type)'/';
+        if (*it==(typename StringType::value_type)'\\')
+            *it = (typename StringType::value_type)'/';
     }
     return name;
 }
@@ -154,7 +154,7 @@ std::vector<StringType> make_string_vector(const std::vector<std::string> &strVe
 template <typename StringType, typename IteratorType> inline
 SourceLineType parseSourceLineForIncludes(IteratorType b, IteratorType e, StringType *pFoundName = 0)
 {
-    typedef StringType::value_type char_type;
+    typedef typename StringType::value_type char_type;
     using sort_includes_utils::make_string_vector;
 
     b = sort_includes_utils::eatSpaces(b, e);
@@ -518,7 +518,7 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
         bool first = true;
         StringType curGroup;
 
-        std::map<StringType, std::size_t, IncludeNameLess<StringType> >::const_iterator it = includesMap.begin();
+        typename std::map<StringType, std::size_t, IncludeNameLess<StringType> >::const_iterator it = includesMap.begin();
         for(; it!=includesMap.end(); ++it)
         {
             if (it->second>=lines.size())
@@ -558,7 +558,7 @@ std::vector<StringType> sortIncludes( const std::vector<StringType>     &lines
             if (vecSlt[n]!=SourceLineType::includeLine)
                 continue;
 
-            std::unordered_map<std::size_t, StringType>::const_iterator nblIt = namesByLine.find(n);
+            typename std::unordered_map<std::size_t, StringType>::const_iterator nblIt = namesByLine.find(n);
             if (nblIt==namesByLine.end())
                 continue;
 

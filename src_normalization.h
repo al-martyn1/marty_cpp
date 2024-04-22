@@ -281,7 +281,7 @@ void stripLineTrailingSpaces(std::vector<StringType> &v)
 template<typename StringType> inline
 std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyLineAfterLastLf = true, typename StringType::value_type lfChar=(typename StringType::value_type)'\n')
 {
-    typedef typename StringType::value_type     char_type;
+    //typedef typename StringType::value_type     char_type;
     typedef typename StringType::const_iterator iterator;
 
     std::vector<StringType> resVec; resVec.reserve(str.size()/32);
@@ -349,7 +349,7 @@ template<typename StringType> inline
     StringType expandTabsToSpaces(const StringType &str, std::size_t tabSize=4 )
 {
     typedef typename StringType::value_type     char_type;
-    typedef typename StringType::const_iterator iterator;
+    //typedef typename StringType::const_iterator iterator;
 
     // const char_type CR = (char_type)'\r'; // CR - 0x0D
     // const char_type LF = (char_type)'\n'; // LF - 0x0A
@@ -390,7 +390,7 @@ template<typename StringType> inline
 StringType condenseSpacesToTabs(const StringType &str, std::size_t tabSize=4u, std::size_t delta=(std::size_t)-1 )
 {
     typedef typename StringType::value_type     char_type;
-    typedef typename StringType::const_iterator iterator;
+    //typedef typename StringType::const_iterator iterator;
 
     if (tabSize>16u)
     {
