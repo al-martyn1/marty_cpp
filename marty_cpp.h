@@ -2113,7 +2113,7 @@ StringType simple_string_replace(const StringType &str, const StringType &search
         res.append(replaceWith);
     }
 
-    res.append(str, prevPos);
+    res.append(str, prevPos, str.npos);
 
     return res;
 }
