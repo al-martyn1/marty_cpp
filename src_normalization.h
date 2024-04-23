@@ -302,7 +302,7 @@ std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyL
         }
         else
         {
-            curStr.append(1, *it);
+            curStr.append((typename StringType::size_type)1u, *it); // , StringType::npos
             prevLf = false;
         }
     }
