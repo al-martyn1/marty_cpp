@@ -724,7 +724,7 @@ void cUnescapeStringImpl( const CharType *pStr, std::size_t sz, OutputIterator o
 {
     // https://en.cppreference.com/w/cpp/language/escape
 
-    #if defined(DEBUG) || defined(_DEBUG)
+    #if !defined(NDEBUG)
         const CharType *curStrPtr = pStr;
     #endif
 
@@ -732,7 +732,7 @@ void cUnescapeStringImpl( const CharType *pStr, std::size_t sz, OutputIterator o
     for(std::size_t i=0; i!=sz; )
     {
 
-        #if defined(DEBUG) || defined(_DEBUG)
+        #if !defined(NDEBUG)
             curStrPtr = &pStr[i];
         #endif
 
@@ -747,7 +747,7 @@ void cUnescapeStringImpl( const CharType *pStr, std::size_t sz, OutputIterator o
         {
             // escape sequence found
             ++i;
-            #if defined(DEBUG) || defined(_DEBUG)
+            #if !defined(NDEBUG)
                 curStrPtr = &pStr[i];
             #endif
             if (i==sz)
@@ -784,7 +784,7 @@ void cUnescapeStringImpl( const CharType *pStr, std::size_t sz, OutputIterator o
                     CharType tmpResCh = 0;
                     for(std::size_t j=0; j!=2; ++j, ++i)
                     {
-                        #if defined(DEBUG) || defined(_DEBUG)
+                        #if !defined(NDEBUG)
                             curStrPtr = &pStr[i];
                         #endif
 
@@ -812,7 +812,7 @@ void cUnescapeStringImpl( const CharType *pStr, std::size_t sz, OutputIterator o
                     CharType tmpResCh = 0;
                     for(std::size_t j=0; j!=2; ++j, ++i)
                     {
-                        #if defined(DEBUG) || defined(_DEBUG)
+                        #if !defined(NDEBUG)
                             curStrPtr = &pStr[i];
                         #endif
 
