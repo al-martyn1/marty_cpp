@@ -3547,7 +3547,7 @@ struct EnumGeneratorTemplate
         StringType setType   = make_string<StringType>( options&EnumGeneratorOptionFlags::useUnorderedMap ? "std::unordered_set" : "std::set" );
         StringType lowerFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::lowercaseDeserialize ? "1" : "0" );
 
-        auto nameExpanded = expand_copy( (options&EnumGeneratorOptionFlags::enumClass) 
+        auto nameExpanded = expand_copy( (options&EnumGeneratorOptionFlags::enumClass)
                                        ? ( formatEnumName(enumName,options) /* enumName */ + make_string<StringType>("::") + name)
                                        : name
                                        , nNameLen
@@ -4245,7 +4245,7 @@ void enum_generate_epilog( StreamType &ss
 template<typename StringType> inline
 StringType getIncludeNamePath(const StringType &name)
 {
-     auto sepPos = name.find_last_of((typename StringType::value_type)'/' ); /* , name.size() */ 
+     auto sepPos = name.find_last_of((typename StringType::value_type)'/' ); /* , name.size() */
      if (sepPos==name.npos)
          return StringType();
      return StringType(name,0,sepPos);
@@ -4672,7 +4672,7 @@ void enum_generate_serialize( StreamType &ss
         typename StringType::size_type sepPos = 0;
         if (equPos!=itemStr.npos && colPos!=itemStr.npos) // found both
         {
-            //auto 
+            //auto
             sepPos = (equPos<colPos) ? equPos : colPos;
             itemStr[sepPos] = (char_type)'=';
         }
