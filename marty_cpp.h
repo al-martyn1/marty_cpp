@@ -2801,8 +2801,9 @@ struct EnumGeneratorTemplate
         paramValue = cUnescapeString(paramValue);
 
         assignTo = make_string<StringType>(paramValue);
+
         return true;
-    };
+    }
 
     template<typename string_type>
     bool checkAssignParam(const string_type &paramName, const string_type &paramValue)
