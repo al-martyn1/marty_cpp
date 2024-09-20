@@ -46,6 +46,19 @@ namespace marty_cpp
 //
 // };
 
+
+
+//----------------------------------------------------------------------------
+constexpr inline
+ELinefeedType getSystemDefaultLinefeedType()
+{
+    #if defined(WIN32) || defined(_WIN32)
+        return marty_cpp::ELinefeedType::crlf;
+    #else
+        return marty_cpp::ELinefeedType::lf;
+    #endif
+}
+
 //----------------------------------------------------------------------------
 //! Реализация нормализации различных видов (CR/LF/CRLF/LFCR) переводов строки к универсальному виду - LF
 /*! В этих ваших линупсах перенос строки кодируется одним символом 0x0A (\n)
