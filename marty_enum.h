@@ -29,16 +29,19 @@
 
 #endif
 
+#if !defined(THROW_MARTY_CPP_MARTY_ENUM_DESERIALIZE_ERROR)
 
-#if defined(MARTY_CPP_NO_MARTY_CPP_EXCEPTIONS)
-
-    #define THROW_MARTY_CPP_MARTY_ENUM_DESERIALIZE_ERROR( tymeName, str ) \
-                throw std::runtime_error( tymeName " - failed to deserialize value")
-
-#else
-
-    #define THROW_MARTY_CPP_MARTY_ENUM_DESERIALIZE_ERROR( tymeName, str ) \
-                throw marty_cpp::enum_deserialization_error( tymeName, str )
+    #if defined(MARTY_CPP_NO_MARTY_CPP_EXCEPTIONS)
+    
+        #define THROW_MARTY_CPP_MARTY_ENUM_DESERIALIZE_ERROR( typeName, str ) \
+                    throw std::runtime_error( typeName " - failed to deserialize value")
+    
+    #else
+    
+        #define THROW_MARTY_CPP_MARTY_ENUM_DESERIALIZE_ERROR( tymeName, str ) \
+                    throw marty_cpp::enum_deserialization_error( tymeName, str )
+    
+    #endif
 
 #endif
 
@@ -70,6 +73,30 @@
 //   <exception>
 //   <stdexcept>
 // to be included
+
+
+
+#if defined(STM32) || defined(TARGET_STM32)
+
+    #define MARTY_CPP_MAKE_ENUM_IS_FLAGS_FOR_NON_FLAGS_ENUM(enumTypeName)
+    #define MARTY_CPP_ENUM_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_SERIALIZE_ITEM( val, valStr )
+    #define MARTY_CPP_ENUM_SERIALIZE_END( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_CLASS_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_CLASS_SERIALIZE_ITEM( val, valStr )
+    #define MARTY_CPP_ENUM_CLASS_SERIALIZE_END( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_SERIALIZE_SET(enumTypeName, setType)
+    #define MARTY_CPP_ENUM_CLASS_SERIALIZE_SET(enumTypeName, setType)
+    #define MARTY_CPP_ENUM_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_DESERIALIZE_ITEM( val, valStr )
+    #define MARTY_CPP_ENUM_DESERIALIZE_END( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_CLASS_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_CLASS_DESERIALIZE_ITEM( val, valStr )
+    #define MARTY_CPP_ENUM_CLASS_DESERIALIZE_END( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_DESERIALIZE_SET(enumTypeName, setType)
+    #define MARTY_CPP_ENUM_CLASS_DESERIALIZE_SET(enumTypeName, setType)
+
+#else
 
 
 //----------------------------------------------------------------------------
@@ -312,7 +339,7 @@ void enum_deserialize_set( setType<enumTypeName> &s, const std::string &str, con
 
 //----------------------------------------------------------------------------
 
-
+#endif // !STM32
 
 
 

@@ -27,6 +27,18 @@
 //----------------------------------------------------------------------------
 
 
+#if defined(STM32) || defined(TARGET_STM32)
+
+    #define MARTY_CPP_ENUM_FLAGS_SERIALIZE_BEGIN( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( val, valStr )
+    #define MARTY_CPP_ENUM_FLAGS_SERIALIZE_END( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_BEGIN( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( val, valStr )
+    #define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_END( enumTypeName, mapType, doLower )
+    #define MARTY_CPP_ENUM_FLAGS_SERIALIZE_SET(enumTypeName, setType)
+    #define MARTY_CPP_ENUM_FLAGS_DESERIALIZE_SET(enumTypeName, setType)
+
+#else
 
 
 //----------------------------------------------------------------------------
@@ -141,6 +153,7 @@ void enum_deserialize_flags( enumTypeName &e, const std::string &str, const std:
 }
 
 
+#endif // !STM32
 
 //----------------------------------------------------------------------------
 
