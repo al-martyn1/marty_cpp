@@ -3503,22 +3503,32 @@ struct EnumGeneratorTemplate
         return simple_string_replace( res, make_string<StringType>("$(COMMENT)"), lfReplaceHelper(comment) );
     }
 
-    StringType formatDeclItem( std::size_t nItem, const StringType &indent, const StringType &name, const StringType &val, const StringType &itemCommentText, unsigned options, std::size_t nNameLen = 32 ) const
+    StringType formatDeclItem( std::size_t nItem, const StringType &indent, const StringType &enumName, const StringType &name, const StringType &val, const StringType &itemCommentText, unsigned options, std::size_t nNameLen = 32 ) const
     {
         StringType commentTextFormatted;
         if ((options&EnumGeneratorOptionFlags::disableComments)==0)
         {
-            if (!itemCommentText.empty())
+            //if (!itemCommentText.empty())
                 commentTextFormatted = simple_string_replace(declItemCommentTemplate, make_string<StringType>("$(ITEMCOMMENTTEXT)"), itemCommentText);
         }
 
         auto nameExpanded = expand_copy(name, nNameLen);
+        // StringType res = replaceLeadingSpaceToIndentMacro(declItemTemplate);
+        // res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
+        // res = simple_string_replace( res, make_string<StringType>("$(ITEMNAME)"), nameExpanded );
+        // res = simple_string_replace( res, make_string<StringType>("$(ITEMVAL)"), val );
+        // res = simple_string_replace( res, make_string<StringType>("$(ITEMCOMMENT)"), lfReplaceHelper(commentTextFormatted) );
+        // res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , formatEnumName(enumName,options) );
+        // return getDeclItemSepBefore(nItem) + res + declItemSepAfter;
+
         StringType res = replaceLeadingSpaceToIndentMacro(declItemTemplate);
+        res = getDeclItemSepBefore(nItem) + res + declItemSepAfter;
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMNAME)"), nameExpanded );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMVAL)"), val );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMCOMMENT)"), lfReplaceHelper(commentTextFormatted) );
-        return getDeclItemSepBefore(nItem) + res + declItemSepAfter;
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , formatEnumName(enumName,options) );
+        return res; // getDeclItemSepBefore(nItem) + res + declItemSepAfter;
 
     }
 
@@ -3719,7 +3729,7 @@ void enum_generate_serialize_enum_def( StreamType &ss
         // }
         // else
         {
-            ss << genTpl.formatDeclItem( i, lineIndent, name, val, comment, genOptions, maxNameLen );
+            ss << genTpl.formatDeclItem( i, lineIndent, enumName, name, val, comment, genOptions, maxNameLen );
         }
 
     }
