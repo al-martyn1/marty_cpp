@@ -4731,6 +4731,7 @@ void enum_generate_serialize( StreamType &ss
                         try
                         {
                             std::size_t pos = 0;
+                            //!!! заменить std::stoll, чтоб умело парсить двоичные константы и разделители
                             lastValCounter = (enum_internal_uint_t)std::stoll(valStrSrc, &pos, 0);
                             if (pos==valStrSrc.size())
                             {

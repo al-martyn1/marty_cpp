@@ -1,0 +1,4 @@
+// Main enum comment
+hex = 0x1A'FF
+bin = 0b1101'0100
+dec = 10
