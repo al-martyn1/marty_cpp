@@ -1,4 +1,5 @@
 // Main enum comment
 dec = 10
-hex = 0x1A'FF
+hex = 0x1A'FF // Multiline comment \
+with ';' separator
 bin = 0b1101'0100 // 0b11010100 = 0xD4

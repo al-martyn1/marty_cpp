@@ -715,6 +715,64 @@ std::int64_t parseStringToInteger(const StringType &s)
 
 
 //----------------------------------------------------------------------------
+template<typename StringType>
+std::vector<StringType> simple_process_line_continuations(const std::vector<StringType> &v)
+{
+    using CharType = typename StringType::value_type;
+
+    std::vector<StringType> vRes; vRes.reserve(v.size());
+
+    auto isSpace = [](auto ch)
+    {
+        return ch==(CharType)' ' || ch==(CharType)'\r' || ch==(CharType)'\n';
+    };
+
+    // StringType
+
+    for(auto l : v)
+    {
+        if (vRes.empty())
+        {
+            vRes.emplace_back(l);
+            continue;
+        }
+
+        auto vResBackRtr = simple_rtrim(vRes.back(), isSpace);
+
+        if (vResBackRtr.empty())
+        {
+            vRes.emplace_back(l);
+            continue;
+        }
+        
+        if (vResBackRtr.back()==(CharType)'\\')
+        {
+            vResBackRtr.erase(vResBackRtr.size()-1, 1);
+            vRes.back() = vResBackRtr + l;
+            continue;
+        }
+
+        vRes.emplace_back(l);
+    }
+
+    if (!vRes.empty())
+    {
+        auto vResBackRtr = simple_rtrim(vRes.back(), isSpace);
+        if (!vResBackRtr.empty() && vResBackRtr.back()==(CharType)'\\')
+        {
+            vResBackRtr.erase(vResBackRtr.size()-1, 1);
+            vRes.back() = vResBackRtr;
+        }
+    }
+
+    return vRes;
+}
+
+// StringType simple_rtrim(const StringType &str, const ConditionType &trimCondition)
+
+
+
+//----------------------------------------------------------------------------
 inline
 bool isValidIdentChar( char ch, bool allowNonAsciiIdents, const std::string &forceAllowedChars )
 {
@@ -4755,10 +4813,10 @@ void enum_generate_serialize( StreamType &ss
 
     genOptions = enum_generate_adjust_gen_options(genOptions);
 
+    //auto valsStrPrepared = simple_string_replace<StringType>(valsStr, make_string<StringType>("\n"), make_string<StringType>(";") /* , typename StringType::size_type nSplits = -1 */ );
 
-    auto valsStrPrepared = simple_string_replace<StringType>(valsStr, make_string<StringType>("\n"), make_string<StringType>(";") /* , typename StringType::size_type nSplits = -1 */ );
-
-    auto enumItems = simple_string_split(valsStrPrepared, make_string<StringType>(";") /* , typename StringType::size_type nSplits = -1 */ );
+    auto enumItems = simple_string_split(valsStr, make_string<StringType>("\n") /* , typename StringType::size_type nSplits = -1 */ );
+    enumItems = simple_process_line_continuations(enumItems);
 
     auto isSpaceChar = [](typename StringType::value_type ch)
                          {
