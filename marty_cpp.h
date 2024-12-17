@@ -22,6 +22,9 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <exception>
+#include <stdexcept>
+#include <limits>
 
 //----------------------------------------------------------------------------
 
@@ -547,6 +550,227 @@ inline int digitToInt(wchar_t ch, int ss)
 
 inline bool isDigit(char    ch, int ss) { return digitToInt(ch, ss)<0 ? false : true; }
 inline bool isDigit(wchar_t ch, int ss) { return digitToInt(ch, ss)<0 ? false : true; }
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename IteratorT>
+IteratorT parseCharSequenceToUnsigned(IteratorT b, IteratorT e, std::uint64_t *pRes=0)
+{
+    std::uint64_t res = 0;
+
+    auto returnIt = [&](IteratorT it)
+    {
+        if (pRes)
+            *pRes = res;
+        return it;
+    };
+
+    int base = 10; // by default
+
+    if (b==e)
+        return returnIt(b);
+
+    int d = digitToInt(*b, base);
+    if (d<0)
+       return returnIt(b);
+
+    if (d==0)
+    {
+        base = 8;
+    }
+    else
+    {
+        res = (std::uint64_t)d;
+    }
+
+    ++b;
+    if (b==e)
+        return returnIt(b);
+
+    char ch = (char)toUpper(*b);
+    bool isX = (ch=='x' || ch=='X');
+    bool isB = (ch=='b' || ch=='B');
+
+    if (base==8 && (isX||isB))
+    {
+        base = isX ? 16 : 2;
+        ++b;
+        if (b==e)
+            return returnIt(b-1); // если дошли до конца, но у нас только префис hex/bin числа, то это не порядок, поэтому возвращаем на шаг назад, чтбы просигналить о проблеме
+        // ch = (char)toUpper(*b);
+    }
+
+    for(; b!=e; ++b)
+    {
+        ch = (char)toUpper(*b);
+        if (ch=='\'' /* || ch=='`' */ ) // пропускаем разделители разрядов
+            continue;
+
+        d = digitToInt(*b, base);
+        if (d<0)
+           return returnIt(b); // Ошибка - не цифра
+
+        if (d>=base)
+           return returnIt(b); // Ошибка - цифра не лезет в систему счисления
+
+        std::uint64_t resNext1 = res*(std::uint64_t)base;
+        if (resNext1<res)
+            return returnIt(b); // У нас тут переполнение
+
+        std::uint64_t resNext2 = resNext1 + (std::uint64_t)d;
+        if (resNext2<resNext1)
+            return returnIt(b); // У нас тут переполнение
+
+        res = resNext2;
+    }
+
+    return returnIt(b);
+}
+
+//----------------------------------------------------------------------------
+template<typename IteratorT>
+IteratorT parseCharSequenceToInteger( IteratorT b, IteratorT e
+                                    , std::int64_t *pRes=0
+                                    , bool throwRangeError = false
+                                    )
+{
+    std::int64_t res = 0;
+
+    auto returnIt = [&](IteratorT it)
+    {
+        if (pRes)
+            *pRes = res;
+        return it;
+    };
+
+    if (b==e)
+        return returnIt(b);
+
+    bool bNeg = false;
+
+    char ch = (char)toUpper(*b);
+
+    if (ch=='-' || ch=='+')
+    {
+        if (ch=='-')
+           bNeg = true;
+
+        ++b;
+        if (b==e)
+            return returnIt(b-1); // что-то пошло не так, возвращаем итератор на символ знака
+    }
+
+    std::uint64_t ures = 0;
+
+    // 9223372036854775808 - 8000000000000000 
+    // 9223372036854775807 - 7FFFFFFFFFFFFFFF 
+    // std::numeric_limits<std::int64_t>
+    // min() / max()
+    // https://en.cppreference.com/w/cpp/types/numeric_limits/min
+    // out_of_range or range_error
+
+    //TODO: !!! пока range_error не кидаем, но надо доделать
+
+    b = parseCharSequenceToUnsigned(b, e, &ures);
+    if (bNeg)
+    {
+        // if (throwRangeError)
+        res = -(std::int64_t)ures;
+    }
+    else
+    {
+        res = (std::int64_t)ures;
+    }
+
+    return returnIt(b);
+}
+
+//----------------------------------------------------------------------------
+
+// template<typename IteratorT>
+// IteratorT parseCharSequenceToInteger( IteratorT b, IteratorT e
+//                                     , std::int64_t *pRes=0
+//                                     , bool throwRangeError = false
+//                                     )
+// {
+
+//----------------------------------------------------------------------------
+template<typename StringType>
+std::int64_t parseStringToInteger(const StringType &s)
+{
+    auto b = s.begin();
+    auto e = s.end();
+    std::int64_t res = 0;
+    auto resIt = parseCharSequenceToInteger(b, e, &res, true /* throwRangeError */ );
+    if (resIt!=e)
+        throw std::domain_error("parseStringToInteger");
+    return res;
+}
+
+//----------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+template<typename StringType>
+std::vector<StringType> simple_process_line_continuations(const std::vector<StringType> &v)
+{
+    using CharType = typename StringType::value_type;
+
+    std::vector<StringType> vRes; vRes.reserve(v.size());
+
+    auto isSpace = [](auto ch)
+    {
+        return ch==(CharType)' ' || ch==(CharType)'\r' || ch==(CharType)'\n';
+    };
+
+    // StringType
+
+    for(auto l : v)
+    {
+        if (vRes.empty())
+        {
+            vRes.emplace_back(l);
+            continue;
+        }
+
+        auto vResBackRtr = simple_rtrim(vRes.back(), isSpace);
+
+        if (vResBackRtr.empty())
+        {
+            vRes.emplace_back(l);
+            continue;
+        }
+        
+        if (vResBackRtr.back()==(CharType)'\\')
+        {
+            vResBackRtr.erase(vResBackRtr.size()-1, 1);
+            vRes.back() = vResBackRtr + l;
+            continue;
+        }
+
+        vRes.emplace_back(l);
+    }
+
+    if (!vRes.empty())
+    {
+        auto vResBackRtr = simple_rtrim(vRes.back(), isSpace);
+        if (!vResBackRtr.empty() && vResBackRtr.back()==(CharType)'\\')
+        {
+            vResBackRtr.erase(vResBackRtr.size()-1, 1);
+            vRes.back() = vResBackRtr;
+        }
+    }
+
+    return vRes;
+}
+
+// StringType simple_rtrim(const StringType &str, const ConditionType &trimCondition)
+
+
 
 //----------------------------------------------------------------------------
 inline
@@ -2792,9 +3016,9 @@ struct EnumGeneratorTemplate
                                  return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
                              };
 
-        paramName  = simple_trim(paramName ,isSpaceChar);
+        paramName  = simple_trim(paramName , isSpaceChar);
 
-        paramValue = simple_trim(paramValue,isSpaceChar);
+        paramValue = simple_trim(paramValue, isSpaceChar);
         if (is_quoted(paramValue, '\"'))
             unquote(paramValue, '\"');
 
@@ -3244,12 +3468,14 @@ struct EnumGeneratorTemplate
         return ppClass;
     }
 
-    StringType replaceLeadingSpaceToIndentMacro(const StringType &str) const
+    StringType replaceLeadingSpaceToIndentMacro(StringType str) const
     {
         if (str.empty() || str[0]!=(typename StringType::value_type)' ')
             return str;
         StringType res = make_string<StringType>("$(INDENT)");
-        res.append(str, 1);
+        str = simple_ltrim( str, [](auto ch) { return ch==(decltype(ch))' '; } );
+        //res.append(str, 1); // что это было?
+        res.append(str);
         return res;
     }
 
@@ -3503,22 +3729,32 @@ struct EnumGeneratorTemplate
         return simple_string_replace( res, make_string<StringType>("$(COMMENT)"), lfReplaceHelper(comment) );
     }
 
-    StringType formatDeclItem( std::size_t nItem, const StringType &indent, const StringType &name, const StringType &val, const StringType &itemCommentText, unsigned options, std::size_t nNameLen = 32 ) const
+    StringType formatDeclItem( std::size_t nItem, const StringType &indent, const StringType &enumName, const StringType &name, const StringType &val, const StringType &itemCommentText, unsigned options, std::size_t nNameLen = 32 ) const
     {
         StringType commentTextFormatted;
         if ((options&EnumGeneratorOptionFlags::disableComments)==0)
         {
-            if (!itemCommentText.empty())
+            //if (!itemCommentText.empty())
                 commentTextFormatted = simple_string_replace(declItemCommentTemplate, make_string<StringType>("$(ITEMCOMMENTTEXT)"), itemCommentText);
         }
 
         auto nameExpanded = expand_copy(name, nNameLen);
+        // StringType res = replaceLeadingSpaceToIndentMacro(declItemTemplate);
+        // res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
+        // res = simple_string_replace( res, make_string<StringType>("$(ITEMNAME)"), nameExpanded );
+        // res = simple_string_replace( res, make_string<StringType>("$(ITEMVAL)"), val );
+        // res = simple_string_replace( res, make_string<StringType>("$(ITEMCOMMENT)"), lfReplaceHelper(commentTextFormatted) );
+        // res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , formatEnumName(enumName,options) );
+        // return getDeclItemSepBefore(nItem) + res + declItemSepAfter;
+
         StringType res = replaceLeadingSpaceToIndentMacro(declItemTemplate);
+        res = getDeclItemSepBefore(nItem) + res + declItemSepAfter;
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMNAME)"), nameExpanded );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMVAL)"), val );
         res = simple_string_replace( res, make_string<StringType>("$(ITEMCOMMENT)"), lfReplaceHelper(commentTextFormatted) );
-        return getDeclItemSepBefore(nItem) + res + declItemSepAfter;
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)") , formatEnumName(enumName,options) );
+        return res; // getDeclItemSepBefore(nItem) + res + declItemSepAfter;
 
     }
 
@@ -3719,7 +3955,7 @@ void enum_generate_serialize_enum_def( StreamType &ss
         // }
         // else
         {
-            ss << genTpl.formatDeclItem( i, lineIndent, name, val, comment, genOptions, maxNameLen );
+            ss << genTpl.formatDeclItem( i, lineIndent, enumName, name, val, comment, genOptions, maxNameLen );
         }
 
     }
@@ -3978,6 +4214,9 @@ unsigned enum_detect_val_output_format(const StringType &str)
         return EnumGeneratorOptionFlags::outputDec;
 
     if (str[1]==(char_type)'x' || str[1]==(char_type)'X')
+        return EnumGeneratorOptionFlags::outputHex;
+
+    if (str[1]==(char_type)'b' || str[1]==(char_type)'B')
         return EnumGeneratorOptionFlags::outputHex;
 
     return EnumGeneratorOptionFlags::outputOct;
@@ -4574,10 +4813,10 @@ void enum_generate_serialize( StreamType &ss
 
     genOptions = enum_generate_adjust_gen_options(genOptions);
 
+    //auto valsStrPrepared = simple_string_replace<StringType>(valsStr, make_string<StringType>("\n"), make_string<StringType>(";") /* , typename StringType::size_type nSplits = -1 */ );
 
-    auto valsStrPrepared = simple_string_replace<StringType>(valsStr, make_string<StringType>("\n"), make_string<StringType>(";") /* , typename StringType::size_type nSplits = -1 */ );
-
-    auto enumItems = simple_string_split(valsStrPrepared, make_string<StringType>(";") /* , typename StringType::size_type nSplits = -1 */ );
+    auto enumItems = simple_string_split(valsStr, make_string<StringType>("\n") /* , typename StringType::size_type nSplits = -1 */ );
+    enumItems = simple_process_line_continuations(enumItems);
 
     auto isSpaceChar = [](typename StringType::value_type ch)
                          {
@@ -4721,18 +4960,33 @@ void enum_generate_serialize( StreamType &ss
                         try
                         {
                             std::size_t pos = 0;
-                            lastValCounter = (enum_internal_uint_t)std::stoll(valStrSrc, &pos, 0);
-                            if (pos==valStrSrc.size())
+                            //!!! заменить std::stoll, чтоб умело парсить двоичные константы и разделители
+                            //try
                             {
+                                //std::int64_t parseStringToInteger(const StringType &s)
+                                lastValCounter = (enum_internal_uint_t)parseStringToInteger(valStrSrc);
                                 unsigned curIntFormat = enum_detect_val_output_format(valStrSrc);
                                 if (curIntFormat!=EnumGeneratorOptionFlags::outputAuto)
                                     lastIntFormat = curIntFormat;
                                 lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions, lastIntFormat, underlayedTypeName, genTpl);
                             }
-                            else
-                            {
-                                lastVal = valStrSrc;
-                            }
+                            // catch(...)
+                            // {
+                            //     lastVal = valStrSrc;
+                            // }
+
+                            // lastValCounter = (enum_internal_uint_t)std::stoll(valStrSrc, &pos, 0);
+                            // if (pos==valStrSrc.size())
+                            // {
+                            //     unsigned curIntFormat = enum_detect_val_output_format(valStrSrc);
+                            //     if (curIntFormat!=EnumGeneratorOptionFlags::outputAuto)
+                            //         lastIntFormat = curIntFormat;
+                            //     lastVal = enum_generate_number_convert<StringType>(lastValCounter, genOptions, lastIntFormat, underlayedTypeName, genTpl);
+                            // }
+                            // else
+                            // {
+                            //     lastVal = valStrSrc;
+                            // }
                         }
                         catch(...)
                         {

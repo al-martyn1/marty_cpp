@@ -1,1 +1,1 @@
-call enums.bat
+call enums.bat > generate_all.log 2>&1
