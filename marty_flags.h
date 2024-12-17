@@ -286,14 +286,14 @@ void deserializeEnumFlagsImpl( EnumType &enumVal // deserialize to
         if (i=="0")
             continue;
 
-#if !defined(MARTY_CPP_SERIALIZE_FLAGS_DISABLE_NUMERIC_FLAGS_SUPORT)
+#if !defined(MARTY_CPP_DESERIALIZE_FLAGS_DISABLE_NUMERIC_FLAGS_SUPPORT)
         if (i[0]=='0')
         {
-#if !defined(MARTY_CPP_SERIALIZE_FLAGS_THROW_ON_UNKNOWN_FLAG)
+#if !defined(MARTY_CPP_DESERIALIZE_FLAGS_THROW_ON_INVALID_NUMERIC_FLAG)
             try{
 #endif
                 enumVal |= (EnumType)(TUnder)std::stoull(i);
-#if !defined(MARTY_CPP_SERIALIZE_FLAGS_THROW_ON_UNKNOWN_FLAG)
+#if !defined(MARTY_CPP_DESERIALIZE_FLAGS_THROW_ON_INVALID_NUMERIC_FLAG)
             } catch(...) {}
 #endif
             continue;
