@@ -198,7 +198,11 @@ std::string serializeEnumFlagsImpl( EnumType enumVal
         {
             std::ostringstream oss;
             oss << std::showbase << std::hex << (EnumUnderlyingUnsignedType)testVal;
+#if defined(MARTY_CPP_SERIALIZE_FLAGS_THROW_ON_UNKNOWN_FLAG)
             throw std::runtime_error("serializeEnumFlagsImpl: try to serialize unknown flag: " + oss.str());
+#else
+            enumValStr = oss.str();
+#endif
         }
 
         if (!res.empty())
@@ -250,6 +254,8 @@ void deserializeEnumFlagsImpl( EnumType &enumVal // deserialize to
                              , const char *seps
                              )
 {
+    using TUnder = typename std::underlying_type<EnumType>::type;
+
     char sep = ',';
     if (seps && *seps)
     {
@@ -274,8 +280,26 @@ void deserializeEnumFlagsImpl( EnumType &enumVal // deserialize to
 
     for(const auto &i : items)
     {
+        if (i.empty())
+            continue;
+
         if (i=="0")
             continue;
+
+#if !defined(MARTY_CPP_SERIALIZE_FLAGS_DISABLE_NUMERIC_FLAGS_SUPORT)
+        if (i[0]=='0')
+        {
+#if !defined(MARTY_CPP_SERIALIZE_FLAGS_THROW_ON_UNKNOWN_FLAG)
+            try{
+#endif
+                enumVal |= (EnumType)(TUnder)std::stoull(i);
+#if !defined(MARTY_CPP_SERIALIZE_FLAGS_THROW_ON_UNKNOWN_FLAG)
+            } catch(...) {}
+#endif
+            continue;
+        }
+#endif
+
         enumVal |= deserializer(i);
     }
 
