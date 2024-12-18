@@ -776,13 +776,14 @@ std::vector<StringType> simple_process_line_continuations(const std::vector<Stri
 inline
 bool isValidIdentChar( char ch, bool allowNonAsciiIdents, const std::string &forceAllowedChars )
 {
+    unsigned char uch = (unsigned char)ch;
     if (forceAllowedChars.find(ch)!=forceAllowedChars.npos)
         return true; // Force allowed
 
     if ( (ch>=0 && ch<=' ') || ch==0x7F)
         return false; // space and control chars are invalid
 
-    if (ch>0x7F || ch<0)
+    if (uch>0x7F) //  || ch<0
     {
         if (allowNonAsciiIdents)
             return true;
@@ -805,10 +806,10 @@ bool isValidIdentChar( wchar_t ch, bool allowNonAsciiIdents, const std::wstring 
     if (forceAllowedChars.find(ch)!=forceAllowedChars.npos)
         return true; // Force allowed
 
-    if ( (ch>=0 && ch<=L' ') || ch==0x7F)
+    if ( (ch<=L' ') || ch==0x7F) // ch>=0 &&
         return false; // space and control chars are invalid
 
-    if (ch>0x7F || ch<0)
+    if (ch>0x7F) //  || ch<0
     {
         if (allowNonAsciiIdents)
             return true;
