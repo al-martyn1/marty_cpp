@@ -950,6 +950,7 @@ void cUnescapeStringImpl( const CharType *pStr, std::size_t sz, OutputIterator o
 
     #if !defined(NDEBUG)
         const CharType *curStrPtr = pStr;
+        MARTY_ARG_USED(curStrPtr);
     #endif
 
 
