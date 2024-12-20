@@ -3672,17 +3672,19 @@ struct EnumGeneratorTemplate
         return res;
     }
 
-    StringType formatScopeBegin( const StringType &indent, const StringType &declBegin ) const
+    StringType formatScopeBegin( const StringType &indent, const StringType &enumName, const StringType &declBegin, unsigned options ) const
     {
         StringType res = replaceLeadingSpaceToIndentMacro(scopeBeginTemplate);
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), formatEnumName(enumName,options) );
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
         res = simple_string_replace( res, make_string<StringType>("$(DECLBEGIN)"), declBegin );
         return res;
     }
 
-    StringType formatScopeEnd( const StringType &indent, const StringType &declBegin ) const
+    StringType formatScopeEnd( const StringType &indent, const StringType &enumName, const StringType &declBegin, unsigned options ) const
     {
         StringType res = replaceLeadingSpaceToIndentMacro(scopeEndTemplate);
+        res = simple_string_replace( res, make_string<StringType>("$(ENAMNAME)"), formatEnumName(enumName,options) );
         res = simple_string_replace( res, make_string<StringType>("$(INDENT)"), indent );
         res = simple_string_replace( res, make_string<StringType>("$(DECLBEGIN)"), declBegin );
         return res;
@@ -3925,7 +3927,7 @@ void enum_generate_serialize_enum_def( StreamType &ss
     auto declBegin = genTpl.formatDeclBegin( indent, enumName, underlayedTypeName, genOptions );
     ss << declBegin;
 
-    ss << genTpl.formatScopeBegin(indent,declBegin);
+    ss << genTpl.formatScopeBegin(indent,enumName,declBegin,genOptions);
 
     auto findMaxValsElement = [=]()
     {
@@ -3962,7 +3964,7 @@ void enum_generate_serialize_enum_def( StreamType &ss
 
     }
 
-    ss << genTpl.formatScopeEnd(indent,declBegin);
+    ss << genTpl.formatScopeEnd(indent,enumName,declBegin,genOptions);
 
     if (genOptions&EnumGeneratorOptionFlags::enumFlags)
     {
