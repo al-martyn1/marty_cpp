@@ -508,6 +508,7 @@ inline bool    isAlpha(wchar_t ch)  { return isLower(ch) || isUpper(ch); }
 inline bool    isDigit(wchar_t ch)  { return (ch>=L'0' && ch<=L'9'); }
 inline bool    getCase(wchar_t ch)  { return isUpper(ch); }
 
+#include "warnings/push_disable_spectre_mitigation.h"
 inline int digitToIntImpl(char ch)
 {
     if (ch>='0' && ch<='9')
@@ -518,6 +519,7 @@ inline int digitToIntImpl(char ch)
         return ch-'A' + 10;
     return -1;
 }
+#include "warnings/pop.h"
 
 inline int digitToIntImpl(wchar_t ch)
 {
@@ -526,6 +528,7 @@ inline int digitToIntImpl(wchar_t ch)
     return digitToIntImpl((char)ch);
 }
 
+#include "warnings/push_disable_spectre_mitigation.h"
 inline int digitToInt(char ch, int ss)
 {
     int d = digitToIntImpl(ch);
@@ -542,6 +545,7 @@ inline int digitToInt(char ch, int ss)
 
     return d;
 }
+#include "warnings/pop.h"
 
 inline int digitToInt(wchar_t ch, int ss)
 {
