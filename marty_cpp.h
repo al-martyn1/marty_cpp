@@ -218,30 +218,32 @@ StringType toString( NameStyle ns, const StringType &unknownStr = make_string<St
 {
     switch(ns)
     {
-        case NameStyle::invalidName                    : //return make_string<StringType>("InvalidName");
-                                                         return make_string<StringType>("DefaultStyle");
+        case NameStyle::invalidName                       : //return make_string<StringType>("InvalidName");
+                                                            return make_string<StringType>("DefaultStyle");
 
-        case NameStyle::all                            : return make_string<StringType>("All");
+        case NameStyle::all                               : return make_string<StringType>("All");
 
-        case NameStyle::hyphenStyle                    : return make_string<StringType>("HyphenStyle");
-        case NameStyle::cppStyle                       : return make_string<StringType>("CppStyle");
-        case NameStyle::camelStyle                     : return make_string<StringType>("CamelStyle");
-        case NameStyle::pascalStyle                    : return make_string<StringType>("PascalStyle");
-        case NameStyle::hyphenCamelMixedStyle          : return make_string<StringType>("HyphenCamelMixedStyle");
-        case NameStyle::hyphenPascalMixedStyle         : return make_string<StringType>("HyphenPascalMixedStyle");
-        case NameStyle::cppCamelMixedStyle             : return make_string<StringType>("CppCamelMixedStyle");
-        case NameStyle::cppPascalMixedStyle            : return make_string<StringType>("CppPascalMixedStyle");
-        case NameStyle::defineStyle                    : return make_string<StringType>("DefineStyle");
+        case NameStyle::hyphenStyle                       : return make_string<StringType>("HyphenStyle");
+        case NameStyle::cppStyle                          : return make_string<StringType>("CppStyle");
+        case NameStyle::camelStyle                        : return make_string<StringType>("CamelStyle");
+        case NameStyle::pascalStyle                       : return make_string<StringType>("PascalStyle");
+        case NameStyle::hyphenCamelMixedStyle             : return make_string<StringType>("HyphenCamelMixedStyle");
+        case NameStyle::hyphenPascalMixedStyle            : return make_string<StringType>("HyphenPascalMixedStyle");
+        case NameStyle::cppCamelMixedStyle                : return make_string<StringType>("CppCamelMixedStyle");
+        case NameStyle::cppPascalMixedStyle               : return make_string<StringType>("CppPascalMixedStyle");
+        case NameStyle::defineStyle                       : return make_string<StringType>("DefineStyle");
 
-        case NameStyle::hyphenUnderscoredStyle         : return make_string<StringType>("HyphenUnderscoredStyle");
-        case NameStyle::cppUnderscoredStyle            : return make_string<StringType>("CppUnderscoredStyle");
-        case NameStyle::camelUnderscoredStyle          : return make_string<StringType>("CamelUnderscoredStyle");
-        case NameStyle::pascalUnderscoredStyle         : return make_string<StringType>("PascalUnderscoredStyle");
+        case NameStyle::hyphenUnderscoredStyle            : return make_string<StringType>("HyphenUnderscoredStyle");
+        case NameStyle::cppUnderscoredStyle               : return make_string<StringType>("CppUnderscoredStyle");
+        case NameStyle::camelUnderscoredStyle             : return make_string<StringType>("CamelUnderscoredStyle");
+        case NameStyle::pascalUnderscoredStyle            : return make_string<StringType>("PascalUnderscoredStyle");
         case NameStyle::hyphenCamelMixedUnderscoredStyle  : return make_string<StringType>("HyphenCamelMixedUnderscoredStyle");
         case NameStyle::hyphenPascalMixedUnderscoredStyle : return make_string<StringType>("HyphenPascalMixedUnderscoredStyle");
-        case NameStyle::cppCamelMixedUnderscoredStyle  : return make_string<StringType>("CppCamelMixedUnderscoredStyle");
-        case NameStyle::cppPascalMixedUnderscoredStyle : return make_string<StringType>("CppPascalMixedUnderscoredStyle");
-        case NameStyle::defineUnderscoredStyle         : return make_string<StringType>("DefineUnderscoredStyle");
+        case NameStyle::cppCamelMixedUnderscoredStyle     : return make_string<StringType>("CppCamelMixedUnderscoredStyle");
+        case NameStyle::cppPascalMixedUnderscoredStyle    : return make_string<StringType>("CppPascalMixedUnderscoredStyle");
+        case NameStyle::defineUnderscoredStyle            : return make_string<StringType>("DefineUnderscoredStyle");
+
+        case NameStyle::end: [[fallthrough]];
 
         default                                        : return unknownStr;
     }
@@ -259,10 +261,10 @@ NameStyle fromString(const StringType &str, NameStyle defVal = NameStyle::invali
                       , [](typename StringType::value_type ch)
                         {
                             typedef typename StringType::value_type CharType;
-                            return ch>=(CharType)'a' && ch<=(CharType)'z'
-                                 ? ch-(CharType)'a'+(CharType)'A'
-                                 : ch
-                                 ;
+                            return (CharType)( ch>=(CharType)'a' && ch<=(CharType)'z'
+                                             ? ch -(CharType)'a'+(CharType)'A'
+                                             : ch
+                                             );
                         }
                       );
         return str;
@@ -560,6 +562,7 @@ inline bool isDigit(wchar_t ch, int ss) { return digitToInt(ch, ss)<0 ? false : 
 
 
 //----------------------------------------------------------------------------
+#include "warnings/push_disable_spectre_mitigation.h"
 template<typename IteratorT>
 IteratorT parseCharSequenceToUnsigned(IteratorT b, IteratorT e, std::uint64_t *pRes=0)
 {
@@ -633,6 +636,7 @@ IteratorT parseCharSequenceToUnsigned(IteratorT b, IteratorT e, std::uint64_t *p
 
     return returnIt(b);
 }
+#include "warnings/pop.h"
 
 //----------------------------------------------------------------------------
 template<typename IteratorT>
@@ -641,6 +645,8 @@ IteratorT parseCharSequenceToInteger( IteratorT b, IteratorT e
                                     , bool throwRangeError = false
                                     )
 {
+    MARTY_ARG_USED(throwRangeError);
+
     std::int64_t res = 0;
 
     auto returnIt = [&](IteratorT it)
@@ -2218,6 +2224,7 @@ StringType merge( const std::vector<std::string> &tokens, const std::wstring &de
 
 
 //-----------------------------------------------------------------------------
+#include "warnings/push_disable_spectre_mitigation.h"
 //! Расширение строки до нужной длины
 template<typename StringType> inline
 void expand( StringType &str                                                            //!< Расширяемая строка
@@ -2231,6 +2238,7 @@ void expand( StringType &str                                                    
     typename StringType::size_type numCharsToAdd = sz - str.size();
     str.append( numCharsToAdd, ch );
 }
+#include "warnings/pop.h"
 
 //------------------------------
 //! Расширение копии строки до нужной длины. \returns Расширеную строку.
@@ -4967,7 +4975,7 @@ void enum_generate_serialize( StreamType &ss
                     {
                         try
                         {
-                            std::size_t pos = 0;
+                            // std::size_t pos = 0;
                             //!!! заменить std::stoll, чтоб умело парсить двоичные константы и разделители
                             //try
                             {
