@@ -2781,7 +2781,7 @@ public:
 
     #if defined(_MSC_VER)
         #pragma warning(push)
-        #pragma warning(disable:4996) // warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+        #pragma warning(disable:4996) // - warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
     #endif
 
     MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL(SimpleStringRefStream)
@@ -2844,7 +2844,7 @@ public:
 
     #if defined(_MSC_VER)
         #pragma warning(push)
-        #pragma warning(disable:4996) // warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+        #pragma warning(disable:4996) // - warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
     #endif
 
     MARTY_CPP_MARTY_CPP_SIMPLE_STRING_STREAM_INSERTERS_BASIC_INTEGRAL_TYPES_IMPL(SimpleStringStream)
@@ -3222,7 +3222,7 @@ struct EnumGeneratorTemplate
                 StringType lline = simple_trim(*lit, isSpaceChar) ; // с обеих сторон
                 if (!lline.empty() && (lline[0]=='#' || lline[0]==';'))
                 {
-                    msg("warning") << "comment line found in continuation\n"; //!!! название?
+                    msg("warning") << "comment line found in continuation\n"; //!!! название? UPD: чего я тут хотел, уже не помню, надо бы коменты более развёрнуто делать
                 }
 
                 if (line.back()=='\\')
@@ -3600,6 +3600,7 @@ struct EnumGeneratorTemplate
         if ((enum_internal_uint_t)val==(enum_internal_uint_t)-1)
         {
             //TODO: !!! Нужен каст к underlaying типу, если он задан. Сюда надо будет передавать шаблоны и строку underlaying типа
+
             // return make_string<StringType>("-1");
             // oss << make_string<StringType>("-1");
 
@@ -4152,6 +4153,7 @@ StringType enum_generate_number_convert( enum_internal_uint_t val, unsigned genO
     if ((enum_internal_uint_t)val==(enum_internal_uint_t)-1)
     {
         //TODO: !!! Нужен каст к underlaying типу, если он задан. Сюда надо будет передавать шаблоны и строку underlaying типа
+
         // return make_string<StringType>("-1");
         // oss << make_string<StringType>("-1");
 
@@ -4795,7 +4797,7 @@ void enum_generate_serialize( StreamType &ss
     for( const auto& [name,val,comment] : vals)
     {
         StringType strVal = enum_generate_number_convert<StringType>(val, genOptions, EnumGeneratorOptionFlags::outputAuto, underlayedTypeName, genTpl);
-        strVals.emplace_back(name, strVal, strVal, comment); //!!! std::make_tuple
+        strVals.emplace_back(name, strVal, strVal, comment); //!!! std::make_tuple - что тут сказать хотел, непонятно, забыл уже
     }
 
     enum_generate_serialize( ss, strVals
