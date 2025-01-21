@@ -4285,6 +4285,9 @@ void enum_generate_serialize_prepare( std::vector< std::tuple< StringType,String
     std::unordered_map<StringType, StringType> formattedEnumNames;
     for( const auto& [name,val,valOrgStr,comment] : vals)
     {
+        MARTY_ARG_USED(val);
+        MARTY_ARG_USED(valOrgStr);
+        MARTY_ARG_USED(comment);
         auto formattedName = makeEnamValueString(name,valuesPrefix,valuesNameStyle);
         formattedEnumNames[name] = formattedName;
     }
