@@ -1806,7 +1806,8 @@ fixName( const std::basic_string< CharT, Traits, Allocator > &str, bool fixStart
     {
         if (keywordsSet.find(toLower(res))!=keywordsSet.end())
         {
-            res.insert(0, 1, (CharT)'_');
+            //res.insert(0, 1, (CharT)'_');
+            res.append(1, '_');
         }
     }
 
