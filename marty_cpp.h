@@ -1758,7 +1758,7 @@ fixName( const std::basic_string< CharT, Traits, Allocator > &str, bool fixStart
             switch(*it)
             {
                 //L"()[]{}";
-                case (CharT)'!': appendFix("exmark"); break;
+                case (CharT)'!': appendFix("exclmark"); break;
                 case (CharT)'@': appendFix("at"); break;
                 case (CharT)'#': appendFix("hash"); break;
                 case (CharT)'$': appendFix("usd"); break;
