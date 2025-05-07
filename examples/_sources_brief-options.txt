@@ -1,6 +1,6 @@
 -X=*_generators/gen_rows_enum.cpp^
 -X=*/kbd_layout_gen.cpp
--X=*_generators/main.c
+-X=*_enums/main.c
 -X=*/TestWinDrawContextCommon/BmpView.cpp
 -X=*.h^
 -X=*/src/encoding/tests/*

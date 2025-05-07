@@ -30,7 +30,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Headers" FILES ${headers})
 
 file(GLOB_RECURSE all_docs "${MODULE_ROOT}/*.md" "${MODULE_ROOT}/*.txt")
 list(FILTER all_docs EXCLUDE REGEX ".*CMakeLists\.txt$")
-list(FILTER all_docs EXCLUDE REGEX ".*_generators/.*")
+list(FILTER all_docs EXCLUDE REGEX ".*_enums/.*")
 list(FILTER all_docs EXCLUDE REGEX ".*examples/.*")
 list(FILTER all_docs EXCLUDE REGEX ".*md_/.*")
 list(FILTER all_docs EXCLUDE REGEX ".*_md/.*")
