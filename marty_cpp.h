@@ -2961,6 +2961,8 @@ struct EnumGeneratorOptionFlags
 
     static const unsigned generateDoc                  = 0x10000000;
 
+    static const unsigned generateTrTemplateCommons    = 0x20000000;
+
 
 }; // struct EnumGeneratorOptionFlags
 
@@ -4113,28 +4115,40 @@ void enum_generate_doc( StreamType &ss
     MARTY_ARG_USED(indentInc);
 
 
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
     const std::string trCatCmnVals  = "_generated-enums_/_common_/values";
     const std::string trCatCmnTexts = "_generated-enums_/_common_/texts" ;
 
 #ifdef MARTY_CPP_USE_MARTY_TR
 
-    auto &trTpl = marty_tr::tr_alter_get_all_translations();
+    if (genOptions&EnumGeneratorOptionFlags::generateTrTemplateCommons)
+    {
+        auto &trTpl = marty_tr::tr_alter_get_all_translations();
 
-    marty_tr::tr_add(trTpl, "invalid"              , "Invalid/unknown value"          , trCatCmnVals);
-    marty_tr::tr_add(trTpl, "unknown"              , "Invalid/unknown value"          , trCatCmnVals);
-    marty_tr::tr_add(trTpl, "none"                 , "Empty/none value"               , trCatCmnVals);
+        marty_tr::tr_add(trTpl, "invalid"              , "Invalid/unknown value"          , trCatCmnVals);
+        marty_tr::tr_add(trTpl, "unknown"              , "Invalid/unknown value"          , trCatCmnVals);
+        marty_tr::tr_add(trTpl, "none"                 , "Empty/none value"               , trCatCmnVals);
+    
+        marty_tr::tr_add(trTpl, "section-title-enum"   , "$(TYPE) enumeration"            , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "section-title-flags"  , "$(TYPE) flags"                  , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "underlayed-type"      , "Underlying type: `$(TYPE)`"     , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "enum-val-list-title"  , "Name|Value|Description"         , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "str-val-list-title"   , "Value|Description"              , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "vals-case-sens"       , "Values are case sensitive"      , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "vals-case-insens"     , "Values are case insensitive"    , trCatCmnTexts);
+    }
 
-    marty_tr::tr_add(trTpl, "section-title-enum"   , "$(TYPE) enumeration"            , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "section-title-flags"  , "$(TYPE) flags"                  , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "underlayed-type"      , "Underlying type: `$(TYPE)`"     , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "enum-val-list-title"  , "Name|Value|Description"         , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "str-val-list-title"   , "Value|Description"              , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "vals-case-sens"       , "Values are case insensitive"    , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "vals-case-insens"     , "Values are case insensitive"    , trCatCmnTexts);
+#if defined(DEBUG) || defined(_DEBUG)
+    const auto &trMap     = marty_tr::tr_get_all_translations();
+    const auto &trDefLang = marty_tr::tr_get_def_lang();
 
+    // Inspect values here
+    UMBA_ARG_USED(trMap);
+    UMBA_ARG_USED(trDefLang);
 #endif
 
-    genOptions = enum_generate_adjust_gen_options(genOptions);
+#endif
 
     StringType enumFullName;
     if (nsFullName.empty())
@@ -4282,27 +4296,40 @@ void enum_generate_deserialize_doc( StreamType &ss
     MARTY_ARG_USED(enumName);
 
 
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
     const std::string trCatCmnVals  = "_generated-enums_/_common_/values";
     const std::string trCatCmnTexts = "_generated-enums_/_common_/texts" ;
 
 #ifdef MARTY_CPP_USE_MARTY_TR
 
-    auto &trTpl = marty_tr::tr_alter_get_all_translations();
-    marty_tr::tr_add(trTpl, "invalid"              , "Invalid/unknown value"          , trCatCmnVals);
-    marty_tr::tr_add(trTpl, "unknown"              , "Invalid/unknown value"          , trCatCmnVals);
-    marty_tr::tr_add(trTpl, "none"                 , "Empty/none value"               , trCatCmnVals);
+    if (genOptions&EnumGeneratorOptionFlags::generateTrTemplateCommons)
+    {
+        auto &trTpl = marty_tr::tr_alter_get_all_translations();
+    
+        marty_tr::tr_add(trTpl, "invalid"              , "Invalid/unknown value"          , trCatCmnVals);
+        marty_tr::tr_add(trTpl, "unknown"              , "Invalid/unknown value"          , trCatCmnVals);
+        marty_tr::tr_add(trTpl, "none"                 , "Empty/none value"               , trCatCmnVals);
+    
+        marty_tr::tr_add(trTpl, "section-title-enum"   , "$(TYPE) enumeration"            , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "section-title-flags"  , "$(TYPE) flags"                  , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "underlayed-type"      , "Underlying type: `$(TYPE)`"     , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "enum-val-list-title"  , "Name|Value|Description"         , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "str-val-list-title"   , "Value|Description"              , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "vals-case-sens"       , "Values are case sensitive"      , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "vals-case-insens"     , "Values are case insensitive"    , trCatCmnTexts);
+    }
 
-    marty_tr::tr_add(trTpl, "section-title-enum"   , "$(TYPE) enumeration"            , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "section-title-flags"  , "$(TYPE) flags"                  , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "underlayed-type"      , "Underlying type: `$(TYPE)`"     , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "enum-val-list-title"  , "Name|Value|Description"         , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "str-val-list-title"   , "Value|Description"              , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "vals-case-sens"       , "Values are case insensitive"    , trCatCmnTexts);
-    marty_tr::tr_add(trTpl, "vals-case-insens"     , "Values are case insensitive"    , trCatCmnTexts);
+#if defined(DEBUG) || defined(_DEBUG)
+    const auto &trMap     = marty_tr::tr_get_all_translations();
+    const auto &trDefLang = marty_tr::tr_get_def_lang();
 
+    // Inspect values here
+    UMBA_ARG_USED(trMap);
+    UMBA_ARG_USED(trDefLang);
 #endif
 
-    genOptions = enum_generate_adjust_gen_options(genOptions);
+#endif
 
     StringType enumFullName;
     if (nsFullName.empty())
@@ -4313,14 +4340,20 @@ void enum_generate_deserialize_doc( StreamType &ss
 
     ss << "\n";
 
+    StringType txtCaseInfo;
+
     if (genOptions&EnumGeneratorOptionFlags::lowercaseDeserialize)
     {
-        ss << "Values are case insensitive.\n\n";
+        txtCaseInfo = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, "vals-case-insens", make_string<StringType>("Values are case insensitive"));
     }
     else
     {
-        ss << "Values are case sensitive.\n\n";
+        txtCaseInfo = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, "vals-case-sens"  , make_string<StringType>("Values are case sensitive"));
     }
+
+    checkFixTrailingDot<StringType>(txtCaseInfo);
+    ss << txtCaseInfo << "\n\n";
+
 
     const std::string trCat = toLower("_generated-enums_/" + make_string<std::string>(enumFullName));
 
@@ -4347,8 +4380,8 @@ void enum_generate_deserialize_doc( StreamType &ss
     //MARTY_ARG_USED(valueToNames);
     //MARTY_ARG_USED(valueDescriptions);
 
-    auto valListTitle = "Value|Description";
-    // !!! Получить valListTitle из ресурсов локализации
+    //auto valListTitle = "Value|Description";
+    auto valListTitle = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, "str-val-list-title", make_string<StringType>("Value|Description"));
     ss << "<val-list title=\"" << valListTitle << "\" value-style=backtick-quote>\n\n";
 
 

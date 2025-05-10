@@ -24,3 +24,4 @@ fmtDec,formatDec,outputDec                                 = marty_cpp::EnumGene
 fmtHex,formatHex,outputHex                                 = marty_cpp::EnumGeneratorOptionFlags::outputHex
 sys,system,sysFirst,systemFirst                            = marty_cpp::EnumGeneratorOptionFlags::generateSysIncludesFirst
 generateDoc                                                = marty_cpp::EnumGeneratorOptionFlags::generateDoc
+generateTrTemplateCommons,TrTemplateCommons,TrTplCommons   = marty_cpp::EnumGeneratorOptionFlags::generateTrTemplateCommons

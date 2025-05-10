@@ -49,16 +49,16 @@ MARTY_CPP_ENUM_CLASS_DESERIALIZE_END( ELinefeedType, std::map, 1 )
 
 
 
-/*!  Соответсвует EnumGeneratorOptionFlags, только по новой технологии */
+/*! Соответсвует EnumGeneratorOptionFlags, только по новой технологии */
 //#!EnumGeneratorOptionFlagsSerializable
 enum class EnumGeneratorOptionFlagsSerializable : std::uint32_t
 {
-    invalid                     = (std::uint32_t)(-1) /*!< !hidden value */,
-    unknown                     = (std::uint32_t)(-1) /*!< !hidden value */,
-    enumClass                   = marty_cpp::EnumGeneratorOptionFlags::enumClass /*!<  */,
-    unsignedVals                = marty_cpp::EnumGeneratorOptionFlags::unsignedVals /*!<  */,
-    umap                        = marty_cpp::EnumGeneratorOptionFlags::useUnorderedMap /*!<  */,
-    useUnorderedMap             = marty_cpp::EnumGeneratorOptionFlags::useUnorderedMap /*!<  */,
+    invalid                     = (std::uint32_t)(-1) /*!< ! */,
+    unknown                     = (std::uint32_t)(-1) /*!< ! */,
+    enumClass                   = marty_cpp::EnumGeneratorOptionFlags::enumClass /*!< Strong typed enum */,
+    unsignedVals                = marty_cpp::EnumGeneratorOptionFlags::unsignedVals /*!< Use unsigned values */,
+    umap                        = marty_cpp::EnumGeneratorOptionFlags::useUnorderedMap /*!< Use unordered_map */,
+    useUnorderedMap             = marty_cpp::EnumGeneratorOptionFlags::useUnorderedMap /*!< Use unordered_map */,
     singleName                  = marty_cpp::EnumGeneratorOptionFlags::singleDef /*!<  */,
     singleDef                   = marty_cpp::EnumGeneratorOptionFlags::singleDef /*!<  */,
     noExtraLinefeed             = marty_cpp::EnumGeneratorOptionFlags::noExtraLinefeed /*!<  */,
@@ -113,7 +113,10 @@ enum class EnumGeneratorOptionFlagsSerializable : std::uint32_t
     system                      = marty_cpp::EnumGeneratorOptionFlags::generateSysIncludesFirst /*!<  */,
     sysFirst                    = marty_cpp::EnumGeneratorOptionFlags::generateSysIncludesFirst /*!<  */,
     systemFirst                 = marty_cpp::EnumGeneratorOptionFlags::generateSysIncludesFirst /*!<  */,
-    generateDoc                 = marty_cpp::EnumGeneratorOptionFlags::generateDoc /*!<  */
+    generateDoc                 = marty_cpp::EnumGeneratorOptionFlags::generateDoc /*!<  */,
+    generateTrTemplateCommons   = marty_cpp::EnumGeneratorOptionFlags::generateTrTemplateCommons /*!<  */,
+    trTemplateCommons           = marty_cpp::EnumGeneratorOptionFlags::generateTrTemplateCommons /*!<  */,
+    trTplCommons                = marty_cpp::EnumGeneratorOptionFlags::generateTrTemplateCommons /*!<  */
 
 }; // enum 
 //#!
@@ -121,30 +124,31 @@ enum class EnumGeneratorOptionFlagsSerializable : std::uint32_t
 MARTY_CPP_MAKE_ENUM_FLAGS(EnumGeneratorOptionFlagsSerializable)
 
 MARTY_CPP_ENUM_FLAGS_SERIALIZE_BEGIN( EnumGeneratorOptionFlagsSerializable, std::map, 1 )
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::enumClass  , "EnumClass"       );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::invalid    , "Invalid"         );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::integers   , "Integers"        );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::unsignedVals , "UnsignedVals"    );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::noExtraLinefeed , "NoExtraLinefeed" );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::fmtOct     , "FmtOct"          );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::singleName , "SingleName"      );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::lowercase  , "Lowercase"       );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::umap       , "Umap"            );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::flags      , "Flags"           );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateDoc , "GenerateDoc"     );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::noComments , "NoComments"      );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::serialize  , "Serialize"       );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::deserialize , "Deserialize"     );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::typeDecl   , "TypeDecl"        );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::serializeSet , "SerializeSet"    );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::deserializeSet , "DeserializeSet"  );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::serializeBoth , "SerializeBoth"   );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::all        , "All"             );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::extra      , "Extra"           );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::fmtAuto    , "FmtAuto"         );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::fmtDec     , "FmtDec"          );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::fmtHex     , "FmtHex"          );
-    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::sys        , "Sys"             );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::enumClass  , "EnumClass"                 );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::invalid    , "Invalid"                   );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::integers   , "Integers"                  );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::unsignedVals , "UnsignedVals"              );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::noExtraLinefeed , "NoExtraLinefeed"           );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::fmtOct     , "FmtOct"                    );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::singleName , "SingleName"                );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::lowercase  , "Lowercase"                 );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::umap       , "Umap"                      );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::flags      , "Flags"                     );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateDoc , "GenerateDoc"               );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::noComments , "NoComments"                );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::serialize  , "Serialize"                 );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::deserialize , "Deserialize"               );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::typeDecl   , "TypeDecl"                  );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::serializeSet , "SerializeSet"              );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "GenerateTrTemplateCommons" );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::deserializeSet , "DeserializeSet"            );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::serializeBoth , "SerializeBoth"             );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::all        , "All"                       );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::extra      , "Extra"                     );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::fmtAuto    , "FmtAuto"                   );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::fmtDec     , "FmtDec"                    );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::fmtHex     , "FmtHex"                    );
+    MARTY_CPP_ENUM_FLAGS_SERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::sys        , "Sys"                       );
 MARTY_CPP_ENUM_FLAGS_SERIALIZE_END( EnumGeneratorOptionFlagsSerializable, std::map, 1 )
 
 MARTY_CPP_ENUM_FLAGS_DESERIALIZE_BEGIN( EnumGeneratorOptionFlagsSerializable, std::map, 1 )
@@ -238,6 +242,15 @@ MARTY_CPP_ENUM_FLAGS_DESERIALIZE_BEGIN( EnumGeneratorOptionFlagsSerializable, st
     MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::serializeSet , "generate-def-serialize-set"   );
     MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::serializeSet , "generate_def_serialize_set"   );
     MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::serializeSet , "generatedefserializeset"      );
+    MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "tr-template-commons"          );
+    MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "tr_template_commons"          );
+    MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "generate-tr-template-commons" );
+    MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "trtemplatecommons"            );
+    MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "tr_tpl_commons"               );
+    MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "generate_tr_template_commons" );
+    MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "trtplcommons"                 );
+    MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "generatetrtemplatecommons"    );
+    MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::generateTrTemplateCommons , "tr-tpl-commons"               );
     MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::deserializeSet , "deserialize-set"              );
     MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::deserializeSet , "deserialize_set"              );
     MARTY_CPP_ENUM_FLAGS_DESERIALIZE_ITEM( EnumGeneratorOptionFlagsSerializable::deserializeSet , "gendeserializeset"            );
@@ -313,7 +326,7 @@ MARTY_CPP_ENUM_FLAGS_DESERIALIZE_SET(EnumGeneratorOptionFlagsSerializable, std::
 
 
 
-/*!  Main enum comment */
+/*! Main enum comment */
 //#!TestNumParsing
 enum class TestNumParsing : std::uint32_t
 {
