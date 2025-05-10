@@ -1,8 +1,9 @@
 // Соответсвует EnumGeneratorOptionFlags, только по новой технологии
-invalid,unknown=-1
-enumClass                                                  = marty_cpp::EnumGeneratorOptionFlags::enumClass
-unsignedVals                                               = marty_cpp::EnumGeneratorOptionFlags::unsignedVals
-umap,useUnorderedMap                                       = marty_cpp::EnumGeneratorOptionFlags::useUnorderedMap
+#//!hidden value
+invalid,unknown=-1 //!
+enumClass                                                  = marty_cpp::EnumGeneratorOptionFlags::enumClass                 // Strong typed enum
+unsignedVals                                               = marty_cpp::EnumGeneratorOptionFlags::unsignedVals              // Use unsigned values
+umap,useUnorderedMap                                       = marty_cpp::EnumGeneratorOptionFlags::useUnorderedMap           // Use unordered_map
 singleName,singleDef                                       = marty_cpp::EnumGeneratorOptionFlags::singleDef
 noExtraLinefeed,noxlf                                      = marty_cpp::EnumGeneratorOptionFlags::noExtraLinefeed
 lowercase,lowercaseDeserialize                             = marty_cpp::EnumGeneratorOptionFlags::lowercaseDeserialize
@@ -22,3 +23,4 @@ fmtOct,formatOct,outputOct                                 = marty_cpp::EnumGene
 fmtDec,formatDec,outputDec                                 = marty_cpp::EnumGeneratorOptionFlags::outputDec
 fmtHex,formatHex,outputHex                                 = marty_cpp::EnumGeneratorOptionFlags::outputHex
 sys,system,sysFirst,systemFirst                            = marty_cpp::EnumGeneratorOptionFlags::generateSysIncludesFirst
+generateDoc                                                = marty_cpp::EnumGeneratorOptionFlags::generateDoc

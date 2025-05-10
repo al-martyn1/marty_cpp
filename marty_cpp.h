@@ -5,7 +5,7 @@
 #pragma once
 
 #ifdef MARTY_CPP_USE_MARTY_TR
-    // #include "marty_tr/marty_tr.h"
+    #include "marty_tr/marty_tr.h"
 #endif
 
 #include <algorithm>
@@ -2702,8 +2702,47 @@ StringType quote( const StringType &s
 }
 
 //----------------------------------------------------------------------------
+template<typename StringType> inline
+bool checkRemoveExclamation(StringType &str)
+{
+    using CharType = typename StringType::value_type;
 
+    if (str.empty())
+        return false;
 
+    if (str.front()==(CharType)'!')
+    {
+        str.erase(0u,1u);
+
+        auto isSpace = [](auto ch)
+        {
+            return ch==(CharType)' ' || ch==(CharType)'\r' || ch==(CharType)'\n';
+        };
+
+        simple_rtrim(str, isSpace);
+
+        return true;
+    }
+
+    return false;
+}
+
+//----------------------------------------------------------------------------
+template<typename StringType> inline
+void checkFixTrailingDot(StringType &str)
+{
+    using CharType = typename StringType::value_type;
+
+    if (str.empty())
+        return;
+
+    if (str.back()!=(CharType)'!' && str.back()!=(CharType)'?' && str.back()!=(CharType)'.' && str.back()!=(CharType)',' && str.back()!=(CharType)';')
+    {
+        str.append(1u, (CharType)'.');
+    }
+}
+
+//-----------------------------------------------------------------------------
 
 
 //----------------------------------------------------------------------------
@@ -2920,6 +2959,9 @@ struct EnumGeneratorOptionFlags
     static const unsigned generateSysIncludesFirst     = 0x04000000;
     static const unsigned disablePrologEpilog          = 0x08000000;
 
+    static const unsigned generateDoc                  = 0x10000000;
+
+
 }; // struct EnumGeneratorOptionFlags
 
 
@@ -3012,6 +3054,8 @@ struct EnumGeneratorTemplate
     StringType includesGroupSep            ;
     StringType includesBlockSep            ;
 
+    StringType namespaceSep                ;
+
     std::vector<StringType> declIncludes       ;
     std::vector<StringType> declFlagIncludes   ;
     std::vector<StringType> serializeIncludes  ;
@@ -3096,7 +3140,7 @@ struct EnumGeneratorTemplate
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumIncludesEntrySeparator"             ) , includesSep                 )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumIncludesGroupSeparator"             ) , includesGroupSep            )) { return true; }
         else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("EnumIncludesBlockSeparator"             ) , includesBlockSep            )) { return true; }
-
+        else if (checkAssignParamImpl(paramName, paramValue, make_string<string_type>("NamespaceSeparator"                     ) , namespaceSep                )) { return true; }
         return false;
     }
 
@@ -3333,6 +3377,7 @@ struct EnumGeneratorTemplate
             else if (checkAssign(paramName, paramValue, "EnumIncludesEntrySeparator"             , genTpl.includesSep                 )) {}
             else if (checkAssign(paramName, paramValue, "EnumIncludesGroupSeparator"             , genTpl.includesGroupSep            )) {}
             else if (checkAssign(paramName, paramValue, "EnumIncludesBlockSeparator"             , genTpl.includesBlockSep            )) {}
+            else if (checkAssign(paramName, paramValue, "NamespaceSeparator"                     , genTpl.namespaceSep                )) {}
 
             else if (checkAssign(paramName, paramValue, "EnumDeclarationIncludes"                , declIncludesStr                    )) {}
             else if (checkAssign(paramName, paramValue, "EnumFlagDeclarationIncludes"            , declFlagIncludesStr                )) {}
@@ -3340,6 +3385,7 @@ struct EnumGeneratorTemplate
             else if (checkAssign(paramName, paramValue, "EnumDeserializationIncludes"            , deserializeIncludesStr             )) {}
             else if (checkAssign(paramName, paramValue, "EnumFlagIncludes"                       , flagIncludesStr                    )) {}
             else if (checkAssign(paramName, paramValue, "EnumSetIncludes"                        , setIncludesStr                     )) {}
+
 
             else
             {
@@ -3461,6 +3507,9 @@ struct EnumGeneratorTemplate
         res.includesSep                  = make_string<StringType>("\n");
         res.includesGroupSep             = make_string<StringType>("\n");
         res.includesBlockSep             = make_string<StringType>("\n");
+
+        res.namespaceSep                = make_string<StringType>("::");
+        
 
         return res;
     }
@@ -3807,7 +3856,7 @@ struct EnumGeneratorTemplate
         StringType lowerFlag = make_string<StringType>( options&EnumGeneratorOptionFlags::lowercaseDeserialize ? "1" : "0" );
 
         auto nameExpanded = expand_copy( (options&EnumGeneratorOptionFlags::enumClass)
-                                       ? ( formatEnumName(enumName,options) /* enumName */ + make_string<StringType>("::") + name)
+                                       ? ( formatEnumName(enumName,options) /* enumName */ + namespaceSep /* make_string<StringType>("::") */  + name)
                                        : name
                                        , nNameLen
                                        );
@@ -3984,16 +4033,444 @@ void enum_generate_serialize_enum_def( StreamType &ss
 
     ss << genTpl.formatScopeEnd(indent,enumName,declBegin,genOptions);
 
-    if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+    if ((genOptions&(EnumGeneratorOptionFlags::generateDefSerialize|EnumGeneratorOptionFlags::generateDefDeserialize|EnumGeneratorOptionFlags::generateDefSerializeSet|EnumGeneratorOptionFlags::generateDefDeserializeSet))!=0)
     {
-        ss << "\n";
-        ss << genTpl.formatDeclFlags(indent,enumName,genOptions);
+        if (genOptions&EnumGeneratorOptionFlags::enumFlags)
+        {
+            ss << "\n";
+            ss << genTpl.formatDeclFlags(indent,enumName,genOptions);
+        }
+        else // enum, not flags
+        {
+            ss << "\n";
+            ss << genTpl.formatDeclNonFlags(indent,enumName,genOptions);
+        }
     }
-    else // enum, not flags
+
+}
+
+//-----------------------------------------------------------------------------
+template<typename StringType> inline
+StringType getTranslation(bool bUpdateTpl, const std::string &trCategory, const std::string &trMsgId, const StringType &defMsg)
+{
+#ifdef MARTY_CPP_USE_MARTY_TR
+
+// bool tr_has_msg(const all_translations_map_t& trAllMap, const std::string &msgId, std::string catId)
+    if (marty_tr::tr_has_msg(trMsgId, trCategory))
     {
-        ss << "\n";
-        ss << genTpl.formatDeclNonFlags(indent,enumName,genOptions);
+        std::string res = marty_tr::tr(trMsgId, trCategory);
+        if (!res.empty())
+            return make_string<StringType>(res);
     }
+
+    // Шаблон перевода
+    auto &trTpl = marty_tr::tr_alter_get_all_translations();
+
+    if (marty_tr::tr_has_msg(trTpl, trMsgId, trCategory))
+    {
+        std::string res = marty_tr::tr(trTpl, trMsgId, trCategory);
+        if (!res.empty())
+            return make_string<StringType>(res);
+    }
+
+    if (bUpdateTpl)
+        marty_tr::tr_add(trTpl, trMsgId, make_string<std::string>(defMsg), trCategory);
+
+#else
+
+    MARTY_ARG_USED(bUpdateTpl);
+    MARTY_ARG_USED(trCategory);
+    MARTY_ARG_USED(trMsgId);
+    MARTY_ARG_USED(defMsg);
+
+#endif
+
+    return defMsg;
+}
+
+//-----------------------------------------------------------------------------
+
+//! Генерирует документацию
+template<typename StreamType, typename StringType> inline
+void enum_generate_doc( StreamType &ss
+                            , const std::vector< std::tuple< StringType,StringType,StringType > > &vals
+                            , const StringType                         &indent
+                            , const StringType                         &indentInc
+                            , const StringType                         &nsFullName
+                            , const StringType                         &enumName
+                            , StringType                               enumDescription
+                            , const StringType                         &underlayedTypeName
+                            , NameStyle                                valuesNameStyle
+                            , const StringType                         &valuesPrefix
+                            , unsigned                                 genOptions
+                            , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
+                            )
+{
+    MARTY_ARG_USED(valuesPrefix);
+    MARTY_ARG_USED(valuesNameStyle);
+    MARTY_ARG_USED(underlayedTypeName);
+    MARTY_ARG_USED(indent);
+    MARTY_ARG_USED(indentInc);
+
+
+    const std::string trCatCmnVals  = "_generated-enums_/_common_/values";
+    const std::string trCatCmnTexts = "_generated-enums_/_common_/texts" ;
+
+#ifdef MARTY_CPP_USE_MARTY_TR
+
+    auto &trTpl = marty_tr::tr_alter_get_all_translations();
+
+    marty_tr::tr_add(trTpl, "invalid"              , "Invalid/unknown value"          , trCatCmnVals);
+    marty_tr::tr_add(trTpl, "unknown"              , "Invalid/unknown value"          , trCatCmnVals);
+    marty_tr::tr_add(trTpl, "none"                 , "Empty/none value"               , trCatCmnVals);
+
+    marty_tr::tr_add(trTpl, "section-title-enum"   , "$(TYPE) enumeration"            , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "section-title-flags"  , "$(TYPE) flags"                  , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "underlayed-type"      , "Underlying type: `$(TYPE)`"     , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "enum-val-list-title"  , "Name|Value|Description"         , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "str-val-list-title"   , "Value|Description"              , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "vals-case-sens"       , "Values are case insensitive"    , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "vals-case-insens"     , "Values are case insensitive"    , trCatCmnTexts);
+
+#endif
+
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+    StringType enumFullName;
+    if (nsFullName.empty())
+        enumFullName = enumName;
+    else
+        enumFullName = nsFullName + genTpl.namespaceSep + enumName;
+
+    auto title = enumFullName;
+    {
+        std::string msgId    = (genOptions&EnumGeneratorOptionFlags::enumFlags)==0 ? "section-title-enum" : "section-title-flags";
+        std::string titleTpl = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, msgId, make_string<StringType>("$(TYPE) enumeration"));
+        title = simple_string_replace(make_string<StringType>(titleTpl), make_string<StringType>("$(TYPE)"), enumFullName);
+    }
+    ss << "# " << title << "\n\n";
+
+
+    if (!underlayedTypeName.empty())
+    {
+        StringType underlayedTypeTpl = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, "underlayed-type", make_string<StringType>("Underlying type: `$(TYPE)`"));
+        StringType underlayedTypeStr = simple_string_replace( underlayedTypeTpl, make_string<StringType>("$(TYPE)"), underlayedTypeName);
+        checkFixTrailingDot<StringType>(underlayedTypeStr);
+        ss << underlayedTypeStr << "\n\n";
+    }
+
+
+    const std::string trCat = toLower("_generated-enums_/" + make_string<std::string>(enumFullName));
+
+    {
+        StringType descrLocalization = getTranslation<StringType>(true /* bUpdateTpl */ , trCat, "___description___", enumDescription);
+        enumDescription = descrLocalization;
+    }
+
+    if (!enumDescription.empty())
+    {
+        checkFixTrailingDot<StringType>(enumDescription);
+        ss << enumDescription << "\n\n";
+    }
+
+    auto valListTitle = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, "enum-val-list-title", make_string<StringType>("Name|Value|Description"));
+    ss << "<val-list title=\"" << valListTitle << "\">\n\n";
+
+    std::vector<StringType> valueList;
+    std::unordered_map<StringType, std::vector<StringType> > valueToNames;
+    std::unordered_map<StringType, StringType > valueDescriptions;
+
+    for( const auto& [name,val,comment] : vals)
+    {
+        auto vtnIt = valueToNames.find(val);
+        if (vtnIt==valueToNames.end())
+        {
+            valueList.emplace_back(val);
+        }
+
+        valueToNames[val].emplace_back(name);
+
+        if (!comment.empty())
+            valueDescriptions[val] = comment;
+
+    }
+
+    StringType valCommaList;
+
+    for(const auto &val : valueList)
+    {
+        auto vtnIt = valueToNames.find(val);
+        if (vtnIt==valueToNames.end())
+            continue;
+
+        StringType descr = "`-`";
+        //StringType descrLocalized;
+
+        auto vdIt = valueDescriptions.find(val);
+        if (vdIt!=valueDescriptions.end())
+        {
+            descr = vdIt->second;
+            //!!! Тут получить локализацию
+            checkFixTrailingDot<StringType>(descr);
+        }
+        checkRemoveExclamation(descr);
+        if (descr.empty())
+            descr = "`-`";
+
+        valCommaList.clear();
+        const auto &nameVec = vtnIt->second;
+        for(const auto &name : nameVec)
+        {
+            if (!valCommaList.empty())
+            {
+                valCommaList.append(1u, ',');
+            }
+            else
+            {
+                auto trDescr = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnVals, toLower(name), StringType());
+                if (trDescr.empty())
+                    trDescr = getTranslation<StringType>(true /* bUpdateTpl */ , trCat, toLower(name), descr);
+                if (!trDescr.empty())
+                {
+                    descr = trDescr;
+                    checkFixTrailingDot(descr);
+                }
+            }
+
+            valCommaList.append(name);
+        }
+
+        ss << "- " << valCommaList << "\n";
+        ss << val << "\n";
+        ss << descr << "\n\n";
+    }
+
+    ss << "</val-list>\n";
+
+}
+
+//-----------------------------------------------------------------------------
+//! Генерирует десериализацию значений enum
+template<typename StreamType, typename StringType> inline
+void enum_generate_deserialize_doc( StreamType &ss
+                            , const std::unordered_map< StringType, std::unordered_set<StringType> >  &deserializeVals
+                            , const std::vector< std::tuple< StringType,StringType,StringType > >     &vals
+                            , const StringType                         &indent
+                            , const StringType                         &indentInc
+                            , const StringType                         &nsFullName
+                            , const StringType                         &enumName
+                            , const StringType                         &enumDescription
+                            , const StringType                         &underlayedTypeName
+                            , NameStyle                                valuesNameStyle
+                            , NameStyle                                serializedNameStyle
+                            , const StringType                         &valuesPrefix
+                            , unsigned                                 genOptions
+                            , const EnumGeneratorTemplate<StringType>  &genTpl = EnumGeneratorTemplate<StringType>::defaultCpp()
+                            )
+{
+    MARTY_ARG_USED(valuesPrefix);
+    MARTY_ARG_USED(serializedNameStyle);
+    MARTY_ARG_USED(valuesNameStyle);
+    MARTY_ARG_USED(underlayedTypeName);
+    MARTY_ARG_USED(enumDescription);
+    MARTY_ARG_USED(deserializeVals);
+    MARTY_ARG_USED(vals);
+    MARTY_ARG_USED(indent);
+    MARTY_ARG_USED(indentInc);
+    MARTY_ARG_USED(nsFullName);
+    MARTY_ARG_USED(genTpl);
+    MARTY_ARG_USED(enumName);
+
+
+    const std::string trCatCmnVals  = "_generated-enums_/_common_/values";
+    const std::string trCatCmnTexts = "_generated-enums_/_common_/texts" ;
+
+#ifdef MARTY_CPP_USE_MARTY_TR
+
+    auto &trTpl = marty_tr::tr_alter_get_all_translations();
+    marty_tr::tr_add(trTpl, "invalid"              , "Invalid/unknown value"          , trCatCmnVals);
+    marty_tr::tr_add(trTpl, "unknown"              , "Invalid/unknown value"          , trCatCmnVals);
+    marty_tr::tr_add(trTpl, "none"                 , "Empty/none value"               , trCatCmnVals);
+
+    marty_tr::tr_add(trTpl, "section-title-enum"   , "$(TYPE) enumeration"            , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "section-title-flags"  , "$(TYPE) flags"                  , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "underlayed-type"      , "Underlying type: `$(TYPE)`"     , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "enum-val-list-title"  , "Name|Value|Description"         , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "str-val-list-title"   , "Value|Description"              , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "vals-case-sens"       , "Values are case insensitive"    , trCatCmnTexts);
+    marty_tr::tr_add(trTpl, "vals-case-insens"     , "Values are case insensitive"    , trCatCmnTexts);
+
+#endif
+
+    genOptions = enum_generate_adjust_gen_options(genOptions);
+
+    StringType enumFullName;
+    if (nsFullName.empty())
+        enumFullName = enumName;
+    else
+        enumFullName = nsFullName + genTpl.namespaceSep + enumName;
+
+
+    ss << "\n";
+
+    if (genOptions&EnumGeneratorOptionFlags::lowercaseDeserialize)
+    {
+        ss << "Values are case insensitive.\n\n";
+    }
+    else
+    {
+        ss << "Values are case sensitive.\n\n";
+    }
+
+    const std::string trCat = toLower("_generated-enums_/" + make_string<std::string>(enumFullName));
+
+    std::vector<StringType> valueList;
+    std::unordered_map<StringType, std::vector<StringType> > valueToNames;
+    std::unordered_map<StringType, StringType > valueDescriptions;
+
+    for( const auto& [name,val,comment] : vals)
+    {
+        auto vtnIt = valueToNames.find(val);
+        if (vtnIt==valueToNames.end())
+        {
+            valueList.emplace_back(val);
+        }
+
+        valueToNames[val].emplace_back(name);
+
+        if (!comment.empty())
+            valueDescriptions[val] = comment;
+
+    }
+
+    //MARTY_ARG_USED(valueList);
+    //MARTY_ARG_USED(valueToNames);
+    //MARTY_ARG_USED(valueDescriptions);
+
+    auto valListTitle = "Value|Description";
+    // !!! Получить valListTitle из ресурсов локализации
+    ss << "<val-list title=\"" << valListTitle << "\" value-style=backtick-quote>\n\n";
+
+
+    StringType curEnumItemName;
+    StringType valCommaList;
+    std::vector<StringType> valueStrList;
+
+    for(const auto & val: valueList)
+    {
+        curEnumItemName.clear();
+
+        auto vtnIt = valueToNames.find(val);
+        if (vtnIt==valueToNames.end())
+            continue;
+
+        StringType descr = "`-`";
+        auto vdIt = valueDescriptions.find(val);
+        if (vdIt!=valueDescriptions.end())
+        {
+            auto descrTmp = vdIt->second;
+            if (checkRemoveExclamation(descrTmp)) // Установлен знак '!' - значение отфильтровывается, как не публичное
+                continue;
+            descr = descrTmp;
+            //!!! Тут получить локализацию
+            checkFixTrailingDot<StringType>(descr);
+        }
+
+        valueStrList.clear();
+
+        const auto &valueSrcNames = vtnIt->second;
+        for(const auto &valSrcName: valueSrcNames)
+        {
+            //const std::unordered_map< StringType, std::unordered_set<StringType> >  &deserializeVals
+            auto dsvIt = deserializeVals.find(valSrcName);
+            if (dsvIt==deserializeVals.end())
+                continue;
+
+            if (curEnumItemName.empty())
+                curEnumItemName = valSrcName;
+
+            valueStrList.insert(valueStrList.end(), dsvIt->second.begin(), dsvIt->second.end());
+        }
+
+        if (valueStrList.empty())
+            continue;
+
+        std::stable_sort(valueStrList.begin(), valueStrList.end());
+
+        valCommaList.clear();
+        for(const auto valStr: valueStrList)
+        {
+            if (!valCommaList.empty())
+            {
+                valCommaList.append(1u, ',');
+            }
+            else
+            {
+                auto trDescr = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnVals, toLower(curEnumItemName), StringType());
+                if (trDescr.empty())
+                    trDescr = getTranslation<StringType>(true /* bUpdateTpl */ , trCat, toLower(curEnumItemName), descr);
+                if (!trDescr.empty())
+                {
+                    descr = trDescr;
+                    checkFixTrailingDot(descr);
+                }
+            }
+            valCommaList.append(valStr);
+        }
+
+        ss << "- " << valCommaList << "\n";
+        ss << descr << "\n\n";
+
+    }
+
+    ss << "</val-list>\n";
+
+    // checkRemoveExclamation(descr);
+
+
+    //ss << genTpl.formatDeserializeBegin( indent, enumName, genOptions );
+
+    // auto setItemsMaxLen = []( const std::unordered_set<StringType> &s )
+    // {
+    //     return s.empty()
+    //          ? (std::size_t)0
+    //          : std::max_element(s.begin(), s.end(), []( const auto &s1, const auto &s2 ){ return s1.size()<s2.size(); } )->size()
+    //          ;
+    // };
+    //  
+    // std::size_t maxNameLen = deserializeVals.empty()
+    //                        ? (std::size_t)0
+    //                        : std::max_element(deserializeVals.begin(), deserializeVals.end(), []( const auto &p1, const auto &p2 ){ return p1.first.size()<p2.first.size(); } )->first.size()
+    //                        ;
+    //  
+    // if (genOptions&EnumGeneratorOptionFlags::enumClass)
+    //     maxNameLen += enumName.size()+2;
+    //  
+    // maxNameLen = (maxNameLen+2)>48 ? 48 : (maxNameLen+2);
+    //  
+    // std::size_t maxValLen  = deserializeVals.empty()
+    //                        ? (std::size_t)0
+    //                        : setItemsMaxLen(std::max_element(deserializeVals.begin(), deserializeVals.end(), [&]( const auto &p1, const auto &p2 ){ return setItemsMaxLen(p1.second)<setItemsMaxLen(p2.second); } )->second)
+    //                        ;
+    // maxValLen = (maxValLen+2)>48 ? 48 : (maxValLen+2);
+    //  
+    //  
+    // StringType lineIndent = indent + indentInc;
+    // std::size_t i = (std::size_t)-1;
+    //  
+    // for( const auto& [name,vals] : deserializeVals)
+    // {
+    //     ++i;
+    //     for( const auto& val : vals)
+    //     ss << genTpl.formatDeserializeItem( i, lineIndent
+    //                                       , enumName, name
+    //                                       , make_string<StringType>("\"") + val + make_string<StringType>("\"")
+    //                                       , genOptions
+    //                                       , maxNameLen, maxValLen
+    //                                       );
+    // }
+
+    // ss << genTpl.formatDeserializeEnd( indent, enumName, genOptions );
 
 }
 
@@ -4707,10 +5184,14 @@ void enum_generate_includes( StreamType &ss
 //-----------------------------------------------------------------------------
 template<typename StringType, typename StreamType> inline
 void enum_generate_serialize( StreamType &ss
+                            , StreamType &ssDoc
+                            , StreamType &ssDocSerialize
                             , const std::vector< std::tuple< StringType,StringType,StringType,StringType > > &vals
                             , const StringType                         &indent
                             , const StringType                         &indentInc
+                            , const StringType                         &nsFullName
                             , const StringType                         &enumName
+                            , const StringType                         &enumDescription
                             , const StringType                         &underlayedTypeName
                             , NameStyle                                valuesNameStyle
                             , NameStyle                                serializedNameStyle
@@ -4724,8 +5205,8 @@ void enum_generate_serialize( StreamType &ss
     genOptions = enum_generate_adjust_gen_options(genOptions);
 
 
-    if ((genOptions&EnumGeneratorOptionFlags::generateDefAll)==0)
-        return;
+    // if ((genOptions&EnumGeneratorOptionFlags::generateDefAll)==0)
+    //     return;
 
     std::vector< std::tuple< StringType,StringType,StringType > >     defVals; // for enum def
     std::unordered_map< StringType, std::unordered_set<StringType> >  deserializeVals; // keyEnumName -> set of deserialize variants
@@ -4737,6 +5218,16 @@ void enum_generate_serialize( StreamType &ss
                                    , valuesPrefix, genOptions, genTpl
                                    , pDups, pDupVals
                                    );
+
+
+    if (genOptions&EnumGeneratorOptionFlags::generateDoc)
+    {
+        // if ((genOptions&EnumGeneratorOptionFlags::noExtraLinefeed)==0)
+        //     ss << make_string<StringType>("\n");
+        enum_generate_doc( ssDoc, defVals, indent, indentInc, nsFullName, enumName, enumDescription, underlayedTypeName, valuesNameStyle, valuesPrefix, genOptions, genTpl );
+        enum_generate_deserialize_doc( ssDocSerialize, deserializeVals, defVals, indent, indentInc, nsFullName, enumName, enumDescription, underlayedTypeName, valuesNameStyle, serializedNameStyle, valuesPrefix, genOptions, genTpl );
+        // enum_generate_serialize_enum_deserialize
+    }
 
     if (genOptions&EnumGeneratorOptionFlags::generateDefType)
     {
@@ -4782,10 +5273,14 @@ void enum_generate_serialize( StreamType &ss
 //-----------------------------------------------------------------------------
 template<typename StringType, typename StreamType> inline
 void enum_generate_serialize( StreamType &ss
+                            , StreamType &ssDoc
+                            , StreamType &ssDocSerialize
                             , const std::vector< std::tuple< StringType,enum_internal_uint_t,StringType > > &vals
                             , const StringType                         &indent
                             , const StringType                         &indentInc
+                            , const StringType                         &nsFullName
                             , const StringType                         &enumName
+                            , const StringType                         &enumDescription
                             , const StringType                         &underlayedTypeName
                             , NameStyle                                valuesNameStyle
                             , NameStyle                                serializedNameStyle
@@ -4808,9 +5303,9 @@ void enum_generate_serialize( StreamType &ss
         strVals.emplace_back(name, strVal, strVal, comment); //!!! std::make_tuple - что тут сказать хотел, непонятно, забыл уже
     }
 
-    enum_generate_serialize( ss, strVals
+    enum_generate_serialize( ss, ssDoc, ssDocSerialize, strVals
                            , indent, indentInc
-                           , enumName, underlayedTypeName
+                           , nsFullName, enumName, enumDescription, underlayedTypeName
                            , valuesNameStyle, serializedNameStyle
                            , valuesPrefix
                            , genOptions, genTpl, pDups, pDupVals
@@ -4821,10 +5316,14 @@ void enum_generate_serialize( StreamType &ss
 //-----------------------------------------------------------------------------
 template<typename StringType, typename StreamType> inline
 void enum_generate_serialize( StreamType &ss
+                            , StreamType &ssDoc
+                            , StreamType &ssDocSerialize
                             , const StringType                         &valsStr
                             , const StringType                         &indent
                             , const StringType                         &indentInc
+                            , const StringType                         &nsFullName
                             , const StringType                         &enumName
+                            , const StringType                         &enumDescription
                             , const StringType                         &underlayedTypeName
                             , NameStyle                                valuesNameStyle
                             , NameStyle                                serializedNameStyle
@@ -5027,7 +5526,7 @@ void enum_generate_serialize( StreamType &ss
         }
     }
 
-    enum_generate_serialize<StringType,StreamType>( ss, vals, indent, indentInc, enumName, underlayedTypeName, valuesNameStyle, serializedNameStyle, valuesPrefix, genOptions, genTpl, pDups, pDupVals );
+    enum_generate_serialize<StringType,StreamType>( ss, ssDoc, ssDocSerialize, vals, indent, indentInc, nsFullName, enumName, enumDescription, underlayedTypeName, valuesNameStyle, serializedNameStyle, valuesPrefix, genOptions, genTpl, pDups, pDupVals );
 
     //enum_generate_serialized_enum_def( ss, vals, enumName, valuesNameStyle, valuesPrefix, enumClass );
 }
@@ -5035,10 +5534,14 @@ void enum_generate_serialize( StreamType &ss
 //-----------------------------------------------------------------------------
 template<typename StringType, typename StreamType> inline
 void enum_generate_serialize( StreamType &ss
+                            , StreamType &ssDoc
+                            , StreamType &ssDocSerialize
                             , const StringType &valsStr
                             , const StringType &indent
                             , const StringType &indentInc
+                            , const StringType &nsFullName
                             , const StringType &enumName
+                            , const StringType &enumDescription
                             , const StringType &underlayedTypeName
                             , const StringType &valuesNameStyle
                             , const StringType &serializedNameStyle
@@ -5051,9 +5554,15 @@ void enum_generate_serialize( StreamType &ss
     if (genOptions&EnumGeneratorOptionFlags::enumFlags)
         genOptions |= EnumGeneratorOptionFlags::enumClass;
 
-    enum_generate_serialize( ss, valsStr, indent, indentInc, enumName, underlayedTypeName
-                           , fromString<StringType>(valuesNameStyle, NameStyle::defaultStyle)
-                           , fromString<StringType>(serializedNameStyle, NameStyle::defaultStyle /* all */ )
+    auto valuesNameStyleEnum     = fromString<StringType>(valuesNameStyle    , NameStyle::defaultStyle);
+    auto serializedNameStyleEnum = fromString<StringType>(serializedNameStyle, NameStyle::defaultStyle /* all */);
+
+    enum_generate_serialize( ss, ssDoc, ssDocSerialize, valsStr
+                           , indent, indentInc
+                           , nsFullName, enumName, enumDescription
+                           , underlayedTypeName
+                           , valuesNameStyleEnum
+                           , serializedNameStyleEnum
                            , valuesPrefix
                            , genOptions
                            , genTpl

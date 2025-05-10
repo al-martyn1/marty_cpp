@@ -30,7 +30,22 @@
 namespace marty_cpp
 {
 
+template<typename StringType>
+std::vector<StringType> parseNsNameList( StringType nsList )
+{
+    auto isSpaceChar = [](typename StringType::value_type ch)
+                         {
+                             typedef typename StringType::value_type CharType;
+                             return ch==(CharType)' ' || ch==(CharType)'\t' || ch==(CharType)'\r' || ch==(CharType)'\n';
+                         };
 
+    // normalize NS separators
+    nsList = simple_string_replace<StringType>(nsList, make_string<StringType>("::"), make_string<StringType>("/"));
+    nsList = simple_string_replace<StringType>(nsList, make_string<StringType>(":" ), make_string<StringType>("/"));
+    //nsList = simple_string_replace<StringType>(nsList, make_string<StringType>(":" ), make_string<StringType>("/"));
+    nsList = simple_string_replace<StringType>(nsList, make_string<StringType>("\\"), make_string<StringType>("/"));
+    return simple_seq_filter(simple_string_split(nsList, make_string<StringType>("/")), [&](auto s) { return !simple_trim(s, isSpaceChar).empty(); } );
+}
 
 
 //-----------------------------------------------------------------------------

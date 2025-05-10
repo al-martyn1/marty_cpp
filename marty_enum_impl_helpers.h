@@ -13,14 +13,14 @@ StringType getStripEnumDefComment(StringType &enumDef)
 {
     typedef typename StringType::value_type char_type;
 
-    enumDef = marty_cpp::simple_trim( enumDef
-                                    , [](char ch)
-                                      {
-                                          if (ch==(char_type)' ' || ch==(char_type)'\t')
-                                              return true;
-                                          return false;
-                                      }
-                                    );
+    auto isSpace = [](char ch)
+    {
+        if (ch==(char_type)' ' || ch==(char_type)'\t')
+            return true;
+        return false;
+    };
+
+    enumDef = marty_cpp::simple_trim(enumDef, isSpace);
 
     StringType commentStart = make_string<StringType>("//");
     StringType defSeps      = make_string<StringType>(";\r\n");
@@ -28,12 +28,13 @@ StringType getStripEnumDefComment(StringType &enumDef)
     if (startsLen==2)
     {
         enumDef.erase(0, startsLen);
+        enumDef = marty_cpp::simple_trim(enumDef, isSpace);
         std::size_t endPos = enumDef.find_first_of(defSeps.c_str());
         if (endPos!=enumDef.npos)
         {
             StringType comment = StringType(enumDef, 0, endPos);
             enumDef.erase(0, endPos+1);
-            return comment;
+            return marty_cpp::simple_trim(comment, isSpace);
         }
     }
     // else
