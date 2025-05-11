@@ -4246,9 +4246,16 @@ void enum_generate_doc( StreamType &ss
             }
             else
             {
-                auto trDescr = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnVals, toLower(name), StringType());
-                if (trDescr.empty())
+                StringType trDescr;
+
+                #ifdef MARTY_CPP_USE_MARTY_TR
+                if (marty_tr::tr_has_msg(toLower(name), trCat))
                     trDescr = getTranslation<StringType>(true /* bUpdateTpl */ , trCat, toLower(name), descr);
+                #endif
+
+                if (trDescr.empty())
+                    trDescr = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnVals, toLower(name), StringType());
+
                 if (!trDescr.empty())
                 {
                     descr = trDescr;
@@ -4444,9 +4451,19 @@ void enum_generate_deserialize_doc( StreamType &ss
             }
             else
             {
-                auto trDescr = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnVals, toLower(curEnumItemName), StringType());
-                if (trDescr.empty())
+                StringType trDescr;
+
+                #ifdef MARTY_CPP_USE_MARTY_TR
+                if (marty_tr::tr_has_msg(toLower(curEnumItemName), trCat))
                     trDescr = getTranslation<StringType>(true /* bUpdateTpl */ , trCat, toLower(curEnumItemName), descr);
+                #endif
+
+                if (trDescr.empty())
+                    trDescr = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnVals, toLower(curEnumItemName), StringType());
+
+                // auto trDescr = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnVals, toLower(curEnumItemName), StringType());
+                // if (trDescr.empty())
+                //     trDescr = getTranslation<StringType>(true /* bUpdateTpl */ , trCat, toLower(curEnumItemName), descr);
                 if (!trDescr.empty())
                 {
                     descr = trDescr;
