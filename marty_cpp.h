@@ -4057,26 +4057,31 @@ StringType getTranslation(bool bUpdateTpl, const std::string &trCategory, const 
 {
 #ifdef MARTY_CPP_USE_MARTY_TR
 
-// bool tr_has_msg(const all_translations_map_t& trAllMap, const std::string &msgId, std::string catId)
+    // Если указано сохранять в шаблон, то надо безусловно сохранять в шаблон
+    if (bUpdateTpl)
+    {
+        auto &trTpl = marty_tr::tr_alter_get_all_translations();
+        marty_tr::tr_add(trTpl, trMsgId, make_string<std::string>(defMsg), trCategory, marty_tr::tr_alter_get_def_lang());
+    }
+
+    // Проверяем, есть ли в текущей локализации данное сообщение
     if (marty_tr::tr_has_msg(trMsgId, trCategory))
     {
+        // Если не пустой перевод, то возвращаем
         std::string res = marty_tr::tr(trMsgId, trCategory);
         if (!res.empty())
             return make_string<StringType>(res);
     }
 
-    // Шаблон перевода
-    auto &trTpl = marty_tr::tr_alter_get_all_translations();
-
-    if (marty_tr::tr_has_msg(trTpl, trMsgId, trCategory))
-    {
-        std::string res = marty_tr::tr(trTpl, trMsgId, trCategory);
-        if (!res.empty())
-            return make_string<StringType>(res);
-    }
-
-    if (bUpdateTpl)
-        marty_tr::tr_add(trTpl, trMsgId, make_string<std::string>(defMsg), trCategory);
+    // if (marty_tr::tr_has_msg(trTpl, trMsgId, trCategory))
+    // {
+    //     std::string res = marty_tr::tr(trTpl, trMsgId, trCategory);
+    //     if (!res.empty())
+    //         return make_string<StringType>(res);
+    // }
+    //  
+    // if (bUpdateTpl)
+    //     marty_tr::tr_add(trTpl, trMsgId, make_string<std::string>(defMsg), trCategory);
 
 #else
 
