@@ -1,6 +1,7 @@
 // Соответсвует EnumGeneratorOptionFlags, только по новой технологии
 #//!hidden value
 invalid,unknown=-1 //!
+none                                                       //!
 enumClass                                                  = marty_cpp::EnumGeneratorOptionFlags::enumClass                 // Strong typed enum
 unsignedVals                                               = marty_cpp::EnumGeneratorOptionFlags::unsignedVals              // Use unsigned values
 umap,useUnorderedMap                                       = marty_cpp::EnumGeneratorOptionFlags::useUnorderedMap           // Use unordered_map

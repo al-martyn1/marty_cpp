@@ -4251,6 +4251,8 @@ void enum_generate_doc( StreamType &ss
                 #ifdef MARTY_CPP_USE_MARTY_TR
                 if (marty_tr::tr_has_msg(toLower(name), trCat))
                     trDescr = getTranslation<StringType>(true /* bUpdateTpl */ , trCat, toLower(name), descr);
+                else if (descr!="`-`")
+                    marty_tr::tr_add(marty_tr::tr_alter_get_all_translations(), toLower(name), make_string<std::string>(descr), trCat, marty_tr::tr_alter_get_def_lang());
                 #endif
 
                 if (trDescr.empty())
@@ -4456,6 +4458,8 @@ void enum_generate_deserialize_doc( StreamType &ss
                 #ifdef MARTY_CPP_USE_MARTY_TR
                 if (marty_tr::tr_has_msg(toLower(curEnumItemName), trCat))
                     trDescr = getTranslation<StringType>(true /* bUpdateTpl */ , trCat, toLower(curEnumItemName), descr);
+                else if (descr!="`-`")
+                    marty_tr::tr_add(marty_tr::tr_alter_get_all_translations(), toLower(curEnumItemName), make_string<std::string>(descr), trCat, marty_tr::tr_alter_get_def_lang());
                 #endif
 
                 if (trDescr.empty())
