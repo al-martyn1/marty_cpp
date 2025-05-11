@@ -4138,8 +4138,8 @@ void enum_generate_doc( StreamType &ss
         marty_tr::tr_add(trTpl, "section-title-enum"   , "$(TYPE) enumeration"            , trCatCmnTexts);
         marty_tr::tr_add(trTpl, "section-title-flags"  , "$(TYPE) flags"                  , trCatCmnTexts);
         marty_tr::tr_add(trTpl, "underlayed-type"      , "Underlying type: `$(TYPE)`"     , trCatCmnTexts);
-        marty_tr::tr_add(trTpl, "enum-val-list-title"  , "Name|Value|Description"         , trCatCmnTexts);
-        marty_tr::tr_add(trTpl, "str-val-list-title"   , "Value|Description"              , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "enum-val-list-title"  , ":Name|:Value|:Description"      , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "str-val-list-title"   , ":Value|:Description"            , trCatCmnTexts);
         marty_tr::tr_add(trTpl, "vals-case-sens"       , "Values are case sensitive"      , trCatCmnTexts);
         marty_tr::tr_add(trTpl, "vals-case-insens"     , "Values are case insensitive"    , trCatCmnTexts);
     }
@@ -4328,8 +4328,8 @@ void enum_generate_deserialize_doc( StreamType &ss
         marty_tr::tr_add(trTpl, "section-title-enum"   , "$(TYPE) enumeration"            , trCatCmnTexts);
         marty_tr::tr_add(trTpl, "section-title-flags"  , "$(TYPE) flags"                  , trCatCmnTexts);
         marty_tr::tr_add(trTpl, "underlayed-type"      , "Underlying type: `$(TYPE)`"     , trCatCmnTexts);
-        marty_tr::tr_add(trTpl, "enum-val-list-title"  , "Name|Value|Description"         , trCatCmnTexts);
-        marty_tr::tr_add(trTpl, "str-val-list-title"   , "Value|Description"              , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "enum-val-list-title"  , ":Name|:Value|:Description"      , trCatCmnTexts);
+        marty_tr::tr_add(trTpl, "str-val-list-title"   , ":Value|:Description"            , trCatCmnTexts);
         marty_tr::tr_add(trTpl, "vals-case-sens"       , "Values are case sensitive"      , trCatCmnTexts);
         marty_tr::tr_add(trTpl, "vals-case-insens"     , "Values are case insensitive"    , trCatCmnTexts);
     }
