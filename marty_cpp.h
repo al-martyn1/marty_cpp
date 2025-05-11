@@ -4354,21 +4354,6 @@ void enum_generate_deserialize_doc( StreamType &ss
 
     ss << "\n";
 
-    StringType txtCaseInfo;
-
-    if (genOptions&EnumGeneratorOptionFlags::lowercaseDeserialize)
-    {
-        txtCaseInfo = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, "vals-case-insens", make_string<StringType>("Values are case insensitive"));
-    }
-    else
-    {
-        txtCaseInfo = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, "vals-case-sens"  , make_string<StringType>("Values are case sensitive"));
-    }
-
-    checkFixTrailingDot<StringType>(txtCaseInfo);
-    ss << txtCaseInfo << "\n\n";
-
-
     const std::string trCat = toLower("_generated-enums_/" + make_string<std::string>(enumFullName));
 
     std::vector<StringType> valueList;
@@ -4482,7 +4467,24 @@ void enum_generate_deserialize_doc( StreamType &ss
 
     }
 
-    ss << "</val-list>\n";
+    ss << "</val-list>\n\n";
+
+    StringType txtCaseInfo;
+
+    if (genOptions&EnumGeneratorOptionFlags::lowercaseDeserialize)
+    {
+        txtCaseInfo = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, "vals-case-insens", make_string<StringType>("Values are case insensitive"));
+    }
+    else
+    {
+        txtCaseInfo = getTranslation<StringType>(false /* bUpdateTpl */ , trCatCmnTexts, "vals-case-sens"  , make_string<StringType>("Values are case sensitive"));
+    }
+
+    checkFixTrailingDot<StringType>(txtCaseInfo);
+    ss << txtCaseInfo << "\n\n";
+
+
+
 
     // checkRemoveExclamation(descr);
 
