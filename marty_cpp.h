@@ -4430,7 +4430,7 @@ void enum_generate_deserialize_doc( StreamType &ss
         std::stable_sort(valueStrList.begin(), valueStrList.end());
 
         valCommaList.clear();
-        for(const auto valStr: valueStrList)
+        for(const auto &valStr: valueStrList)
         {
             if (!valCommaList.empty())
             {
