@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstring>
+#include <cstdint>
 #include <cwctype>
 #include <iomanip>
 #include <ios>
