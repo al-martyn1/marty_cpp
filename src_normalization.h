@@ -522,6 +522,9 @@ StringType mergeLines(const std::vector<StringType> &v, ELinefeedType lfType, bo
 
     StringType lfStr;
 
+    if (lfType==ELinefeedType::systemDefault)
+        lfType = getSystemDefaultLinefeedType();
+
     switch(lfType)
     {
         case ELinefeedType::lf             :  lfStr = make_string<StringType>("\n"  ); break;
@@ -531,7 +534,9 @@ StringType mergeLines(const std::vector<StringType> &v, ELinefeedType lfType, bo
         case ELinefeedType::linefeedRemove :  lfStr = make_string<StringType>(""    ); break;
         // case ELinefeedType:::  lfStr = make_string<StringType>(""); break;
         case ELinefeedType::detect         :  [[fallthrough]];
+        // case ELinefeedType::systemDefault  :  [[fallthrough]]; // same as detect
         case ELinefeedType::invalid        :  [[fallthrough]];
+
         default                            :  lfStr = make_string<StringType>("\r\n");
     }
 
@@ -559,6 +564,8 @@ StringType converLfToOutputFormat(const StringType &str, ELinefeedType lfType)
 
     const char_type LF = (char_type)'\n'; // LF - 0x0A
 
+    if (lfType==ELinefeedType::systemDefault)
+        lfType = getSystemDefaultLinefeedType();
 
     StringType resText; resText.reserve(str.size() + str.size()/32);
 
@@ -566,11 +573,12 @@ StringType converLfToOutputFormat(const StringType &str, ELinefeedType lfType)
 
     switch(lfType)
     {
-        case ELinefeedType::lf      :  lfStr = make_string<StringType>("\n"  ); break;
-        case ELinefeedType::cr      :  lfStr = make_string<StringType>("\r"  ); break;
-        case ELinefeedType::crlf    :  lfStr = make_string<StringType>("\r\n"); break;
-        case ELinefeedType::lfcr    :  lfStr = make_string<StringType>("\n\r"); break;
-        case ELinefeedType::detect  :
+        case ELinefeedType::lf             :  lfStr = make_string<StringType>("\n"  ); break;
+        case ELinefeedType::cr             :  lfStr = make_string<StringType>("\r"  ); break;
+        case ELinefeedType::crlf           :  lfStr = make_string<StringType>("\r\n"); break;
+        case ELinefeedType::lfcr           :  lfStr = make_string<StringType>("\n\r"); break;
+        //case ELinefeedType::systemDefault  :  [[fallthrough]]; // same as detect
+        case ELinefeedType::detect         :
             #if defined(WIN32) || defined(_WIN32)
                 lfStr = make_string<StringType>("\r\n"); break;
             #else
