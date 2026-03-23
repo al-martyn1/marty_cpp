@@ -300,6 +300,18 @@ std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyL
     std::vector<StringType> resVec; resVec.reserve(str.size()/32);
     StringType curStr;
 
+    auto pushCurLine = [&]()
+    {
+        while(!curStr.empty() && (curStr.back()=='\r' || curStr.back()=='\n'))
+        {
+            curStr.erase(curStr.size()-1, 1);
+        }
+
+        resVec.emplace_back(curStr);
+        curStr.clear();
+    };
+
+
     iterator it    = str.begin();
     iterator itEnd = str.end();
 
@@ -309,8 +321,7 @@ std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyL
     {
         if (*it==lfChar)
         {
-            resVec.emplace_back(curStr);
-            curStr.clear();
+            pushCurLine();
             prevLf = true;
         }
         else
@@ -328,7 +339,7 @@ std::vector<StringType> splitToLinesSimple(const StringType &str, bool addEmptyL
 
     if (!curStr.empty() || prevLf)
     {
-        resVec.emplace_back(curStr);
+        pushCurLine();
     }
 
     return resVec;
