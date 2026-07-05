@@ -1660,6 +1660,8 @@ std::unordered_set<StringType> makeCppKeywordsSet()
 
     s.insert(make_string<StringType>("template"));
 
+    s.insert(make_string<StringType>("interface"));
+
     s.insert(make_string<StringType>("auto"));
     s.insert(make_string<StringType>("decltype"));
     s.insert(make_string<StringType>("register"));
