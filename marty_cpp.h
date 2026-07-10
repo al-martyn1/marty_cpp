@@ -9,6 +9,9 @@
 #ifdef MARTY_CPP_USE_MARTY_TR
     #include "marty_tr/marty_tr.h"
 #endif
+//
+#include "undef_min_max.h"
+//
 
 #include <algorithm>
 #include <cctype>
